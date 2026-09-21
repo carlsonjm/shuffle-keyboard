@@ -10,6 +10,7 @@ Rectangle {
     id: root
 
     required property string label
+    property string secondaryLabel: ""
     property bool active: false
     property bool repeat: false
     property bool quiet: false
@@ -41,12 +42,36 @@ Rectangle {
 
     Controls.Label {
         anchors.centerIn: parent
-        visible: !root.dotGlyph
+        visible: !root.dotGlyph && root.secondaryLabel.length === 0
         text: root.label
         color: root.active ? root.activeLabelColor : root.labelColor
         opacity: root.active ? 1 : 0.84
         font.pixelSize: Math.max(14, Math.min(root.height * 0.34, 27) * root.labelScale)
         font.weight: Font.Normal
+    }
+
+    Column {
+        anchors.centerIn: parent
+        visible: !root.dotGlyph && root.secondaryLabel.length > 0
+        spacing: -2
+
+        Controls.Label {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: root.secondaryLabel
+            color: root.active ? root.activeLabelColor : root.labelColor
+            opacity: root.active ? 1 : 0.66
+            font.pixelSize: Math.max(10, Math.min(root.height * 0.22, 16) * root.labelScale)
+            font.weight: Font.Normal
+        }
+
+        Controls.Label {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: root.label
+            color: root.active ? root.activeLabelColor : root.labelColor
+            opacity: root.active ? 1 : 0.84
+            font.pixelSize: Math.max(12, Math.min(root.height * 0.28, 20) * root.labelScale)
+            font.weight: Font.Normal
+        }
     }
 
     Rectangle {

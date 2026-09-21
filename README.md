@@ -19,6 +19,9 @@ custom input engine.
   tap is one-shot Shift and a double tap locks Caps. Backspace and the muted
   Ghost White Enter share one aligned right edge; Enter fills the home-row gap
   and the enlarged `/` completes the third row without moving the letter grid.
+- The punctuation keys share their standard shifted characters: comma/`<`,
+  period/`>`, and slash/`?`. They stay in the accepted letter layout and avoid
+  a `123` round trip for these common characters.
 - Bottom controls are Ctrl, Alt, large Space, and a Tette Dot Meta key. The dot
   is the protected resting brand mark, not a generic text label. It resolves
   the user's live bare-Meta binding through KDE's global-shortcut service and

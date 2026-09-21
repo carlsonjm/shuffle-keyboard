@@ -86,6 +86,12 @@ InputPanelWindow {
     function sendCharacter(text) {
         const alphabetic = !symbolLayer && text.length === 1 && text >= "a" && text <= "z";
         const uppercase = alphabetic && (shiftActive !== capsActive);
+        let output = uppercase ? text.toUpperCase() : text;
+        if (!symbolLayer && shiftActive && !alphabetic) {
+            if (text === ",") output = "<";
+            else if (text === ".") output = ">";
+            else if (text === "/") output = "?";
+        }
         const textShift = alphabetic ? uppercase : (shiftActive && !symbolLayer);
         const modifiers = (textShift ? Qt.ShiftModifier : Qt.NoModifier)
                           | (controlActive ? Qt.ControlModifier : Qt.NoModifier)
@@ -94,7 +100,6 @@ InputPanelWindow {
         if (controlActive || altActive || metaActive) {
             thing.sendShortcut(keyCode(text), modifiers);
         } else {
-            const output = uppercase ? text.toUpperCase() : text;
             inputEngine.InputContext.inputEngine.virtualKeyClick(keyCode(text), output, modifiers);
         }
         clearOneShotModifiers();
@@ -104,6 +109,14 @@ InputPanelWindow {
         if (!symbolLayer && label.length === 1 && label >= "a" && label <= "z"
                 && (shiftActive !== capsActive)) return label.toUpperCase();
         return label;
+    }
+
+    function secondaryLabel(label) {
+        if (symbolLayer) return "";
+        if (label === ",") return "<";
+        if (label === ".") return ">";
+        if (label === "/") return "?";
+        return "";
     }
 
     function sendSpecial(key, text) {
@@ -433,6 +446,7 @@ InputPanelWindow {
                         width: keyField.spanWidth(cellSpan + (index === root.keyRows[2].length - 1 ? 0.75 : 0))
                         height: keyField.rowHeight
                         label: root.displayLabel(modelData)
+                        secondaryLabel: root.secondaryLabel(modelData)
                         onTriggered: root.dispatchLabel(modelData)
                     }
                 }

@@ -45,7 +45,9 @@ Record one line for each item as `Pass`, `Fail`, or `Note: …`.
 - **Row stagger:** Q begins at 1.00 units, A at 1.25, and Z at 1.75. Every
   character key keeps the same pitch across all three rows.
 - **Lower row:** The lower row reads Shift, Z–M, comma, period, slash without
-  clipping or unexpectedly narrow targets.
+  clipping or unexpectedly narrow targets. Tap Shift followed by comma,
+  period, and slash; they enter `<`, `>`, and `?` respectively, then return
+  Shift to neutral after each character.
 - **Right controls:** Backspace and Enter share one aligned right edge. Enter
   fills the home-row gap, is muted Ghost White with dark text, and neither
   control moves QWERTY.
