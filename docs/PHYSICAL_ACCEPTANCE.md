@@ -8,7 +8,7 @@ Complete this pass without a physical keyboard or mouse after setup.
 1. Open a terminal and run:
 
    ```sh
-   cd /home/ghostiepost/Projects/Itasca/shuffle-keyboard
+   cd ~/Projects/Shuffle/shuffle-keyboard
    cmake -S . -B build -G Ninja -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo
    cmake --build build
    cmake --install build --prefix /home/ghostiepost/.local
