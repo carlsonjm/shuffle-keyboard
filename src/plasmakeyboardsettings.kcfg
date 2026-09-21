@@ -33,6 +33,18 @@
             <label>Whether the keyboard panel fills the screen width.</label>
             <default>true</default>
         </entry>
+        <entry key="keyboardHeight" type="int">
+            <label>Persisted Shuffle Keyboard height in logical pixels.</label>
+            <min>220</min>
+            <max>720</max>
+            <default>460</default>
+        </entry>
+        <entry key="keyboardWidthPercent" type="int">
+            <label>Shuffle Keyboard width as a percentage of the usable panel.</label>
+            <min>80</min>
+            <max>100</max>
+            <default>100</default>
+        </entry>
         <entry key="diacriticsPopupEnabled" type="bool">
             <label>Whether holding a physical key shows diacritic options.</label>
             <default>true</default>

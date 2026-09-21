@@ -24,8 +24,9 @@ class InputListenerItem : public QQuickItem
     Q_OBJECT
     QML_ELEMENT
 
-    Q_PROPERTY(QVirtualKeyboardInputEngine *engine WRITE setEngine)
+    Q_PROPERTY(QVirtualKeyboardInputEngine *engine READ engine WRITE setEngine)
     Q_PROPERTY(bool keyboardNavigationActive MEMBER m_keyboardNavigationActive)
+    Q_PROPERTY(int contentPurpose READ contentPurpose NOTIFY contentPurposeChanged)
 
     /**
      * Controller for overlay popups (diacritics, emoji, text expansion).
@@ -38,6 +39,7 @@ public:
     InputListenerItem();
 
     void setEngine(QVirtualKeyboardInputEngine *engine);
+    QVirtualKeyboardInputEngine *engine() const;
 
     QVariant inputMethodQuery(Qt::InputMethodQuery query) const override;
 
@@ -49,13 +51,19 @@ public:
      * Get the overlay controller.
      */
     OverlayController *overlayController() const;
+    int contentPurpose() const;
+
+    Q_INVOKABLE bool sendShortcut(int qtKey, int qtModifiers);
+    Q_INVOKABLE bool triggerGlobalShortcut(int qtKey);
 
 Q_SIGNALS:
     void keyNavigationPressed(int key);
     void keyNavigationReleased(int key);
+    void contentPurposeChanged();
 
 private:
     InputPlugin m_input;
     OverlayController *m_overlayController = nullptr;
     bool m_keyboardNavigationActive = false;
+    QVirtualKeyboardInputEngine *m_engine = nullptr;
 };

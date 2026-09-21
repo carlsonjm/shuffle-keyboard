@@ -22,7 +22,9 @@
 #include <QDir>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QQuickWindow>
+#include <QTimer>
 #include <QWindow>
 #include <qpa/qwindowsysteminterface.h>
 
@@ -33,19 +35,20 @@ int main(int argc, char **argv)
     initLayoutsPath();
 
     QGuiApplication application(argc, argv);
+    const bool baselineMode = qEnvironmentVariable("SHUFFLE_KEYBOARD_LAYOUT") == QLatin1String("ipad");
 
     KLocalizedString::setApplicationDomain("plasma-keyboard");
 
-    KAboutData aboutData(QStringLiteral("plasma-keyboard"),
-                         i18n("Plasma Keyboard"),
+    KAboutData aboutData(baselineMode ? QStringLiteral("shuffle-ipad-baseline") : QStringLiteral("shuffle-keyboard"),
+                         baselineMode ? i18n("iPad Layout Baseline") : i18n("Shuffle Keyboard"),
                          QStringLiteral(PLASMA_KEYBOARD_VERSION_STRING),
-                         i18n("An on-screen keyboard for Plasma"),
+                         baselineMode ? i18n("Four-row iPad keyboard geometry baseline for Plasma") : i18n("Touch keyboard and precision surface for Plasma"),
                          KAboutLicense::GPL,
-                         i18n("Copyright 2024, Aleix Pol Gonzalez"));
+                         i18n("Copyright 2024 Plasma Keyboard contributors; 2026 Shuffle Project"));
 
     aboutData.addAuthor(i18n("Aleix Pol Gonzalez"), i18n("Author"), QStringLiteral("aleixpol@kde.org"));
     aboutData.setOrganizationDomain("kde.org");
-    aboutData.setDesktopFileName(QStringLiteral("org.kde.plasma.keyboard"));
+    aboutData.setDesktopFileName(baselineMode ? QStringLiteral("org.shuffle.IPadBaseline") : QStringLiteral("org.shuffle.Keyboard"));
     application.setWindowIcon(QIcon::fromTheme(QStringLiteral("input-keyboard-virtual")));
     aboutData.setProgramLogo(application.windowIcon());
 
@@ -82,23 +85,54 @@ int main(int argc, char **argv)
 
     QQmlApplicationEngine view;
     KLocalization::setupLocalizedContext(&view);
+    const bool previewMode = qEnvironmentVariableIntValue("SHUFFLE_PREVIEW_MODE") != 0;
+    const QString previewScreenshot = qEnvironmentVariable("SHUFFLE_PREVIEW_SCREENSHOT");
+    // The probe is inert unless explicitly enabled in an isolated test
+    // session. It exercises the same Qt Virtual Keyboard delivery call used
+    // by touch keys without requiring synthetic pointer input.
+    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeText"), qEnvironmentVariable("SHUFFLE_PROBE_TEXT"));
+    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeInterval"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_INTERVAL"));
+    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeRepeat"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_REPEAT"));
+    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeDelay"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_DELAY"));
+    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeShortcuts"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_SHORTCUTS") != 0);
+    view.rootContext()->setContextProperty(QStringLiteral("shufflePreviewMode"), previewMode);
+    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeHeight"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_HEIGHT"));
+    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbePrecision"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_PRECISION"));
+    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeDismiss"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_DISMISS") != 0);
+    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeLayer"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_LAYER"));
 
-    QObject::connect(&view, &QQmlApplicationEngine::objectCreated, &application, [](QObject *object) {
-        auto window = qobject_cast<QWindow *>(object);
-        const bool initSuccessful = initInputPanelIntegration(window, InputPanelRole::Keyboard);
+    QObject::connect(&view, &QQmlApplicationEngine::objectCreated, &application, [previewMode, previewScreenshot](QObject *object) {
+        auto window = qobject_cast<QQuickWindow *>(object);
+        if (!window) {
+            qCCritical(PlasmaKeyboard) << "Shuffle Keyboard failed to create its input-panel window.";
+            QCoreApplication::exit(1);
+            return;
+        }
+        const bool initSuccessful = previewMode || initInputPanelIntegration(window, InputPanelRole::Keyboard);
 
         if (!initSuccessful) {
-            qCCritical(PlasmaKeyboard)
-                << "Cannot run plasma-keyboard standalone. You can enable it in Plasma's System Settings app, on the “Virtual Keyboard” page.";
+            qCCritical(PlasmaKeyboard) << "Cannot run Shuffle Keyboard standalone. Enable it on Plasma's Virtual Keyboard settings page.";
             exit(1);
         }
 
         window->requestActivate();
         window->setVisible(true);
-    });
-    view.load(QUrl(QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/main.qml")));
 
-    qCDebug(PlasmaKeyboard) << "Starting Plasma Keyboard application";
+        if (previewMode && !previewScreenshot.isEmpty()) {
+            QTimer::singleShot(500, window, [window, previewScreenshot] {
+                window->grabWindow().save(previewScreenshot);
+                QCoreApplication::quit();
+            });
+        }
+    });
+    view.load(QUrl(baselineMode ? QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/IPadBaseline.qml")
+                                : QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/main.qml")));
+
+    if (view.rootObjects().isEmpty()) {
+        return 1;
+    }
+
+    qCDebug(PlasmaKeyboard) << (baselineMode ? "Starting iPad Layout Baseline" : "Starting Shuffle Keyboard");
 
     return application.exec();
 }

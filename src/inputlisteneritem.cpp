@@ -16,6 +16,9 @@
 #include "overlay/prefixquerytrigger.h"
 #include "overlay/textexpansiontrigger.h"
 
+#include <QDBusInterface>
+#include <QDBusObjectPath>
+#include <QDBusReply>
 #include <QLoggingCategory>
 #include <QTextFormat>
 
@@ -102,6 +105,7 @@ InputListenerItem::InputListenerItem()
     connect(&m_input, &InputPlugin::resetRequested, this, [] {
         QGuiApplication::inputMethod()->reset();
     });
+    connect(&m_input, &InputPlugin::contentTypeChanged, this, &InputListenerItem::contentPurposeChanged);
     connect(QGuiApplication::inputMethod(), &QInputMethod::visibleChanged, this, [this] {
         window()->setVisible(QGuiApplication::inputMethod()->isVisible());
     });
@@ -182,14 +186,51 @@ InputListenerItem::InputListenerItem()
     QGuiApplication::inputMethod()->update(Qt::ImQueryAll);
 }
 
+int InputListenerItem::contentPurpose() const
+{
+    return static_cast<int>(m_input.contentPurpose());
+}
+
 OverlayController *InputListenerItem::overlayController() const
 {
     return m_overlayController;
 }
 
-void InputListenerItem::setEngine(QVirtualKeyboardInputEngine * /*engine*/)
+bool InputListenerItem::sendShortcut(int qtKey, int qtModifiers)
 {
-    // TODO: hook into engine events if necessary?
+    return m_input.sendShortcut(qtKey, qtModifiers);
+}
+
+bool InputListenerItem::triggerGlobalShortcut(int qtKey)
+{
+    // A virtual keyboard key is delivered to the focused client, but a
+    // modifier-only Plasma shortcut (notably bare Meta) is owned by
+    // KGlobalAccel. Resolve the user's live binding instead of naming an
+    // applet, then ask its registered component to invoke that action.
+    QDBusInterface accelerator(QStringLiteral("org.kde.kglobalaccel"), QStringLiteral("/kglobalaccel"), QStringLiteral("org.kde.KGlobalAccel"));
+    const QDBusReply<QStringList> actionReply = accelerator.call(QStringLiteral("action"), qtKey);
+    if (!actionReply.isValid() || actionReply.value().size() < 2) {
+        return m_input.sendShortcut(qtKey, qtKey == Qt::Key_Meta ? Qt::MetaModifier : Qt::NoModifier);
+    }
+
+    const QStringList action = actionReply.value();
+    const QDBusReply<QDBusObjectPath> componentReply = accelerator.call(QStringLiteral("getComponent"), action.at(0));
+    if (!componentReply.isValid() || componentReply.value().path().isEmpty()) {
+        return false;
+    }
+
+    QDBusInterface component(QStringLiteral("org.kde.kglobalaccel"), componentReply.value().path(), QStringLiteral("org.kde.kglobalaccel.Component"));
+    return component.call(QStringLiteral("invokeShortcut"), action.at(1)).type() != QDBusMessage::ErrorMessage;
+}
+
+void InputListenerItem::setEngine(QVirtualKeyboardInputEngine *engine)
+{
+    m_engine = engine;
+}
+
+QVirtualKeyboardInputEngine *InputListenerItem::engine() const
+{
+    return m_engine;
 }
 
 QVariant InputListenerItem::inputMethodQuery(Qt::InputMethodQuery query) const

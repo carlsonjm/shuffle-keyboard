@@ -8,6 +8,7 @@
 #include "inputpanelwindow.h"
 
 #include "inputpanelintegration.h"
+#include "plasmakeyboardsettings.h"
 
 #include <KSandbox>
 #include <QDesktopServices>
@@ -49,6 +50,25 @@ void InputPanelWindow::showSettings()
 bool InputPanelWindow::initInputPanel(InputPanelRole::Role role)
 {
     return initInputPanelIntegration(this, role);
+}
+
+void InputPanelWindow::refreshInteractiveRegion()
+{
+    const QRect region = m_interactiveRegion;
+    setMask(QRegion());
+    setMask(QRegion(region));
+}
+
+void InputPanelWindow::persistKeyboardHeight(int height)
+{
+    PlasmaKeyboardSettings::self()->setKeyboardHeight(height);
+    PlasmaKeyboardSettings::self()->save();
+}
+
+void InputPanelWindow::persistKeyboardWidthPercent(int widthPercent)
+{
+    PlasmaKeyboardSettings::self()->setKeyboardWidthPercent(widthPercent);
+    PlasmaKeyboardSettings::self()->save();
 }
 
 #include "moc_inputpanelwindow.cpp"

@@ -38,6 +38,9 @@ public:
      * @return True if integration was initialized successfully, otherwise false.
      */
     Q_INVOKABLE bool initInputPanel(InputPanelRole::Role role);
+    Q_INVOKABLE void refreshInteractiveRegion();
+    Q_INVOKABLE void persistKeyboardHeight(int height);
+    Q_INVOKABLE void persistKeyboardWidthPercent(int widthPercent);
 
 Q_SIGNALS:
     void interactiveRegionChanged();

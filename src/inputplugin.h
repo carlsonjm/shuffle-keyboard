@@ -78,6 +78,7 @@ public:
     };
     void keysym(uint timestamp, uint sym, KeyState state, uint modifiers);
     void key(KeyState state, quint32 scancode);
+    bool sendShortcut(int qtKey, int qtModifiers);
 
     ContentHint contentHint() const;
     ContentPurpose contentPurpose() const;

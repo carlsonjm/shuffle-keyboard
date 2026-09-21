@@ -115,6 +115,61 @@ Keyboard::~Keyboard()
     //        release();
 }
 
+std::optional<quint32> Keyboard::keycodeForKeysym(xkb_keysym_t keysym) const
+{
+    if (!mXkbKeymap) {
+        return std::nullopt;
+    }
+
+    const xkb_keycode_t minimum = xkb_keymap_min_keycode(mXkbKeymap.get());
+    const xkb_keycode_t maximum = xkb_keymap_max_keycode(mXkbKeymap.get());
+    for (xkb_keycode_t code = minimum; code <= maximum; ++code) {
+        const xkb_layout_index_t layouts = xkb_keymap_num_layouts_for_key(mXkbKeymap.get(), code);
+        for (xkb_layout_index_t layout = 0; layout < layouts; ++layout) {
+            const xkb_level_index_t levels = xkb_keymap_num_levels_for_key(mXkbKeymap.get(), code, layout);
+            for (xkb_level_index_t level = 0; level < levels; ++level) {
+                const xkb_keysym_t *symbols = nullptr;
+                const int count = xkb_keymap_key_get_syms_by_level(mXkbKeymap.get(), code, layout, level, &symbols);
+                for (int index = 0; index < count; ++index) {
+                    if (symbols[index] == keysym && code >= 8) {
+                        return code - 8;
+                    }
+                }
+            }
+        }
+    }
+    return std::nullopt;
+}
+
+quint32 Keyboard::modifierMask(const char *name) const
+{
+    if (!mXkbKeymap) {
+        return 0;
+    }
+    const xkb_mod_index_t index = xkb_keymap_mod_get_index(mXkbKeymap.get(), name);
+    return index == XKB_MOD_INVALID || index >= 32 ? 0 : quint32(1) << index;
+}
+
+quint32 Keyboard::depressedModifiers() const
+{
+    return m_depressedModifiers;
+}
+
+quint32 Keyboard::latchedModifiers() const
+{
+    return m_latchedModifiers;
+}
+
+quint32 Keyboard::lockedModifiers() const
+{
+    return m_lockedModifiers;
+}
+
+quint32 Keyboard::currentLayout() const
+{
+    return m_currentLayout;
+}
+
 void Keyboard::keyboard_keymap(uint32_t format, int32_t fd, uint32_t size)
 {
     mKeymapFormat = format;
@@ -177,6 +232,10 @@ void Keyboard::keyboard_key(uint32_t serial, uint32_t time, uint32_t key, uint32
 
 void Keyboard::keyboard_modifiers(uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
 {
+    m_depressedModifiers = mods_depressed;
+    m_latchedModifiers = mods_latched;
+    m_lockedModifiers = mods_locked;
+    m_currentLayout = group;
     xkb_state_update_mask(mXkbState.get(), mods_depressed, mods_latched, mods_locked, 0, 0, group);
 
     // currently not filterable

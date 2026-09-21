@@ -12,6 +12,7 @@
 #include <QtWaylandClient/QWaylandClientExtensionTemplate>
 
 #include <memory>
+#include <optional>
 #include <qwayland-input-method-unstable-v1.h>
 #include <qwayland-wayland.h>
 
@@ -94,6 +95,13 @@ public:
     Keyboard(::wl_keyboard *keyboard, InputMethodContext *parent);
     ~Keyboard();
 
+    std::optional<quint32> keycodeForKeysym(xkb_keysym_t keysym) const;
+    quint32 modifierMask(const char *name) const;
+    quint32 depressedModifiers() const;
+    quint32 latchedModifiers() const;
+    quint32 lockedModifiers() const;
+    quint32 currentLayout() const;
+
 Q_SIGNALS:
     void keyPressed(QKeyEvent *keyEvent);
     void keyReleased(QKeyEvent *keyEvent);
@@ -109,4 +117,8 @@ private:
     QXkbCommon::ScopedXKBContext mXkbContext;
     QXkbCommon::ScopedXKBKeymap mXkbKeymap;
     QXkbCommon::ScopedXKBState mXkbState;
+    quint32 m_depressedModifiers = 0;
+    quint32 m_latchedModifiers = 0;
+    quint32 m_lockedModifiers = 0;
+    quint32 m_currentLayout = 0;
 };

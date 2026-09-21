@@ -25,6 +25,10 @@ target_sources(plasma-keyboard PRIVATE
     inputpanelwindow.h
     inputplugin.cpp
     inputplugin.h
+    bottomsurfacecoordinator.cpp
+    bottomsurfacecoordinator.h
+    precisioncontroller.cpp
+    precisioncontroller.h
     qwaylandinputpanelshellintegration.cpp
     qwaylandinputpanelshellintegration_p.h
     qwaylandinputpanelsurface.cpp
@@ -69,7 +73,7 @@ ecm_qt_declare_logging_category(plasma-keyboard
     HEADER logging.h
     IDENTIFIER "PlasmaKeyboard"
     CATEGORY_NAME "org.kde.plasma.keyboard"
-    DESCRIPTION "Plasma Keyboard"
+    DESCRIPTION "Shuffle Keyboard"
     DEFAULT_SEVERITY Warning
 )
 
@@ -82,12 +86,19 @@ ecm_add_qml_module(plasma-keyboard
 
 ecm_target_qml_sources(plasma-keyboard SOURCES
     qml/main.qml
+    qml/ShuffleButton.qml
+    qml/EditGestureSurface.qml
+    qml/IPadBaseline.qml
+    qml/IPadKey.qml
+    qml/PrecisionSurface.qml
     qml/LanguagePopup.qml
     qml/LanguagePopupDelegate.qml
     qml/DiacriticsOverlay.qml
     qml/OverlayWindow.qml
 )
 ecm_finalize_qml_module(plasma-keyboard)
+
+set_target_properties(plasma-keyboard PROPERTIES OUTPUT_NAME shuffle-keyboard)
 
 kconfig_add_kcfg_files(plasma-keyboard GENERATE_MOC plasmakeyboardsettings.kcfgc)
 
@@ -118,15 +129,11 @@ target_link_libraries(plasma-keyboard
 )
 
 install(TARGETS plasma-keyboard ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
-install(PROGRAMS org.kde.plasma.keyboard.desktop DESTINATION ${KDE_INSTALL_APPDIR})
+install(PROGRAMS org.shuffle.Keyboard.desktop DESTINATION ${KDE_INSTALL_APPDIR})
+install(PROGRAMS org.shuffle.IPadBaseline.desktop DESTINATION ${KDE_INSTALL_APPDIR})
 
 add_subdirectory(styles)
 add_subdirectory(qmlplugin)
 
-install(DIRECTORY layouts DESTINATION ${CMAKE_INSTALL_PREFIX}/share/plasma/keyboard)
-install(DIRECTORY overlay/diacritics DESTINATION ${CMAKE_INSTALL_PREFIX}/share/plasma/keyboard)
-
-install(
-    FILES ${CMAKE_CURRENT_SOURCE_DIR}/org.kde.plasma.keyboard.metainfo.xml
-    DESTINATION ${KDE_INSTALL_METAINFODIR}
-)
+install(DIRECTORY layouts DESTINATION ${KDE_INSTALL_DATADIR}/plasma/keyboard)
+install(DIRECTORY overlay/diacritics DESTINATION ${KDE_INSTALL_DATADIR}/plasma/keyboard)
