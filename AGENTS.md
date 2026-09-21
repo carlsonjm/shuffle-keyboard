@@ -28,8 +28,10 @@ that checkout is present, and say the suite plan was unavailable when it is not.
 
 - J approves product behavior and visual direction before implementation begins.
   He sets intent, scope and sequencing and does not review code.
-- One implementation owner. A second worker is read-only review or a disjoint
-  file set.
+- One implementation owner, which since 21 September is this workflow. The
+  keyboard was written elsewhere and handed over; changes arrive here as commits
+  against this repository, not as a folder from somewhere else. A second worker
+  is read-only review or a disjoint file set.
 - Reproduce a defect and measure the property controlling it before changing it.
 - Run `./verify.sh` before treating a change as complete. It formats, checks
   licence headers, builds and runs the tests. The mock input-method compositor
