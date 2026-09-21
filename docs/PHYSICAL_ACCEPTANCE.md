@@ -16,8 +16,7 @@ Complete this pass without a physical keyboard or mouse after setup.
    ```
 
 2. Open **System Settings → Keyboard → Virtual Keyboard**.
-3. Select **Shuffle Keyboard** and choose **Apply**. The same install also adds
-   **iPad Layout Baseline** for the comparison pass below.
+3. Select **Shuffle Keyboard** and choose **Apply**.
 4. If it does not become available immediately, sign out and sign back in once.
 5. Tap a text field. The keyboard should replace the normal bottom panel.
 To stop the test at any time, return to **Virtual Keyboard**, select **None**,
@@ -77,34 +76,14 @@ Record one line for each item as `Pass`, `Fail`, or `Note: …`.
 - **Touch reach:** Type several sentences at normal speed. Note any intended
   key that lands left or right of the target.
 
-## Four-row baseline comparison
+## Row geometry is settled
 
-1. In **System Settings → Keyboard → Virtual Keyboard**, select
-   **iPad Layout Baseline** and choose **Apply**.
-2. Use the same panel height and type the same two sentences without correcting
-   mistakes.
-3. Switch back to **Shuffle Keyboard**, repeat once, then record:
-
-- **Footprint:** Both keyboards occupy the same four-row panel height.
-- **Fixed pitch:** Q, A, and Z-row character keys have the same width; Tab,
-  Caps Lock, Shift, Delete, and Go do not compress their neighboring letters.
-- **Stagger:** A begins one-quarter key right of Q, and Z begins three-quarters
-  of a key right of Q.
-- **Q row:** Note every intended key and the key actually hit.
-- **A row:** Note every intended key and the key actually hit.
-- **Z row:** Note every intended key and the key actually hit.
-- **Reach:** Note which layout requires less horizontal hand movement.
-- **Controls:** Note whether Delete, Go, either Shift, Space, `.?123`, and the
-  hide key are comfortably sized and placed.
-- **Delivery:** No character is lost, duplicated, reordered, or incorrectly
-  mapped on either layout.
-
-The emoji and microphone keys are inert in this 1.0 baseline. That is expected,
-not a failure.
-
-Initial physical result: the fixed-pitch baseline produced essentially no
-misses. Shuffle now uses the same pitch and stagger, so further comparison is
-focused on its edge controls and mode transition rather than re-evaluating the
-input engine.
+The fixed pitch and the Q/A/Z stagger were chosen by an on-device comparison
+against a conventional four-row iPad layout built on this keyboard's exact
+delivery path. That comparison found essentially no misses on the fixed pitch,
+and Shuffle adopted the same geometry, so it is not re-run and the comparison
+keyboard has been removed. A miss pattern found in this pass is therefore a
+finding about the Shuffle layout itself, not a question about which geometry to
+use.
 
 Include the application name and exact observed behavior in every failure note.

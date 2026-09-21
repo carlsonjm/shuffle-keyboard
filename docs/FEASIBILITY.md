@@ -70,11 +70,13 @@ The client returned to the panel-reserved 724 px height after dismissal.
 
 ## Remaining physical acceptance
 
-The first on-device geometry comparison found essentially no misses on the
-four-row fixed-pitch iPad baseline. Because it shares the exact delivery path
-with Shuffle, this isolates the earlier miss pattern to row geometry. The
-Shuffle candidate now uses the same Q/A/Z pitch and stagger and defaults to the
-full width proven by that comparison.
+The first on-device geometry comparison found essentially no misses on a
+four-row fixed-pitch iPad layout built on this keyboard's exact delivery path.
+Sharing that path is what isolated the earlier miss pattern to row geometry
+rather than to input delivery, and Shuffle adopted the same Q/A/Z pitch and
+stagger and the full width proven by it. The comparison keyboard has since been
+removed: it settled one question, and shipping a second virtual keyboard to
+answer it again is not worth carrying.
 
 Automated tests cannot establish finger comfort, accidental Cut frequency,
 pointer feel, portal-consent ergonomics, or real panel animation quality. Those

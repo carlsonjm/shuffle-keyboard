@@ -38,27 +38,6 @@ custom input engine.
 - Plasma's bottom panel yields while the keyboard is requested and restores
   its previous hiding mode afterward.
 
-## Four-row iPad baseline
-
-The same executable also supplies **iPad Layout Baseline** as a second Plasma
-virtual keyboard. It uses the identical Qt Virtual Keyboard/KWin delivery path
-and the same four-row panel footprint as Shuffle, but substitutes conventional
-iPad-style key geometry and presentation:
-
-- A fixed character pitch across all typing rows, with Q at 1.00 units,
-  A at 1.25 units, and Z at 1.75 units.
-- Tab and Delete flanking QWERTY without compressing the letter keys.
-- Caps Lock and a large Go key filling the home-row edges.
-- Full Shift keys flanking Z–M, comma, period, and slash.
-- iPad-style bottom-row proportions with a large centered Space key.
-
-The emoji and microphone positions are visible but intentionally inactive;
-emoji and dictation infrastructure are outside the Shuffle 1.0 contract. The
-baseline exists to isolate layout accuracy from input delivery and to support
-a direct physical A/B comparison with Shuffle. The first comparison reported
-essentially no misses on this fixed-pitch geometry, which is now the geometry
-used by the Shuffle candidate.
-
 See [the feasibility record](docs/FEASIBILITY.md) for the foundation decision
 and test evidence.
 

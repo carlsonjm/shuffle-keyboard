@@ -35,20 +35,19 @@ int main(int argc, char **argv)
     initLayoutsPath();
 
     QGuiApplication application(argc, argv);
-    const bool baselineMode = qEnvironmentVariable("SHUFFLE_KEYBOARD_LAYOUT") == QLatin1String("ipad");
 
     KLocalizedString::setApplicationDomain("plasma-keyboard");
 
-    KAboutData aboutData(baselineMode ? QStringLiteral("shuffle-ipad-baseline") : QStringLiteral("shuffle-keyboard"),
-                         baselineMode ? i18n("iPad Layout Baseline") : i18n("Shuffle Keyboard"),
+    KAboutData aboutData(QStringLiteral("shuffle-keyboard"),
+                         i18n("Shuffle Keyboard"),
                          QStringLiteral(PLASMA_KEYBOARD_VERSION_STRING),
-                         baselineMode ? i18n("Four-row iPad keyboard geometry baseline for Plasma") : i18n("Touch keyboard and precision surface for Plasma"),
+                         i18n("Touch keyboard and precision surface for Plasma"),
                          KAboutLicense::GPL,
                          i18n("Copyright 2024 Plasma Keyboard contributors; 2026 Shuffle Project"));
 
     aboutData.addAuthor(i18n("Aleix Pol Gonzalez"), i18n("Author"), QStringLiteral("aleixpol@kde.org"));
     aboutData.setOrganizationDomain("kde.org");
-    aboutData.setDesktopFileName(baselineMode ? QStringLiteral("org.shuffle.IPadBaseline") : QStringLiteral("org.shuffle.Keyboard"));
+    aboutData.setDesktopFileName(QStringLiteral("org.shuffle.Keyboard"));
     application.setWindowIcon(QIcon::fromTheme(QStringLiteral("input-keyboard-virtual")));
     aboutData.setProgramLogo(application.windowIcon());
 
@@ -125,14 +124,13 @@ int main(int argc, char **argv)
             });
         }
     });
-    view.load(QUrl(baselineMode ? QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/IPadBaseline.qml")
-                                : QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/main.qml")));
+    view.load(QUrl(QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/main.qml")));
 
     if (view.rootObjects().isEmpty()) {
         return 1;
     }
 
-    qCDebug(PlasmaKeyboard) << (baselineMode ? "Starting iPad Layout Baseline" : "Starting Shuffle Keyboard");
+    qCDebug(PlasmaKeyboard) << "Starting Shuffle Keyboard";
 
     return application.exec();
 }

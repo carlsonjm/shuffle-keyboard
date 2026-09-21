@@ -88,8 +88,6 @@ ecm_target_qml_sources(plasma-keyboard SOURCES
     qml/main.qml
     qml/ShuffleButton.qml
     qml/EditGestureSurface.qml
-    qml/IPadBaseline.qml
-    qml/IPadKey.qml
     qml/PrecisionSurface.qml
     qml/LanguagePopup.qml
     qml/LanguagePopupDelegate.qml
@@ -130,7 +128,6 @@ target_link_libraries(plasma-keyboard
 
 install(TARGETS plasma-keyboard ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 install(PROGRAMS org.shuffle.Keyboard.desktop DESTINATION ${KDE_INSTALL_APPDIR})
-install(PROGRAMS org.shuffle.IPadBaseline.desktop DESTINATION ${KDE_INSTALL_APPDIR})
 
 add_subdirectory(styles)
 add_subdirectory(qmlplugin)
