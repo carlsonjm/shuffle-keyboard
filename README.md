@@ -38,6 +38,42 @@ custom input engine.
 - Plasma's bottom panel yields while the keyboard is requested and restores
   its previous hiding mode afterward.
 
+## Superseded by the 22 September direction
+
+J built this candidate and used it before its product contract was tested, and
+four of that contract's interaction hypotheses did not survive the use. The suite
+concept, `../kadunce/docs/SHUFFLE-KEYBOARD-1.0-CONCEPT.md`, is the product
+contract and now records what replaces them. Nothing below is built yet, and this
+list exists so the current candidate's behavior is not mistaken for the target.
+
+- **Edge hold surfaces stop being the pointer.** The space bar becomes it: press
+  and slide, armed by about ten pixels of travel rather than by a timer, so an
+  ordinary space is never lost. The keys step back but are never replaced or
+  disabled, so there is no mode to leave. A control at the space bar's right end
+  latches the surface, which today's precision mode deliberately never does.
+- **Both edges change owner.** They become scrub columns: multi-step undo and
+  redo on the left, key height on the right, each notched and close to invisible
+  until touched. Undo and redo were the only edit gestures worth keeping; copy
+  and cut return to modifier chords.
+- **Height stops changing width.** This is the sharpest conflict with what is
+  built. The typing block derives its width from the selected row height today,
+  so resizing rescales the keyboard. The direction holds width fixed and moves
+  only key height, so the gutter, the key columns and the space bar never move
+  and the window above grows by exactly what the keyboard gives back.
+- **The draggable top grab goes.** Height moves to the right scrub column, with a
+  marked default, because a continuous drag loses the one size already known to
+  be right. Show and hide then owns the top edge alone.
+
+Two more items follow from the suite rather than from this list. The keyboard
+takes Kadunce's 10 px gutter on every side so it aligns with an Active card. And
+`bottomsurfacecoordinator` asking Plasma's bottom panel to yield is replaced by
+asking the downstream Bottom Surface, which owns that region; the arrangement is
+specified in `../shuffle/docs/BOTTOM-SURFACE-CONTRACT.md` and this repository
+keeps its current behavior until that surface exists.
+
+Without haptics on the device, a notch holds briefly before it gives and marks
+itself with a short click through the touch sounds this build already has.
+
 See [the feasibility record](docs/FEASIBILITY.md) for the foundation decision
 and test evidence.
 

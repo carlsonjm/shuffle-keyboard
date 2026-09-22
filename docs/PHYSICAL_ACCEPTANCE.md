@@ -59,6 +59,12 @@ Record one line for each item as `Pass`, `Fail`, or `Note: …`.
 - **Height:** On first launch, ordinary keys are approximately square. Drag the
   centered top grab to both comfortable extremes. The app workspace follows
   the edge continuously, and the chosen height survives a close/reopen.
+> The height, Shuffle-surface, Shuffle-transition, pointer-button and
+> edit-gesture steps below test the superseded interaction. They stay until the
+> 22 September direction is built, because they are the pass for the candidate
+> that exists; `../README.md` names what replaces each. Do not treat a pass here
+> as evidence for the direction, or a conflict with it as a defect in this build.
+
 - **Shuffle surfaces:** The centered keyboard leaves unoutlined hold space on
   both edges. Either edge enters the same precision mode.
 - **Shuffle transition:** Hold that blank surface; the precision surface
