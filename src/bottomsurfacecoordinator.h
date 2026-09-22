@@ -16,11 +16,23 @@ class BottomSurfaceCoordinator : public QObject
     Q_PROPERTY(bool requestedVisible READ requestedVisible WRITE setRequestedVisible NOTIFY requestedVisibleChanged)
     Q_PROPERTY(QString error READ error NOTIFY errorChanged)
 
+    // What the Bottom Surface is doing, for the handle that sits above it.
+    // All of it is absent-safe: with no surface on the bus these stay false
+    // and zero, and the handle simply does not appear.
+    Q_PROPERTY(bool surfacePresent READ surfacePresent NOTIFY extentChanged)
+    Q_PROPERTY(int bandHeight READ bandHeight NOTIFY extentChanged)
+    Q_PROPERTY(int dockWidth READ dockWidth NOTIFY extentChanged)
+    Q_PROPERTY(bool regionObscured READ regionObscured NOTIFY extentChanged)
+
 public:
     explicit BottomSurfaceCoordinator(QObject *parent = nullptr);
     ~BottomSurfaceCoordinator() override;
 
     bool keyboardVisible() const;
+    bool surfacePresent() const;
+    int bandHeight() const;
+    int dockWidth() const;
+    bool regionObscured() const;
     bool requestedVisible() const;
     void setRequestedVisible(bool visible);
     QString error() const;
@@ -29,6 +41,7 @@ Q_SIGNALS:
     void keyboardVisibleChanged();
     void requestedVisibleChanged();
     void errorChanged();
+    void extentChanged();
     void reservationRefreshRequested();
 
 private:
@@ -36,14 +49,29 @@ private:
     QString evaluate(const QString &script);
     void yieldBottomPanels();
     void restoreBottomPanels();
+
+    /// Ask the Bottom Surface for the region. False means there is no surface
+    /// to ask, not that it refused --- the caller then falls back to the panel
+    /// behaviour this component has always had.
+    bool askSurface(bool yield);
+    void readExtent();
     void setError(const QString &error);
 
 private Q_SLOTS:
     void syncKeyboardVisibility();
+    void onExtentChanged(const QString &outputName);
 
 private:
     bool m_keyboardVisible = false;
     bool m_requestedVisible = false;
     QString m_savedPanels;
+
+    /// True while the surface is the one that yielded, so the release goes
+    /// back the same way it was taken.
+    bool m_surfaceYielded = false;
+    bool m_surfacePresent = false;
+    int m_bandHeight = 0;
+    int m_dockWidth = 0;
+    bool m_regionObscured = false;
     QString m_error;
 };

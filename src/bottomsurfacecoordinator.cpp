@@ -6,10 +6,23 @@
 #include "bottomsurfacecoordinator.h"
 
 #include <QDBusConnection>
+#include <QDBusConnectionInterface>
 #include <QDBusInterface>
 #include <QDBusReply>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QTimer>
+
+namespace
+{
+// The Bottom Surface, when one is installed. Discovered at run time and never
+// required: with the name unowned this component behaves exactly as it did
+// before the surface existed.
+constexpr auto kSurfaceService = "studio.warbler.BottomSurface";
+constexpr auto kSurfacePath = "/BottomSurface";
+constexpr auto kSurfaceInterface = "studio.warbler.BottomSurface";
+constexpr int kSupportedMajor = 1;
+}
 
 BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
     : QObject(parent)
@@ -20,7 +33,95 @@ BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
                                           QStringLiteral("visibleChanged"),
                                           this,
                                           SLOT(syncKeyboardVisibility()));
+    QDBusConnection::sessionBus().connect(QString::fromLatin1(kSurfaceService),
+                                          QString::fromLatin1(kSurfacePath),
+                                          QString::fromLatin1(kSurfaceInterface),
+                                          QStringLiteral("dockExtentChanged"),
+                                          this,
+                                          SLOT(onExtentChanged(QString)));
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::syncKeyboardVisibility);
+    QTimer::singleShot(0, this, &BottomSurfaceCoordinator::readExtent);
+}
+
+bool BottomSurfaceCoordinator::surfacePresent() const
+{
+    return m_surfacePresent;
+}
+
+int BottomSurfaceCoordinator::bandHeight() const
+{
+    return m_bandHeight;
+}
+
+int BottomSurfaceCoordinator::dockWidth() const
+{
+    return m_dockWidth;
+}
+
+bool BottomSurfaceCoordinator::regionObscured() const
+{
+    return m_regionObscured;
+}
+
+void BottomSurfaceCoordinator::onExtentChanged(const QString &outputName)
+{
+    Q_UNUSED(outputName)
+    readExtent();
+}
+
+void BottomSurfaceCoordinator::readExtent()
+{
+    const bool present = QDBusConnection::sessionBus().interface()
+        && QDBusConnection::sessionBus().interface()->isServiceRegistered(QString::fromLatin1(kSurfaceService)).value();
+
+    int bandHeight = 0;
+    int dockWidth = 0;
+    bool obscured = false;
+    bool usable = false;
+
+    if (present) {
+        QDBusInterface surface(QString::fromLatin1(kSurfaceService),
+                               QString::fromLatin1(kSurfacePath),
+                               QString::fromLatin1(kSurfaceInterface),
+                               QDBusConnection::sessionBus());
+        const QDBusReply<QString> reply = surface.call(QStringLiteral("dockExtent"), QString());
+        if (reply.isValid()) {
+            const QJsonObject payload = QJsonDocument::fromJson(reply.value().toUtf8()).object();
+            // An unknown major version is refused rather than guessed at.
+            if (payload.value(QStringLiteral("version")).toInt() == kSupportedMajor) {
+                usable = payload.value(QStringLiteral("presenting")).toBool();
+                bandHeight = payload.value(QStringLiteral("band")).toObject().value(QStringLiteral("height")).toInt();
+                const QJsonObject dock = payload.value(QStringLiteral("dock")).toObject();
+                dockWidth = dock.value(QStringLiteral("right")).toInt() - dock.value(QStringLiteral("left")).toInt();
+                obscured = payload.value(QStringLiteral("obscured")).toBool();
+            }
+        }
+    }
+
+    if (m_surfacePresent == usable && m_bandHeight == bandHeight && m_dockWidth == dockWidth && m_regionObscured == obscured) {
+        return;
+    }
+
+    m_surfacePresent = usable;
+    m_bandHeight = bandHeight;
+    m_dockWidth = dockWidth;
+    m_regionObscured = obscured;
+    Q_EMIT extentChanged();
+}
+
+bool BottomSurfaceCoordinator::askSurface(bool yield)
+{
+    if (!QDBusConnection::sessionBus().interface()
+        || !QDBusConnection::sessionBus().interface()->isServiceRegistered(QString::fromLatin1(kSurfaceService)).value()) {
+        return false;
+    }
+
+    QDBusInterface surface(QString::fromLatin1(kSurfaceService),
+                           QString::fromLatin1(kSurfacePath),
+                           QString::fromLatin1(kSurfaceInterface),
+                           QDBusConnection::sessionBus());
+    const QDBusReply<bool> reply = surface.call(yield ? QStringLiteral("yieldRegion") : QStringLiteral("releaseRegion"));
+    return reply.isValid() && reply.value();
 }
 
 void BottomSurfaceCoordinator::syncKeyboardVisibility()
@@ -112,6 +213,19 @@ QString BottomSurfaceCoordinator::evaluate(const QString &script)
 
 void BottomSurfaceCoordinator::yieldBottomPanels()
 {
+    // Ask the surface that owns the region before touching anything. Two
+    // things independently commanding one panel is how a panel is left in the
+    // wrong state, and the surface knows what giving up the region means ---
+    // this component does not and should not.
+    if (m_surfaceYielded) {
+        return;
+    }
+    if (askSurface(true)) {
+        m_surfaceYielded = true;
+        Q_EMIT reservationRefreshRequested();
+        return;
+    }
+
     if (!m_savedPanels.isEmpty()) {
         return;
     }
@@ -132,6 +246,14 @@ void BottomSurfaceCoordinator::yieldBottomPanels()
 
 void BottomSurfaceCoordinator::restoreBottomPanels()
 {
+    // Given back the same way it was taken.
+    if (m_surfaceYielded) {
+        askSurface(false);
+        m_surfaceYielded = false;
+        Q_EMIT reservationRefreshRequested();
+        return;
+    }
+
     if (m_savedPanels.isEmpty()) {
         return;
     }
