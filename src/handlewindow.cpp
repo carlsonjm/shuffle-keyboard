@@ -31,12 +31,17 @@ HandleWindow::HandleWindow(QWindow *parent)
     // Anchored to three edges, so the compositor gives it the output's width
     // and the client only ever chooses its height.
     layer->setAnchors(LayerShellQt::Window::Anchors(LayerShellQt::Window::AnchorBottom) | LayerShellQt::Window::AnchorLeft | LayerShellQt::Window::AnchorRight);
-    layer->setLayer(LayerShellQt::Window::LayerTop);
+    // The layer below the dock's. KWin gives reserved space layer by layer,
+    // top before bottom, and only then in the order surfaces were created; the
+    // Keyboard starts before the shell, so on the same layer the bar would take
+    // the very edge and the dock's band would sit on top of it. One layer down,
+    // it is always placed on the band. Windows draw over this layer, and none
+    // reaches it, because the bar reserves its own height.
+    layer->setLayer(LayerShellQt::Window::LayerBottom);
 
-    // Zero is not "no opinion": it asks to be placed inside what is left after
-    // every other exclusive zone, and to claim none itself. That is what puts
-    // this in the gutter above the reserved band rather than on top of it, and
-    // what keeps the reservation the dock's band alone.
+    // Zero until the bar is shown: it asks to be placed inside what is left
+    // after every other exclusive zone and to claim none itself. The bar's own
+    // height is reserved only while it is drawn.
     layer->setExclusiveZone(0);
 
     layer->setKeyboardInteractivity(LayerShellQt::Window::KeyboardInteractivityNone);
@@ -51,6 +56,27 @@ HandleWindow::HandleWindow(QWindow *parent)
 bool HandleWindow::placed() const
 {
     return m_placed;
+}
+
+int HandleWindow::reservation() const
+{
+    return m_reservation;
+}
+
+void HandleWindow::setReservation(int reservation)
+{
+    if (reservation == m_reservation) {
+        return;
+    }
+    m_reservation = reservation;
+    Q_EMIT reservationChanged();
+
+    if (!m_placed) {
+        return;
+    }
+    if (auto *layer = LayerShellQt::Window::get(this)) {
+        layer->setExclusiveZone(m_reservation);
+    }
 }
 
 QRect HandleWindow::interactiveRegion() const

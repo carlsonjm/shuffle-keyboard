@@ -25,7 +25,8 @@ Window {
     LayerShell.Window.anchors: LayerShell.Window.AnchorBottom
                                | LayerShell.Window.AnchorLeft
                                | LayerShell.Window.AnchorRight
-    LayerShell.Window.layer: LayerShell.Window.LayerBottom
+    // Plasma's panels are on the top layer, always.
+    LayerShell.Window.layer: LayerShell.Window.LayerTop
     LayerShell.Window.exclusionZone: band.reserving ? 60 : 0
     LayerShell.Window.scope: "shuffle-test-band"
     // A dock never takes the keyboard. One that did would be the active client,

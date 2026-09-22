@@ -12,14 +12,15 @@ import org.kde.plasma.keyboard
 HandleWindow {
     id: root
 
-    // Kadunce keeps this much clear above anything reserving a strut at the
-    // bottom edge, around every card and pane. The handle takes that room
-    // rather than asking for room of its own, which is why the bar inside is
-    // an even number of pixels: two clear, a hairline, four of handle, a
-    // hairline, two clear.
+    // The bar sits directly on the dock's band and reserves its own height,
+    // so the work area stops at its top edge. Whatever keeps a gutter above
+    // the work area --- Kadunce keeps ten around every card and pane --- keeps
+    // it above the bar, and the dock keeps its own ten between the band's top
+    // and the icons: the bar reads as one more step of the same spacing. The
+    // surface is the gutter's height so a reach that lands just above the bar
+    // still takes it, over room that is empty by design.
     readonly property int gutter: 10
-    readonly property int thickness: 4
-    readonly property int hairline: 1
+    readonly property int thickness: 6
 
     // Reaching for it is a distance, not a wait --- the rule the space bar's
     // pointer already uses.
@@ -37,6 +38,15 @@ HandleWindow {
         // With the keyboard up, the keyboard is the surface being used and the
         // dock this reports the width of has stepped aside.
         && !BottomSurfaceCoordinator.keyboardVisible
+
+    // Held through a blackout rather than following the bar out, because
+    // letting it go would resize every window each time the region darkens and
+    // clears. It goes with the dock and while the keyboard is up.
+    reservation: root.placed
+        && BottomSurfaceCoordinator.surfacePresent
+        && BottomSurfaceCoordinator.dockWidth > 0
+        && !BottomSurfaceCoordinator.keyboardVisible
+        ? root.thickness : 0
 
     // The only dimension this window chooses. Its width is the output's,
     // because it is anchored to both side edges.
@@ -118,47 +128,25 @@ HandleWindow {
     }
 
     // Exactly over the application row, so the handle reports the dock's
-    // extent rather than floating over it at some width of its own.
-    //
-    // The light fill alone disappears over a light window running under the
-    // gutter, and this surface cannot see what is beneath it to adapt. A dark
-    // hairline edge carries it there, and all but vanishes over dark content,
-    // where the fill already reads. The edge stays at the same strength while
-    // the fill brightens, so pressing reads as the bar lighting up.
+    // extent rather than floating over it at some width of its own. It is
+    // light and translucent, so the wallpaper reads through it, and it
+    // brightens under the finger.
     Rectangle {
         id: bar
 
         x: BottomSurfaceCoordinator.dockLeft
-        y: (root.gutter - root.thickness) / 2 - root.hairline
+        y: root.gutter - root.thickness
         width: Math.max(0, BottomSurfaceCoordinator.dockWidth)
-        height: root.thickness + 2 * root.hairline
+        height: root.thickness
         radius: height / 2
 
-        color: "transparent"
-        border.width: root.hairline
-        border.color: Qt.rgba(0, 0, 0, 0.28)
-        opacity: root.wanted ? 1 : 0
+        color: "#F8F8FF"
+        opacity: root.wanted ? (press.pressed || lift.active ? 0.9 : 0.35) : 0
 
         Behavior on opacity {
             NumberAnimation {
                 duration: 120
                 easing.type: Easing.OutCubic
-            }
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: root.hairline
-            radius: height / 2
-
-            color: "#F8F8FF"
-            opacity: press.pressed || lift.active ? 0.9 : 0.35
-
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 120
-                    easing.type: Easing.OutCubic
-                }
             }
         }
     }

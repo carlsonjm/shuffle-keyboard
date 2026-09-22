@@ -24,7 +24,8 @@ Window {
     LayerShell.Window.anchors: LayerShell.Window.AnchorBottom
                                | LayerShell.Window.AnchorLeft
                                | LayerShell.Window.AnchorRight
-    LayerShell.Window.layer: LayerShell.Window.LayerBottom
+    // Plasma's panels are on the top layer, always.
+    LayerShell.Window.layer: LayerShell.Window.LayerTop
     LayerShell.Window.exclusionZone: 60
     LayerShell.Window.scope: "shuffle-test-band"
 }

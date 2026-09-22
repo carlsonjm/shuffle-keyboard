@@ -17,9 +17,11 @@
  * is exactly when the handle has to be on screen. So the handle is a surface of
  * its own, placed by the compositor against the bottom edge.
  *
- * It claims no space. The Bottom Surface's band is the only reservation; this
- * sits in the gutter above it, overlaying room that is empty by design, and
- * adds nothing to any work area.
+ * It claims only the bar. The surface is placed against the Bottom Surface's
+ * band and reserves exactly the bar's height while the bar is shown, so the
+ * work area stops above it and whatever keeps a gutter above the work area
+ * keeps it above the bar as well. The rest of the surface overlays that gutter,
+ * which is empty by design.
  *
  * The surface spans the output and only the handle inside it takes touches.
  * The alternative --- a surface the width of the handle --- has to be resized
@@ -42,6 +44,8 @@ class HandleWindow : public QQuickWindow
     /// passes through to whatever is beneath, which is most of the screen's
     /// width.
     Q_PROPERTY(QRect interactiveRegion READ interactiveRegion WRITE setInteractiveRegion NOTIFY interactiveRegionChanged)
+    /// How much of the bottom edge this surface reserves from the work area.
+    Q_PROPERTY(int reservation READ reservation WRITE setReservation NOTIFY reservationChanged)
 
 public:
     explicit HandleWindow(QWindow *parent = nullptr);
@@ -50,6 +54,8 @@ public:
 
     QRect interactiveRegion() const;
     void setInteractiveRegion(QRect interactiveRegion);
+    int reservation() const;
+    void setReservation(int reservation);
 
     /// Applied again after the surface has been created, because hiding the
     /// window destroys it and a region set against the old one is gone.
@@ -57,8 +63,10 @@ public:
 
 Q_SIGNALS:
     void interactiveRegionChanged();
+    void reservationChanged();
 
 private:
     bool m_placed = false;
+    int m_reservation = 0;
     QRect m_interactiveRegion;
 };

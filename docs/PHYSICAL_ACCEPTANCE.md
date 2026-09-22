@@ -92,8 +92,10 @@ Record one line for each item as `Pass`, `Fail`, or `Note: …`.
 These need the Bottom Surface installed. On an ordinary Plasma panel there is
 no handle, which is the supported result and not a failure.
 
-- **It is there:** A thin light line sits in the gap just above the row of
-  application icons, as wide as that row and touching nothing.
+- **It is there:** A translucent light bar sits directly on top of the dock,
+  as wide as the row of application icons, with the same even gap above it to
+  the window as below it to the icons. Windows stop above it rather than
+  running under it.
 - **It grows with the row:** Open another application. The line widens with
   the row and stays centered on it.
 - **It raises:** Tap the line with nothing selected for typing. The keyboard
@@ -108,10 +110,9 @@ no handle, which is the supported result and not a failure.
 - **It does not take taps that are not for it:** Tap in the same gap but well
   to the left and to the right of the line. Whatever is underneath gets the
   tap and the keyboard stays down.
-- **Reaching for it:** Tap the line ten times at a natural speed and note how
-  many attempts miss, and whether a miss lands on an application icon instead.
-  The line is four pixels of paint in a ten pixel gap, and whether that is
-  enough to hit is the open question about it.
+- **Reaching for it:** Pull the bar up ten times at a natural speed and note
+  how many attempts miss, and whether a miss lands on an application icon
+  instead. A pull is the gesture; a tap has to land on the bar itself.
 
 ## Row geometry is settled
 

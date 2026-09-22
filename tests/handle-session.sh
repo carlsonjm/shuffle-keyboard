@@ -142,6 +142,11 @@ if gdbus call --session --dest org.kde.KWin --object-path /Scripting \
     # at 905, which is what it measured before anything reserved anything.
     check "it is the gutter above the reserved band, across the output" \
         "${placement}" "record window 0,845 1463x10"
+    # The bar reserves its own six pixels on top of the band's sixty, so the
+    # work area stops at the bar's top edge: 915 less 66.
+    check "the work area stops at the top of the bar" \
+        "$(grep -oE 'record area bottom=[0-9]+' "${stand_in_log}" | tail -1)" \
+        "record area bottom=849"
 else
     echo "  FAIL the compositor would not run the placement script"
     fail=$((fail + 1))
