@@ -15,9 +15,11 @@ HandleWindow {
     // Kadunce keeps this much clear above anything reserving a strut at the
     // bottom edge, around every card and pane. The handle takes that room
     // rather than asking for room of its own, which is why the bar inside is
-    // an even number of pixels: three clear, four of handle, three clear.
+    // an even number of pixels: two clear, a hairline, four of handle, a
+    // hairline, two clear.
     readonly property int gutter: 10
     readonly property int thickness: 4
+    readonly property int hairline: 1
 
     // Reaching for it is a distance, not a wait --- the rule the space bar's
     // pointer already uses.
@@ -117,22 +119,46 @@ HandleWindow {
 
     // Exactly over the application row, so the handle reports the dock's
     // extent rather than floating over it at some width of its own.
+    //
+    // The light fill alone disappears over a light window running under the
+    // gutter, and this surface cannot see what is beneath it to adapt. A dark
+    // hairline edge carries it there, and all but vanishes over dark content,
+    // where the fill already reads. The edge stays at the same strength while
+    // the fill brightens, so pressing reads as the bar lighting up.
     Rectangle {
         id: bar
 
         x: BottomSurfaceCoordinator.dockLeft
-        y: (root.gutter - root.thickness) / 2
+        y: (root.gutter - root.thickness) / 2 - root.hairline
         width: Math.max(0, BottomSurfaceCoordinator.dockWidth)
-        height: root.thickness
+        height: root.thickness + 2 * root.hairline
         radius: height / 2
 
-        color: "#F8F8FF"
-        opacity: root.wanted ? (press.pressed || lift.active ? 0.9 : 0.35) : 0
+        color: "transparent"
+        border.width: root.hairline
+        border.color: Qt.rgba(0, 0, 0, 0.28)
+        opacity: root.wanted ? 1 : 0
 
         Behavior on opacity {
             NumberAnimation {
                 duration: 120
                 easing.type: Easing.OutCubic
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: root.hairline
+            radius: height / 2
+
+            color: "#F8F8FF"
+            opacity: press.pressed || lift.active ? 0.9 : 0.35
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 120
+                    easing.type: Easing.OutCubic
+                }
             }
         }
     }
