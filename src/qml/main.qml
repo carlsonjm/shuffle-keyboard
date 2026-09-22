@@ -194,9 +194,21 @@ InputPanelWindow {
         if (shuffleProbeLayer > 1) shiftActive = true;
     }
 
-    BottomSurfaceCoordinator {
-        requestedVisible: Qt.inputMethod.visible || root.precisionActive
-        onReservationRefreshRequested: Qt.callLater(root.refreshInteractiveRegion)
+    // One boundary for the whole process. The keyboard and the handle are
+    // separate surfaces and both speak to the same region, and two clients
+    // each believing they hold it is the state the boundary exists to prevent.
+    Binding {
+        target: BottomSurfaceCoordinator
+        property: "requestedVisible"
+        value: Qt.inputMethod.visible || root.precisionActive
+        restoreMode: Binding.RestoreNone
+    }
+
+    Connections {
+        target: BottomSurfaceCoordinator
+        function onReservationRefreshRequested() {
+            Qt.callLater(root.refreshInteractiveRegion);
+        }
     }
 
     PrecisionController { id: precisionController }

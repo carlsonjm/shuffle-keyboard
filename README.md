@@ -36,7 +36,14 @@ custom input engine.
   taps provide Copy and Cut; horizontal swipes provide Undo/Redo.
 - Persisted, directly draggable height with live KWin workspace updates.
 - Plasma's bottom panel yields while the keyboard is requested and restores
-  its previous hiding mode afterward.
+  its previous hiding mode afterward. Where the downstream Bottom Surface is
+  installed the region is asked for instead of the panel being commanded, and
+  the surface decides what giving it up means.
+- A drag handle above that surface's application row raises the keyboard when
+  nothing has asked for text. It is a layer surface of the keyboard's own,
+  because the keyboard's window is an input panel and the compositor unmaps it
+  exactly when the handle is needed. It reserves nothing, takes its width from
+  the published dock extent, and leaves before the region goes solid.
 
 ## Superseded by the 22 September direction
 
@@ -69,7 +76,8 @@ takes Kadunce's 10 px gutter on every side so it aligns with an Active card. And
 `bottomsurfacecoordinator` asking Plasma's bottom panel to yield is replaced by
 asking the downstream Bottom Surface, which owns that region; the arrangement is
 specified in `../shuffle/docs/BOTTOM-SURFACE-CONTRACT.md` and this repository
-keeps its current behavior until that surface exists.
+keeps its current behavior where no such surface answers. That replacement is
+built, and the drag handle above the dock is built with it.
 
 Without haptics on the device, a notch holds briefly before it gives and marks
 itself with a short click through the touch sounds this build already has.

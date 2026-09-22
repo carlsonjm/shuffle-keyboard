@@ -32,6 +32,10 @@ Record one line for each item as `Pass`, `Fail`, or `Note: …`.
   field opens it again.
 - **Panel handoff:** The normal bottom panel yields without overlap or visible
   bouncing and returns after dismissal.
+- **Dock handoff:** With the Bottom Surface installed instead, raising the
+  keyboard slides the dock down and out rather than blinking it away, and
+  dismissing brings it back with a small settle. Nothing is ever left holding
+  space it is not using, and the dock never arrives on top of anything.
 - **Fast text:** Type a sentence quickly in a KDE/Qt app, a GTK app, Firefox,
   Chromium or an Electron app, and a terminal. No character is lost,
   duplicated, reordered, or wrongly mapped.
@@ -81,6 +85,32 @@ Record one line for each item as `Pass`, `Fail`, or `Note: …`.
   fire while typing on an adjacent key.
 - **Touch reach:** Type several sentences at normal speed. Note any intended
   key that lands left or right of the target.
+
+## The handle above the dock
+
+These need the Bottom Surface installed. On an ordinary Plasma panel there is
+no handle, which is the supported result and not a failure.
+
+- **It is there:** A thin light line sits in the gap just above the row of
+  application icons, as wide as that row and touching nothing.
+- **It grows with the row:** Open another application. The line widens with
+  the row and stays centered on it.
+- **It raises:** Tap the line with nothing selected for typing. The keyboard
+  comes up.
+- **It raises on a pull:** Put a finger on the line and drag upward. The
+  keyboard comes up before the finger has gone far.
+- **It gets out of the way:** With the keyboard up, the line is gone.
+- **It comes back:** Dismiss the keyboard. The line returns with the dock.
+- **It leaves before the dark:** Put a window full screen until the bottom
+  strip goes solid black. The line goes first; there is never a black strip
+  with a line floating over it.
+- **It does not take taps that are not for it:** Tap in the same gap but well
+  to the left and to the right of the line. Whatever is underneath gets the
+  tap and the keyboard stays down.
+- **Reaching for it:** Tap the line ten times at a natural speed and note how
+  many attempts miss, and whether a miss lands on an application icon instead.
+  The line is four pixels of paint in a ten pixel gap, and whether that is
+  enough to hit is the open question about it.
 
 ## Row geometry is settled
 

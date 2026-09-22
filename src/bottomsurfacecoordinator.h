@@ -8,10 +8,19 @@
 #include <QObject>
 #include <qqmlintegration.h>
 
+/**
+ * The Keyboard's whole relationship with the Bottom Surface.
+ *
+ * One instance, because there is one region and one holder of it. The keyboard
+ * window and the handle window are separate surfaces in the same process and
+ * both need this; two of these would mean two clients each believing they hold
+ * the region, which is the state the contract exists to prevent.
+ */
 class BottomSurfaceCoordinator : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
+    QML_SINGLETON
     Q_PROPERTY(bool keyboardVisible READ keyboardVisible NOTIFY keyboardVisibleChanged)
     Q_PROPERTY(bool requestedVisible READ requestedVisible WRITE setRequestedVisible NOTIFY requestedVisibleChanged)
     Q_PROPERTY(QString error READ error NOTIFY errorChanged)
@@ -21,6 +30,7 @@ class BottomSurfaceCoordinator : public QObject
     // and zero, and the handle simply does not appear.
     Q_PROPERTY(bool surfacePresent READ surfacePresent NOTIFY extentChanged)
     Q_PROPERTY(int bandHeight READ bandHeight NOTIFY extentChanged)
+    Q_PROPERTY(int dockLeft READ dockLeft NOTIFY extentChanged)
     Q_PROPERTY(int dockWidth READ dockWidth NOTIFY extentChanged)
     Q_PROPERTY(bool regionObscured READ regionObscured NOTIFY extentChanged)
 
@@ -31,11 +41,22 @@ public:
     bool keyboardVisible() const;
     bool surfacePresent() const;
     int bandHeight() const;
+    int dockLeft() const;
     int dockWidth() const;
     bool regionObscured() const;
     bool requestedVisible() const;
     void setRequestedVisible(bool visible);
     QString error() const;
+
+    /**
+     * Ask the compositor to show the keyboard when nothing asked for text.
+     *
+     * This is what the handle is for. Everywhere else the keyboard appears
+     * because a text field was touched; here the user is reaching for it
+     * directly, so the request goes to the compositor rather than pretending
+     * an input focus exists.
+     */
+    Q_INVOKABLE void raiseKeyboard();
 
 Q_SIGNALS:
     void keyboardVisibleChanged();
@@ -71,6 +92,7 @@ private:
     bool m_surfaceYielded = false;
     bool m_surfacePresent = false;
     int m_bandHeight = 0;
+    int m_dockLeft = 0;
     int m_dockWidth = 0;
     bool m_regionObscured = false;
     QString m_error;

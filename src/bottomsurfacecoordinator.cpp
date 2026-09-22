@@ -53,6 +53,11 @@ int BottomSurfaceCoordinator::bandHeight() const
     return m_bandHeight;
 }
 
+int BottomSurfaceCoordinator::dockLeft() const
+{
+    return m_dockLeft;
+}
+
 int BottomSurfaceCoordinator::dockWidth() const
 {
     return m_dockWidth;
@@ -75,6 +80,7 @@ void BottomSurfaceCoordinator::readExtent()
         && QDBusConnection::sessionBus().interface()->isServiceRegistered(QString::fromLatin1(kSurfaceService)).value();
 
     int bandHeight = 0;
+    int dockLeft = 0;
     int dockWidth = 0;
     bool obscured = false;
     bool usable = false;
@@ -92,18 +98,20 @@ void BottomSurfaceCoordinator::readExtent()
                 usable = payload.value(QStringLiteral("presenting")).toBool();
                 bandHeight = payload.value(QStringLiteral("band")).toObject().value(QStringLiteral("height")).toInt();
                 const QJsonObject dock = payload.value(QStringLiteral("dock")).toObject();
-                dockWidth = dock.value(QStringLiteral("right")).toInt() - dock.value(QStringLiteral("left")).toInt();
+                dockLeft = dock.value(QStringLiteral("left")).toInt();
+                dockWidth = dock.value(QStringLiteral("right")).toInt() - dockLeft;
                 obscured = payload.value(QStringLiteral("obscured")).toBool();
             }
         }
     }
 
-    if (m_surfacePresent == usable && m_bandHeight == bandHeight && m_dockWidth == dockWidth && m_regionObscured == obscured) {
+    if (m_surfacePresent == usable && m_bandHeight == bandHeight && m_dockLeft == dockLeft && m_dockWidth == dockWidth && m_regionObscured == obscured) {
         return;
     }
 
     m_surfacePresent = usable;
     m_bandHeight = bandHeight;
+    m_dockLeft = dockLeft;
     m_dockWidth = dockWidth;
     m_regionObscured = obscured;
     Q_EMIT extentChanged();
@@ -169,6 +177,20 @@ void BottomSurfaceCoordinator::setRequestedVisible(bool visible)
     if (m_keyboardVisible || (willShow.isValid() && willShow.value())) {
         yieldBottomPanels();
     }
+}
+
+void BottomSurfaceCoordinator::raiseKeyboard()
+{
+    QDBusInterface keyboard(QStringLiteral("org.kde.KWin"),
+                            QStringLiteral("/VirtualKeyboard"),
+                            QStringLiteral("org.kde.kwin.VirtualKeyboard"),
+                            QDBusConnection::sessionBus());
+    if (!keyboard.isValid()) {
+        setError(QStringLiteral("The compositor is not offering a virtual keyboard"));
+        return;
+    }
+    keyboard.asyncCall(QStringLiteral("forceActivate"));
+    setError({});
 }
 
 void BottomSurfaceCoordinator::setKeyboardVisible(bool visible)

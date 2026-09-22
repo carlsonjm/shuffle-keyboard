@@ -99,8 +99,24 @@ int main(int argc, char **argv)
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbePrecision"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_PRECISION"));
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeDismiss"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_DISMISS") != 0);
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeLayer"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_LAYER"));
+    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeHandle"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_HANDLE") != 0);
 
-    QObject::connect(&view, &QQmlApplicationEngine::objectCreated, &application, [previewMode, previewScreenshot](QObject *object) {
+    // The keyboard is an input panel; the drag handle is not. They are two
+    // surfaces with two shell protocols, so which one arrived has to be known
+    // before anything is done to it.
+    const QUrl keyboardUrl(QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/main.qml"));
+    const QUrl handleUrl(QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/KeyboardHandle.qml"));
+
+    QObject::connect(&view, &QQmlApplicationEngine::objectCreated, &application, [previewMode, previewScreenshot, handleUrl](QObject *object, const QUrl &url) {
+        if (url == handleUrl) {
+            // The handle places and shows itself. A keyboard without one still
+            // types, so this is reported and not fatal.
+            if (!object) {
+                qCWarning(PlasmaKeyboard) << "Shuffle Keyboard is running without its drag handle.";
+            }
+            return;
+        }
+
         auto window = qobject_cast<QQuickWindow *>(object);
         if (!window) {
             qCCritical(PlasmaKeyboard) << "Shuffle Keyboard failed to create its input-panel window.";
@@ -124,11 +140,15 @@ int main(int argc, char **argv)
             });
         }
     });
-    view.load(QUrl(QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/main.qml")));
+    view.load(keyboardUrl);
 
     if (view.rootObjects().isEmpty()) {
         return 1;
     }
+
+    // Loaded after the keyboard, so a failure here cannot cost the keyboard
+    // itself.
+    view.load(handleUrl);
 
     qCDebug(PlasmaKeyboard) << "Starting Shuffle Keyboard";
 

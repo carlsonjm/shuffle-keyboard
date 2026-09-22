@@ -71,6 +71,11 @@ find_package(Wayland 1.2 REQUIRED COMPONENTS Client)
 find_package(QtWaylandScanner REQUIRED ${QT_MIN_VERSION})
 find_package(WaylandProtocols 1.19 REQUIRED)
 
+# The drag handle is a layer surface. It cannot be part of the keyboard's own
+# window, because that window is an input panel and the compositor unmaps it
+# the moment text input goes away, which is when the handle has to be there.
+find_package(LayerShellQt REQUIRED)
+
 add_subdirectory(kcm)
 add_subdirectory(src)
 if(BUILD_TESTING)
