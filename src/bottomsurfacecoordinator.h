@@ -95,5 +95,10 @@ private:
     int m_dockLeft = 0;
     int m_dockWidth = 0;
     bool m_regionObscured = false;
+
+    /// Whether the surface still holds its reservation. A surface that does not
+    /// publish it is taken to hold it, which is what every surface did before
+    /// the field existed.
+    bool m_regionReserving = true;
     QString m_error;
 };

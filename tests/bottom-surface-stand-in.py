@@ -46,6 +46,9 @@ INTROSPECTION = """
       <arg type='i' name='left' direction='in'/>
       <arg type='i' name='right' direction='in'/>
     </method>
+    <method name='setReserving'>
+      <arg type='b' name='reserving' direction='in'/>
+    </method>
     <method name='record'>
       <arg type='s' name='line' direction='in'/>
     </method>
@@ -61,6 +64,7 @@ class StandIn:
         self.band = 0
         self.left = 0
         self.right = 0
+        self.reserving = True
         self.output_width = 1463
         self.holder = None
         self.connection = None
@@ -73,6 +77,7 @@ class StandIn:
                 "output": output_name or "Virtual-1",
                 "presenting": self.presenting,
                 "obscured": self.obscured,
+                "reserving": self.reserving,
                 "band": {"height": self.band},
                 "dock": {
                     "left": self.left,
@@ -113,6 +118,14 @@ class StandIn:
         if interface == "studio.warbler.test.Control":
             if method == "report":
                 self.presenting, self.obscured, self.band, self.left, self.right = parameters
+                self.connection.emit_signal(
+                    None, PATH, "studio.warbler.BottomSurface",
+                    "dockExtentChanged", GLib.Variant("(s)", ("Virtual-1",)),
+                )
+                invocation.return_value(None)
+                return
+            if method == "setReserving":
+                self.reserving = parameters[0]
                 self.connection.emit_signal(
                     None, PATH, "studio.warbler.BottomSurface",
                     "dockExtentChanged", GLib.Variant("(s)", ("Virtual-1",)),

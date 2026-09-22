@@ -54,9 +54,31 @@ bool InputPanelWindow::initInputPanel(InputPanelRole::Role role)
 
 void InputPanelWindow::refreshInteractiveRegion()
 {
-    const QRect region = m_interactiveRegion;
-    setMask(QRegion());
-    setMask(QRegion(region));
+    // The compositor places an input panel again only when a committed input
+    // region differs from the one before it, and a mask change reaches it only
+    // with the next frame. Clearing the mask and restoring it at once therefore
+    // arrives as no change at all. So one frame goes out with the region a
+    // pixel shorter at the top, and the region is restored on the frame after:
+    // two real changes, each of which places the panel against the work area
+    // as it is now. Shortening rather than clearing keeps the panel's bottom
+    // edge, which is all the placement reads, and never presents the whole
+    // window as the panel for a frame.
+    if (m_interactiveRegion.height() < 2 || m_refreshPending) {
+        return;
+    }
+    m_refreshPending = true;
+    setMask(QRegion(m_interactiveRegion.adjusted(0, 1, 0, 0)));
+    connect(
+        this,
+        &QQuickWindow::frameSwapped,
+        this,
+        [this] {
+            m_refreshPending = false;
+            setMask(QRegion(m_interactiveRegion));
+            update();
+        },
+        Qt::SingleShotConnection);
+    update();
 }
 
 void InputPanelWindow::persistKeyboardHeight(int height)

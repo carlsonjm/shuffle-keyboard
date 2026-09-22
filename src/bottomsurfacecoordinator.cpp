@@ -83,6 +83,7 @@ void BottomSurfaceCoordinator::readExtent()
     int dockLeft = 0;
     int dockWidth = 0;
     bool obscured = false;
+    bool reserving = true;
     bool usable = false;
 
     if (present) {
@@ -101,8 +102,19 @@ void BottomSurfaceCoordinator::readExtent()
                 dockLeft = dock.value(QStringLiteral("left")).toInt();
                 dockWidth = dock.value(QStringLiteral("right")).toInt() - dockLeft;
                 obscured = payload.value(QStringLiteral("obscured")).toBool();
+                reserving = payload.value(QStringLiteral("reserving")).toBool(true);
             }
         }
+    }
+
+    // The compositor seats this window on the bottom of the work area and does
+    // not move it when the work area grows. The surface gives its reservation
+    // up only after its presentation has left, well after this window was
+    // seated, so the moment it says the reservation has gone is the moment to
+    // be placed again. Asking any earlier seats it on a band that is leaving.
+    if (m_regionReserving != reserving) {
+        m_regionReserving = reserving;
+        Q_EMIT reservationRefreshRequested();
     }
 
     if (m_surfacePresent == usable && m_bandHeight == bandHeight && m_dockLeft == dockLeft && m_dockWidth == dockWidth && m_regionObscured == obscured) {

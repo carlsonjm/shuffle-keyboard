@@ -47,4 +47,5 @@ Q_SIGNALS:
 
 private:
     QRect m_interactiveRegion;
+    bool m_refreshPending = false;
 };
