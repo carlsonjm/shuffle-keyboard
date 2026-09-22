@@ -8,12 +8,13 @@ Complete this pass without a physical keyboard or mouse after setup.
 1. Open a terminal and run:
 
    ```sh
-   cd ~/Projects/Shuffle/shuffle-keyboard
-   cmake -S . -B build -G Ninja -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo
-   cmake --build build
-   cmake --install build --prefix /home/ghostiepost/.local
-   kbuildsycoca6
+   /home/ghostiepost/Projects/Shuffle/shuffle-keyboard/install-keyboard.sh
    ```
+
+   It builds, replaces the copy in your own prefix, and checks that what
+   landed is what was built. No password, and nothing outside your home
+   directory. The Keyboard you are typing on is still the previous copy until
+   you have signed out and back in, which the script says as well.
 
 2. Open **System Settings → Keyboard → Virtual Keyboard**.
 3. Select **Shuffle Keyboard** and choose **Apply**.
