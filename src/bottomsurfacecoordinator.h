@@ -69,6 +69,8 @@ Q_SIGNALS:
     void extentChanged();
     void reservationRefreshRequested();
     void keyboardFocusReclaimRequested();
+    /// Someone reached for the keyboard from the dock rather than the handle.
+    void keyboardRequested();
 
 private:
     void setKeyboardVisible(bool visible);

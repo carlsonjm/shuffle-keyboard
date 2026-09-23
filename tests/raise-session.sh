@@ -142,6 +142,17 @@ else
     fail=$((fail + 1))
 fi
 
+echo
+echo "A pull that starts on the dock raises it the same way"
+gdbus call --session --dest org.kde.KWin --object-path /VirtualKeyboard \
+    --method org.freedesktop.DBus.Properties.Set \
+    org.kde.kwin.VirtualKeyboard active "<false>" > /dev/null 2>&1
+wait_keyboard false
+sleep 0.5
+control requestKeyboard
+wait_keyboard true
+check "the dock's request brings the Keyboard up" "$(keyboard visible)" "(<true>,)"
+
 kill "${app_pid}" 2>/dev/null
 
 echo

@@ -157,9 +157,10 @@ HandleWindow {
         width: 1
         height: 1
         color: "transparent"
-        // The compositor gives it the focus; Qt must not treat it as this
-        // process's focus window, or the in-process virtual keyboard sees a
-        // window with nothing to type into and hides the keyboard again.
+        // Asking Qt not to focus this window does not stop Qt following the
+        // compositor's focus here, which is what reclaiming below is for, but
+        // it narrows the moment: without it the raise failed one isolated run
+        // in three, with it none in fifteen.
         flags: Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.WindowDoesNotAcceptFocus
         visible: false
 
@@ -218,6 +219,14 @@ HandleWindow {
 
     Connections {
         target: BottomSurfaceCoordinator
+
+        // A pull that starts on the dock is a pull on the handle that landed
+        // a few pixels low, and raises the same way.
+        function onKeyboardRequested() {
+            if (root.wanted && !root.holdingFocus) {
+                root.raise();
+            }
+        }
 
         function onKeyboardVisibleChanged() {
             if (!root.holdingFocus) {

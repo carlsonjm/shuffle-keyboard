@@ -39,6 +39,12 @@ BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
                                           QStringLiteral("dockExtentChanged"),
                                           this,
                                           SLOT(onExtentChanged(QString)));
+    QDBusConnection::sessionBus().connect(QString::fromLatin1(kSurfaceService),
+                                          QString::fromLatin1(kSurfacePath),
+                                          QString::fromLatin1(kSurfaceInterface),
+                                          QStringLiteral("keyboardRequested"),
+                                          this,
+                                          SIGNAL(keyboardRequested()));
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::syncKeyboardVisibility);
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::readExtent);
 }

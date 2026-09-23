@@ -37,6 +37,7 @@ INTROSPECTION = """
     <signal name='dockExtentChanged'>
       <arg type='s' name='outputName'/>
     </signal>
+    <signal name='keyboardRequested'/>
   </interface>
   <interface name='studio.warbler.test.Control'>
     <method name='report'>
@@ -46,6 +47,7 @@ INTROSPECTION = """
       <arg type='i' name='left' direction='in'/>
       <arg type='i' name='right' direction='in'/>
     </method>
+    <method name='requestKeyboard'/>
     <method name='setReserving'>
       <arg type='b' name='reserving' direction='in'/>
     </method>
@@ -121,6 +123,13 @@ class StandIn:
                 self.connection.emit_signal(
                     None, PATH, "studio.warbler.BottomSurface",
                     "dockExtentChanged", GLib.Variant("(s)", ("Virtual-1",)),
+                )
+                invocation.return_value(None)
+                return
+            if method == "requestKeyboard":
+                self.connection.emit_signal(
+                    None, PATH, "studio.warbler.BottomSurface",
+                    "keyboardRequested", None,
                 )
                 invocation.return_value(None)
                 return
