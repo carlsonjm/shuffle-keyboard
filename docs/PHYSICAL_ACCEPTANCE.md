@@ -104,6 +104,8 @@ no handle, which is the supported result and not a failure.
   keyboard comes up before the finger has gone far.
 - **It works straight after signing in:** Sign in and, before touching any text
   field, pull the handle. The keyboard comes up the first time.
+- **It keeps the focus where it is:** Tap into a text box, put the keyboard
+  away, then pull the handle. What you type goes into that same box.
 - **It gives the focus back:** Raise the keyboard from the handle, dismiss it,
   and type on a physical keyboard. The text goes to the application that had
   the focus before, and nothing is lost.

@@ -43,7 +43,9 @@ custom input engine.
   nothing has asked for text. It is a layer surface of the keyboard's own,
   because the keyboard's window is an input panel and the compositor unmaps it
   exactly when the handle is needed. It reserves nothing, takes its width from
-  the published dock extent, and leaves before the region goes solid.
+  the published dock extent, and leaves before the region goes solid. A pull
+  never takes the focus from a text box that is ready to be typed into; only
+  a cold start, with nothing ready, borrows it until the keyboard goes.
 
 ## Superseded by the 22 September direction
 
