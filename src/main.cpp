@@ -100,6 +100,7 @@ int main(int argc, char **argv)
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeDismiss"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_DISMISS") != 0);
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeLayer"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_LAYER"));
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeHandle"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_HANDLE") != 0);
+    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeRaise"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_RAISE"));
 
     // The keyboard is an input panel; the drag handle is not. They are two
     // surfaces with two shell protocols, so which one arrived has to be known

@@ -58,12 +58,17 @@ public:
      */
     Q_INVOKABLE void raiseKeyboard();
 
+    /// Ask the keyboard's own window to become Qt's focus window again, after
+    /// another of this process's surfaces has held the compositor's focus.
+    Q_INVOKABLE void reclaimKeyboardFocus();
+
 Q_SIGNALS:
     void keyboardVisibleChanged();
     void requestedVisibleChanged();
     void errorChanged();
     void extentChanged();
     void reservationRefreshRequested();
+    void keyboardFocusReclaimRequested();
 
 private:
     void setKeyboardVisible(bool visible);

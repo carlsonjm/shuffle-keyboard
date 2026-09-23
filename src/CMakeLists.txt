@@ -10,6 +10,7 @@ add_executable(plasma-keyboard)
 
 ecm_add_qtwayland_client_protocol(plasma-keyboard PROTOCOL ${WaylandProtocols_DATADIR}/unstable/input-method/input-method-unstable-v1.xml BASENAME input-method-unstable-v1)
 ecm_add_qtwayland_client_protocol(plasma-keyboard PROTOCOL ${WaylandProtocols_DATADIR}/unstable/text-input/text-input-unstable-v1.xml BASENAME text-input-unstable-v1)
+ecm_add_qtwayland_client_protocol(plasma-keyboard PROTOCOL ${WaylandProtocols_DATADIR}/unstable/text-input/text-input-unstable-v3.xml BASENAME text-input-unstable-v3)
 ecm_add_qtwayland_client_protocol(plasma-keyboard PROTOCOL "${Wayland_DATADIR}/wayland.xml" BASENAME wayland)
 
 target_sources(plasma-keyboard PRIVATE
@@ -29,6 +30,8 @@ target_sources(plasma-keyboard PRIVATE
     bottomsurfacecoordinator.h
     handlewindow.cpp
     handlewindow.h
+    textinputhold.cpp
+    textinputhold.h
     precisioncontroller.cpp
     precisioncontroller.h
     qwaylandinputpanelshellintegration.cpp

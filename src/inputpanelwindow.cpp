@@ -10,6 +10,9 @@
 #include "inputpanelintegration.h"
 #include "plasmakeyboardsettings.h"
 
+#include <QtWaylandClient/private/qwaylanddisplay_p.h>
+#include <QtWaylandClient/private/qwaylandwindow_p.h>
+
 #include <KSandbox>
 #include <QDesktopServices>
 #include <QProcess>
@@ -79,6 +82,17 @@ void InputPanelWindow::refreshInteractiveRegion()
         },
         Qt::SingleShotConnection);
     update();
+}
+
+void InputPanelWindow::reclaimFocus()
+{
+    // Qt's focus window is the most recently activated one it holds, and an
+    // activation of a window it already holds is ignored, so this one is
+    // taken out and put back at the end.
+    if (auto *wayland = dynamic_cast<QtWaylandClient::QWaylandWindow *>(handle())) {
+        wayland->display()->handleWindowDeactivated(wayland);
+        wayland->display()->handleWindowActivated(wayland);
+    }
 }
 
 void InputPanelWindow::persistKeyboardHeight(int height)

@@ -102,6 +102,11 @@ no handle, which is the supported result and not a failure.
   comes up.
 - **It raises on a pull:** Put a finger on the line and drag upward. The
   keyboard comes up before the finger has gone far.
+- **It works straight after signing in:** Sign in and, before touching any text
+  field, pull the handle. The keyboard comes up the first time.
+- **It gives the focus back:** Raise the keyboard from the handle, dismiss it,
+  and type on a physical keyboard. The text goes to the application that had
+  the focus before, and nothing is lost.
 - **It gets out of the way:** With the keyboard up, the line is gone.
 - **It comes back:** Dismiss the keyboard. The line returns with the dock.
 - **It leaves before the dark:** Put a window full screen until the bottom

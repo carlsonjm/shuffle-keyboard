@@ -6,7 +6,9 @@ pragma ComponentBehavior: Bound
 */
 
 import QtQuick
+import QtQuick.Window
 
+import org.kde.layershell as LayerShell
 import org.kde.plasma.keyboard
 
 HandleWindow {
@@ -74,7 +76,10 @@ HandleWindow {
                     + " height=" + root.height
                     + " present=" + BottomSurfaceCoordinator.surfacePresent
                     + " obscured=" + BottomSurfaceCoordinator.regionObscured
-                    + " keyboard=" + BottomSurfaceCoordinator.keyboardVisible);
+                    + " keyboard=" + BottomSurfaceCoordinator.keyboardVisible
+                    + " holding=" + root.holdingFocus
+                    + " holderActive=" + holder.active
+                    + " fieldHeld=" + field.held);
     }
 
     onWantedChanged: root.reportPlacement()
@@ -89,6 +94,156 @@ HandleWindow {
         root.reportPlacement();
     }
     Component.onCompleted: root.reportPlacement()
+
+    // Plasma shows a raised keyboard only once it has been allowed to, and it
+    // allows that only when a text field asks while touch was the last input.
+    // A raise on its own never counts, so after signing in the handle did
+    // nothing until some text field had been touched. So the handle raises the
+    // way a text field does: a field nobody sees takes typing focus for as
+    // long as the keyboard is up, and gives the focus back when it goes.
+    // Whatever is typed from the handle goes nowhere, which is what a raise
+    // with nothing selected has always meant.
+    TextInputHold {
+        id: field
+
+        // The compositor moving the focus off the field --- a touch on an
+        // application --- ends the hold.
+        property bool wasHeld: false
+
+        onHeldChanged: {
+            if (field.held) {
+                field.wasHeld = true;
+                // The field asking is what raises the keyboard.
+            } else if (field.wasHeld && root.holdingFocus) {
+                root.releaseFocus();
+            }
+            root.reportPlacement();
+        }
+    }
+    property bool holdingFocus: false
+    // Only a keyboard that has been up during this hold and then goes ends it;
+    // the focus moving to the holder can hide one that was up before it.
+    property bool heldKeyboardShown: false
+
+    function raise() {
+        root.holdingFocus = true;
+        root.heldKeyboardShown = false;
+        field.wasHeld = false;
+        field.hold();
+        holder.visible = true;
+        focusRelease.restart();
+        root.reportPlacement();
+    }
+
+    function releaseFocus() {
+        focusRelease.stop();
+        dismissal.stop();
+        root.holdingFocus = false;
+        field.release();
+        // Unmapped, the holder's focus goes back to whatever had it before.
+        holder.visible = false;
+        BottomSurfaceCoordinator.reclaimKeyboardFocus();
+        root.reportPlacement();
+    }
+
+    // The field is presented from a surface of its own rather than the handle's. KWin
+    // gives a layer surface the focus when it asks only on the top and overlay
+    // layers, and the handle is on the bottom one so that it sits on the dock;
+    // the handle also leaves while the keyboard is up, which is exactly when
+    // the focus has to be held. One transparent pixel that takes no touches.
+    Window {
+        id: holder
+
+        width: 1
+        height: 1
+        color: "transparent"
+        // The compositor gives it the focus; Qt must not treat it as this
+        // process's focus window, or the in-process virtual keyboard sees a
+        // window with nothing to type into and hides the keyboard again.
+        flags: Qt.FramelessWindowHint | Qt.WindowTransparentForInput | Qt.WindowDoesNotAcceptFocus
+        visible: false
+
+        LayerShell.Window.layer: LayerShell.Window.LayerOverlay
+        LayerShell.Window.anchors: LayerShell.Window.AnchorBottom | LayerShell.Window.AnchorLeft
+        LayerShell.Window.exclusionZone: -1
+        LayerShell.Window.keyboardInteractivity: LayerShell.Window.KeyboardInteractivityOnDemand
+        LayerShell.Window.scope: "shuffle-keyboard-focus"
+
+        // Qt moves this process's own focus here along with the compositor's,
+        // and the in-process virtual keyboard types into whatever Qt has
+        // focused and hides when that is nothing it can type into. So Qt's
+        // focus goes straight back to the keyboard's window, while the
+        // compositor's stays here with the field.
+        onActiveChanged: {
+            if (holder.active) {
+                BottomSurfaceCoordinator.reclaimKeyboardFocus();
+            }
+            root.reportPlacement();
+        }
+
+        onVisibleChanged: root.reportPlacement()
+    }
+
+    // A raise that never brings the keyboard up must not keep the focus, or
+    // what is typed on a real keyboard afterwards would vanish into the field.
+    // Where the compositor offers no text input to ask with, a forced raise is
+    // the only way in, and this is when it is tried.
+    Timer {
+        id: fallbackRaise
+
+        interval: 300
+        running: root.holdingFocus && !field.held
+        onTriggered: BottomSurfaceCoordinator.raiseKeyboard()
+    }
+
+    // The focus arriving at the holder can hide the keyboard for a moment
+    // and show it again. Only a keyboard that stays down has been dismissed.
+    Timer {
+        id: dismissal
+
+        interval: 200
+        onTriggered: if (!BottomSurfaceCoordinator.keyboardVisible) {
+            root.releaseFocus();
+        }
+    }
+
+    Timer {
+        id: focusRelease
+
+        interval: 1500
+        onTriggered: if (!root.heldKeyboardShown) {
+            root.releaseFocus();
+        }
+    }
+
+    Connections {
+        target: BottomSurfaceCoordinator
+
+        function onKeyboardVisibleChanged() {
+            if (!root.holdingFocus) {
+                return;
+            }
+            if (BottomSurfaceCoordinator.keyboardVisible) {
+                root.heldKeyboardShown = true;
+                focusRelease.stop();
+                dismissal.stop();
+            } else if (root.heldKeyboardShown) {
+                dismissal.restart();
+            }
+        }
+    }
+
+    // What an isolated session uses in place of a finger, once.
+    Timer {
+        property bool fired: false
+
+        interval: Math.max(1, shuffleProbeRaise)
+        running: shuffleProbeRaise > 0 && root.wanted && !fired
+        onTriggered: {
+            fired = true;
+            root.raise();
+        }
+    }
 
     Item {
         id: reach
@@ -105,7 +260,7 @@ HandleWindow {
         TapHandler {
             id: press
 
-            onTapped: BottomSurfaceCoordinator.raiseKeyboard()
+            onTapped: root.raise()
         }
 
         DragHandler {
@@ -121,7 +276,7 @@ HandleWindow {
             onActiveTranslationChanged: {
                 if (!reach.lifted && lift.activeTranslation.y <= -root.armDistance) {
                     reach.lifted = true;
-                    BottomSurfaceCoordinator.raiseKeyboard();
+                    root.raise();
                 }
             }
         }

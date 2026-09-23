@@ -39,6 +39,13 @@ public:
      */
     Q_INVOKABLE bool initInputPanel(InputPanelRole::Role role);
     Q_INVOKABLE void refreshInteractiveRegion();
+
+    /// Make this window Qt's focus window again. The compositor never gives
+    /// an input panel the focus; Qt is told directly when the panel is
+    /// configured, and the keyboard types into whatever Qt considers focused.
+    /// Another of this process's surfaces taking the compositor's focus moves
+    /// Qt's focus with it, and this puts it back.
+    Q_INVOKABLE void reclaimFocus();
     Q_INVOKABLE void persistKeyboardHeight(int height);
     Q_INVOKABLE void persistKeyboardWidthPercent(int widthPercent);
 

@@ -209,6 +209,9 @@ InputPanelWindow {
         function onReservationRefreshRequested() {
             Qt.callLater(root.refreshInteractiveRegion);
         }
+        function onKeyboardFocusReclaimRequested() {
+            root.reclaimFocus();
+        }
     }
 
     PrecisionController { id: precisionController }

@@ -205,6 +205,11 @@ void BottomSurfaceCoordinator::raiseKeyboard()
     setError({});
 }
 
+void BottomSurfaceCoordinator::reclaimKeyboardFocus()
+{
+    Q_EMIT keyboardFocusReclaimRequested();
+}
+
 void BottomSurfaceCoordinator::setKeyboardVisible(bool visible)
 {
     if (m_keyboardVisible == visible) {
