@@ -95,14 +95,17 @@ HandleWindow {
     }
     Component.onCompleted: root.reportPlacement()
 
-    // Plasma shows a raised keyboard only once it has been allowed to, and it
-    // allows that only when a text field asks while touch was the last input.
-    // A raise on its own never counts, so after signing in the handle did
-    // nothing until some text field had been touched. So the handle raises the
-    // way a text field does: a field nobody sees takes typing focus for as
-    // long as the keyboard is up, and gives the focus back when it goes.
-    // Whatever is typed from the handle goes nowhere, which is what a raise
-    // with nothing selected has always meant.
+    // A pull never takes over what the person was doing. The handle first
+    // asks the compositor for the keyboard directly, which leaves the focus
+    // where it is: a text box that was ready is typed into, and the card that
+    // holds it pans it into view. Only a cold start needs more. Plasma shows a
+    // raised keyboard only once it has been allowed to, and straight after
+    // signing in a direct raise did nothing until some text field had been
+    // touched. When the keyboard has not come up shortly after asking, the
+    // handle raises the way a text field does: a field nobody sees takes
+    // typing focus for as long as the keyboard is up, and gives the focus back
+    // when it goes. Whatever is typed then goes nowhere until a text box is
+    // tapped, which is what a raise with nothing selected has always meant.
     TextInputHold {
         id: field
 
@@ -126,6 +129,29 @@ HandleWindow {
     property bool heldKeyboardShown: false
 
     function raise() {
+        if (BottomSurfaceCoordinator.keyboardVisible || coldStart.running) {
+            return;
+        }
+        if (shuffleProbeColdStart) {
+            root.hold();
+            return;
+        }
+        BottomSurfaceCoordinator.raiseKeyboard();
+        coldStart.restart();
+    }
+
+    // How long a direct raise has to show the keyboard before the handle
+    // treats it as a cold start.
+    Timer {
+        id: coldStart
+
+        interval: 300
+        onTriggered: if (!BottomSurfaceCoordinator.keyboardVisible) {
+            root.hold();
+        }
+    }
+
+    function hold() {
         root.holdingFocus = true;
         root.heldKeyboardShown = false;
         field.wasHeld = false;
@@ -229,6 +255,9 @@ HandleWindow {
         }
 
         function onKeyboardVisibleChanged() {
+            if (BottomSurfaceCoordinator.keyboardVisible) {
+                coldStart.stop();
+            }
             if (!root.holdingFocus) {
                 return;
             }

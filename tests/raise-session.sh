@@ -99,21 +99,30 @@ echo
 echo "An application holds the focus"
 check "the application is focused" "$(focus_now)" "app"
 
-echo
-echo "The handle raises the Keyboard by taking the focus"
 # Publishing a dock is what puts the handle on screen, and the probe raises
 # from it a moment later, the way a finger would.
-control report true false 60 544 920
-wait_keyboard true
-check "the Keyboard is up" "$(keyboard visible)" "(<true>,)"
-check "a text field is what asked for it" "$(keyboard activeClientSupportsTextInput)" "(<true>,)"
-focus="$(focus_now)"
-if [[ "${focus}" != "app" && "${focus}" != "none" ]]; then
-    printf '  ok   %s\n' "the handle holds the focus while it is up (${focus})"
-    pass=$((pass + 1))
+if [[ "${RAISE_PATH:-cold}" == direct ]]; then
+    echo
+    echo "The handle raises the Keyboard and leaves the focus where it was"
+    control report true false 60 544 920
+    wait_keyboard true
+    check "the Keyboard is up" "$(keyboard visible)" "(<true>,)"
+    check "the application keeps the focus" "$(focus_now)" "app"
 else
-    printf '  FAIL %s\n         got: %s\n' "the handle holds the focus while it is up" "${focus}"
-    fail=$((fail + 1))
+    echo
+    echo "A cold start raises the Keyboard by taking the focus"
+    control report true false 60 544 920
+    wait_keyboard true
+    check "the Keyboard is up" "$(keyboard visible)" "(<true>,)"
+    check "a text field is what asked for it" "$(keyboard activeClientSupportsTextInput)" "(<true>,)"
+    focus="$(focus_now)"
+    if [[ "${focus}" != "app" && "${focus}" != "none" ]]; then
+        printf '  ok   %s\n' "the handle holds the focus while it is up (${focus})"
+        pass=$((pass + 1))
+    else
+        printf '  FAIL %s\n         got: %s\n' "the handle holds the focus while it is up" "${focus}"
+        fail=$((fail + 1))
+    fi
 fi
 
 echo
@@ -152,6 +161,11 @@ sleep 0.5
 control requestKeyboard
 wait_keyboard true
 check "the dock's request brings the Keyboard up" "$(keyboard visible)" "(<true>,)"
+if [[ "${RAISE_PATH:-cold}" == direct ]]; then
+    # The application's text box was ready, so the pull types into it and
+    # nothing else takes the focus.
+    check "a pull with a text box ready leaves it the focus" "$(focus_now)" "app"
+fi
 
 kill "${app_pid}" 2>/dev/null
 
