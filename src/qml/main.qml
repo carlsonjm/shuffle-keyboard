@@ -85,7 +85,7 @@ InputPanelWindow {
     // bar's right end latches the whole keyboard as a trackpad.
     property bool spacePointing: false
     readonly property real spaceArmDistance: 10
-    readonly property real spacePointerGain: 2.4
+    readonly property real spacePointerGain: 2.6
     property bool pointerButtonDown: false
 
     function pointerButton(down) {
@@ -690,6 +690,8 @@ InputPanelWindow {
                 height: keyboardBody.height
                 notchStep: 28
                 downIsPositive: true
+                name: "History"
+                readingIcons: ["edit-undo-symbolic", "edit-redo-symbolic"]
                 onStepped: direction => root.sendEditAction(direction > 0 ? "Undo" : "Redo")
                 onReleased: value = 0
             }
@@ -706,7 +708,8 @@ InputPanelWindow {
                 maximum: root.maximumPercent - root.defaultPercent
                 marksHome: true
                 home: 0
-                label: (root.defaultPercent + value) + "%"
+                name: "Height"
+                reading: (root.defaultPercent + value) + "%"
                 onStepped: {
                     root.requestedHeight = root.heightForPercent(root.defaultPercent + value);
                 }

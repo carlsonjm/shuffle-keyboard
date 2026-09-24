@@ -7,6 +7,8 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 
+import org.kde.kirigami as Kirigami
+
 // A vertical scrub control in the width beside the keys: close to invisible
 // until a finger arrives, then a column of notches with the current one lit.
 // Each notch is one step. The device has no haptics, so a notch is felt two
@@ -29,8 +31,11 @@ Item {
     // A notch drawn bright whenever the column shows, such as a default.
     property bool marksHome: false
     property int home: 0
-    // What the value means, shown beside the lit notch while it is held.
-    property string label: ""
+    // While held: what the column is, in small capitals under the line, and
+    // what it reads, at the top of the line, as text or as a pair of icons.
+    property string name: ""
+    property string reading: ""
+    property var readingIcons: []
 
     // The line the notches sit on; nothing is drawn beyond it.
     readonly property real trackTop: height * 0.12
@@ -46,7 +51,18 @@ Item {
     // window's coordinates, since the column itself may move as it acts.
     property real startY: 0
     property int startValue: 0
-    property real fingerY: 0
+    // Where the press landed, in this column's coordinates as it is now. The
+    // notches stay put there while the lit one moves over them; the column
+    // may itself move, as the height column does, so this is kept current.
+    property real anchorY: 0
+    function refreshAnchor() {
+        root.anchorY = root.startY - touch.mapToItem(null, 0, 0).y;
+    }
+    // Where notch n sits on the line.
+    function notchY(n) {
+        const k = n - root.startValue;
+        return root.anchorY + (root.downIsPositive ? k : -k) * root.notchStep;
+    }
 
     function tryStep(windowY) {
         const along = (root.downIsPositive ? windowY - root.startY : root.startY - windowY) / root.notchStep;
@@ -82,11 +98,11 @@ Item {
         onPressed: mouse => {
             root.startY = windowY(mouse);
             root.startValue = root.value;
-            root.fingerY = mouse.y;
+            root.refreshAnchor();
         }
         onPositionChanged: mouse => {
-            root.fingerY = mouse.y;
             root.tryStep(windowY(mouse));
+            root.refreshAnchor();
         }
         onReleased: root.released()
         onCanceled: root.released()
@@ -110,14 +126,13 @@ Item {
         }
     }
 
-    // Touched: the notches around the finger, the one in effect lit, and
-    // the home notch bright wherever it falls.
+    // Touched: the notches stay where they are and the lit one moves over
+    // them, a notch at a time; the home notch is bright wherever it falls.
     Item {
         id: notches
 
         anchors.fill: parent
         opacity: root.active ? 1 : 0
-        clip: true
 
         Behavior on opacity {
             NumberAnimation {
@@ -126,55 +141,83 @@ Item {
             }
         }
 
-        // The lit notch is where the finger is, kept on the line.
-        readonly property real litY: Math.max(root.trackTop, Math.min(root.trackBottom, root.fingerY))
-
-        // The value, just above the lit notch, while the column is held.
-        Rectangle {
-            visible: root.label !== ""
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: Math.max(0, notches.litY - height - 14)
-            width: valueText.implicitWidth + 16
-            height: 24
-            radius: 12
-            color: "#242424"
-
-            Text {
-                id: valueText
-                anchors.centerIn: parent
-                text: root.label
-                color: "#F8F8FF"
-                font.pixelSize: 13
-                font.weight: Font.DemiBold
-            }
-        }
-
         Repeater {
-            model: 11
+            model: 15
 
             delegate: Rectangle {
                 required property int index
 
-                readonly property int offset: index - 5
-                readonly property int notch: root.value + (root.downIsPositive ? offset : -offset)
-                readonly property bool inRange: notch >= root.minimum && notch <= root.maximum
+                readonly property int notch: root.value + index - 7
+                readonly property bool lit: notch === root.value
                 readonly property bool isHome: root.marksHome && notch === root.home
-                readonly property real centre: notches.litY + offset * root.notchStep
-                // Notches thin out toward the line's ends rather than running
-                // past them.
+                readonly property real centre: root.notchY(notch)
+                // Notches thin out toward the line's ends and are never
+                // drawn beyond them.
                 readonly property real edgeFade: Math.max(0, Math.min(1,
                     Math.min(centre - root.trackTop, root.trackBottom - centre) / root.notchStep))
 
                 anchors.horizontalCenter: parent.horizontalCenter
                 y: centre - height / 2
-                width: offset === 0 ? 36 : (isHome ? 22 : 12)
-                height: offset === 0 ? 6 : 2
+                width: lit ? 36 : (isHome ? 22 : 12)
+                height: lit ? 6 : 2
                 radius: height / 2
-                visible: inRange && (offset === 0 || edgeFade > 0)
+                visible: notch >= root.minimum && notch <= root.maximum
+                    && centre >= root.trackTop && centre <= root.trackBottom
                 color: "#F8F8FF"
-                opacity: offset === 0 ? 1
-                    : (isHome ? 0.8 : Math.max(0.1, 0.35 - Math.abs(offset) * 0.06)) * edgeFade
+                opacity: lit ? 1 : (isHome ? 0.8 : 0.3) * edgeFade
+
+                Behavior on width {
+                    NumberAnimation {
+                        duration: 90
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
+        }
+
+        // What it reads, at the top of the line.
+        Text {
+            visible: root.reading !== ""
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: Math.max(0, root.trackTop - height - 6)
+            text: root.reading
+            color: "#F8F8FF"
+            font.pixelSize: 13
+            font.weight: Font.DemiBold
+        }
+
+        Row {
+            visible: root.readingIcons.length > 0
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: Math.max(0, root.trackTop - height - 6)
+            spacing: 10
+
+            Repeater {
+                model: root.readingIcons
+
+                delegate: Kirigami.Icon {
+                    required property string modelData
+                    width: 16
+                    height: 16
+                    source: modelData
+                    isMask: true
+                    color: "#F8F8FF"
+                    opacity: 0.8
+                }
+            }
+        }
+
+        // What the column is, under the line.
+        Text {
+            visible: root.name !== ""
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: Math.min(parent.height - height, root.trackBottom + 6)
+            text: root.name
+            color: "#F8F8FF"
+            opacity: 0.6
+            font.pixelSize: 10
+            font.letterSpacing: 1
+            font.capitalization: Font.AllUppercase
         }
     }
 }
