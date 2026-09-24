@@ -47,14 +47,6 @@ BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
                                           SIGNAL(keyboardRequested()));
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::syncKeyboardVisibility);
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::readExtent);
-
-    m_arrivalGrace.setSingleShot(true);
-    m_arrivalGrace.setInterval(1000);
-    connect(&m_arrivalGrace, &QTimer::timeout, this, [this] {
-        if (!m_keyboardVisible) {
-            restoreBottomPanels();
-        }
-    });
 }
 
 bool BottomSurfaceCoordinator::surfacePresent() const
@@ -189,25 +181,6 @@ void BottomSurfaceCoordinator::setRequestedVisible(bool visible)
     }
     m_requestedVisible = visible;
     Q_EMIT requestedVisibleChanged();
-
-    if (!visible) {
-        restoreBottomPanels();
-        return;
-    }
-
-    QDBusInterface keyboard(QStringLiteral("org.kde.KWin"),
-                            QStringLiteral("/VirtualKeyboard"),
-                            QStringLiteral("org.kde.kwin.VirtualKeyboard"),
-                            QDBusConnection::sessionBus());
-    const QDBusReply<bool> willShow = keyboard.call(QStringLiteral("willShowOnActive"));
-    if (m_keyboardVisible || (willShow.isValid() && willShow.value())) {
-        yieldBottomPanels();
-        // The compositor can still decline, as it does for a field an
-        // application focused on its own, and then no keys come to fill it.
-        if (!m_keyboardVisible) {
-            m_arrivalGrace.start();
-        }
-    }
 }
 
 void BottomSurfaceCoordinator::raiseKeyboard()
@@ -237,12 +210,12 @@ void BottomSurfaceCoordinator::setKeyboardVisible(bool visible)
     m_keyboardVisible = visible;
     Q_EMIT keyboardVisibleChanged();
 
-    // The region follows the keys on screen, not the request for them. An
-    // application's field can stay focused, and so keep the request, after the
-    // compositor has put the keys down; waiting on the request then left the
-    // dock gone with nothing in its place.
+    // The region follows the keys on screen and nothing else. A request for
+    // keys is only a promise: the compositor can decline it, and does for a
+    // field an application focused on its own, so the dock that stepped aside
+    // for the promise fell out and came back with no keys ever shown. The
+    // arrival motion is what hides the moment between keys and dock.
     if (visible) {
-        m_arrivalGrace.stop();
         yieldBottomPanels();
     } else {
         restoreBottomPanels();
