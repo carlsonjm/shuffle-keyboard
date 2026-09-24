@@ -28,6 +28,7 @@ target_sources(plasma-keyboard PRIVATE
     inputplugin.h
     bottomsurfacecoordinator.cpp
     bottomsurfacecoordinator.h
+    keysrequest.h
     handlewindow.cpp
     handlewindow.h
     textinputhold.cpp

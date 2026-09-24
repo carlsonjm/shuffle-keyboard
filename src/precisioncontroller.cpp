@@ -4,6 +4,7 @@
 */
 
 #include "precisioncontroller.h"
+#include "keysrequest.h"
 
 #include <KConfigGroup>
 #include <KSharedConfig>
@@ -182,11 +183,7 @@ void PrecisionController::handleStartResponse(uint response, const QVariantMap &
 
 void PrecisionController::keepKeyboardVisible()
 {
-    QDBusInterface keyboard(QStringLiteral("org.kde.KWin"),
-                            QStringLiteral("/VirtualKeyboard"),
-                            QStringLiteral("org.kde.kwin.VirtualKeyboard"),
-                            QDBusConnection::sessionBus());
-    keyboard.asyncCall(QStringLiteral("forceActivate"));
+    requestKeys(this);
 }
 
 void PrecisionController::move(qreal dx, qreal dy)

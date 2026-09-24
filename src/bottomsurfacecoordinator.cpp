@@ -4,6 +4,7 @@
 */
 
 #include "bottomsurfacecoordinator.h"
+#include "keysrequest.h"
 
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
@@ -193,7 +194,7 @@ void BottomSurfaceCoordinator::raiseKeyboard()
         setError(QStringLiteral("The compositor is not offering a virtual keyboard"));
         return;
     }
-    keyboard.asyncCall(QStringLiteral("forceActivate"));
+    requestKeys(this);
     setError({});
 }
 
