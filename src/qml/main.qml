@@ -31,10 +31,10 @@ InputPanelWindow {
     // The keyboard is a card: Kadunce's gutter at either side and nowhere
     // else, rounded where it stands free, flush with the screen's bottom edge
     // and lying over the window above it. Its top strip carries the handle
-    // with clear room between the handle and the keys.
+    // with the same clear room above it as between it and the keys.
     readonly property real sideGutter: 10
     readonly property real cardRadius: 18
-    readonly property real handleInset: 4
+    readonly property real handleInset: 10
     readonly property real handleThickness: 6
     readonly property real handleClearance: 10
     readonly property real topStrip: handleInset + handleThickness + handleClearance

@@ -15,7 +15,8 @@ custom input engine.
 - Hairline Ghost White key outlines on the Itasca `#141414` surface, drawn as
   a card: Kadunce's 10 px gutter at either side only, 18 px corners at the top,
   flush with the screen's bottom edge and lying over the window above. The
-  dock's handle rides its top strip with 10 px clear above the keys.
+  dock's handle rides its top strip with 10 px clear above it and above the
+  keys.
 - The key block is fixed at 88% of the width and only key height changes, so
   the keys and the space bar never move sideways. A key is square at the
   default; rows stay between 48 px and a quarter taller than a key is wide,
