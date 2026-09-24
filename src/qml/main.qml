@@ -76,34 +76,8 @@ InputPanelWindow {
 
     readonly property bool precisionActive: precisionHeld
 
-    // The space bar is the pointer: a slide past a few pixels turns the touch
-    // into pointing, and a touch that lifts without sliding types a space, so
-    // no space is lost to a timer. While it points, the keys step back but
-    // stay where they are, and any second finger is the button: down presses
-    // it and up releases it, so a tap clicks, two taps double-click and a hold
-    // drags or selects while the first finger moves. The control at the space
-    // bar's right end latches the whole keyboard as a trackpad.
-    property bool spacePointing: false
-    readonly property real spaceArmDistance: 10
-    readonly property real spacePointerGain: 2.6
-    property bool pointerButtonDown: false
-
-    function pointerButton(down) {
-        if (down === root.pointerButtonDown) {
-            return;
-        }
-        root.pointerButtonDown = down;
-        if (down) {
-            precisionController.primaryDown();
-        } else {
-            precisionController.primaryUp();
-        }
-    }
-
-    function endSpacePointing() {
-        root.pointerButton(false);
-        root.spacePointing = false;
-    }
+    // The pointer is the trackpad the latch at the space bar's right end
+    // opens; the space bar itself only types (J, 24 September).
     readonly property real minimumPanelHeight: heightForPercent(minimumPercent)
     readonly property real maximumPanelHeight: heightForPercent(maximumPercent)
     readonly property real panelHeight: Math.round(Math.max(minimumPanelHeight, Math.min(maximumPanelHeight, requestedHeight)))
@@ -673,7 +647,7 @@ InputPanelWindow {
             anchors.leftMargin: root.outerGap
             anchors.rightMargin: root.outerGap
             anchors.bottomMargin: root.outerGap
-            opacity: root.precisionHeld ? 0.28 : (root.spacePointing ? 0.35 : 1)
+            opacity: root.precisionHeld ? 0.28 : 1
 
             Behavior on opacity { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
 
@@ -901,54 +875,7 @@ InputPanelWindow {
                     height: keyField.rowHeight
                     label: "Space"
                     labelScale: 0.74
-                    active: spaceTouch.pressed && !root.spacePointing
                     onTriggered: root.sendCharacter(" ")
-
-                    // Everything but the latch at the right end. The touch is
-                    // taken here rather than by the key, since a slide is not
-                    // a press, and it keeps tracking past the key's edges.
-                    MultiPointTouchArea {
-                        id: spaceTouch
-
-                        readonly property bool pressed: spacePoint.pressed
-                        property point origin: Qt.point(0, 0)
-                        property point last: Qt.point(0, 0)
-
-                        x: 0
-                        y: 0
-                        width: parent.width - latch.width
-                        height: parent.height
-                        maximumTouchPoints: 1
-                        touchPoints: [TouchPoint { id: spacePoint }]
-
-                        onPressed: {
-                            origin = Qt.point(spacePoint.x, spacePoint.y);
-                            last = origin;
-                        }
-                        onUpdated: {
-                            const here = Qt.point(spacePoint.x, spacePoint.y);
-                            if (!root.spacePointing
-                                    && Math.hypot(here.x - origin.x, here.y - origin.y) > root.spaceArmDistance) {
-                                root.spacePointing = true;
-                                precisionController.ensureSession();
-                                last = here;
-                                return;
-                            }
-                            if (root.spacePointing) {
-                                precisionController.move((here.x - last.x) * root.spacePointerGain,
-                                                         (here.y - last.y) * root.spacePointerGain);
-                                last = here;
-                            }
-                        }
-                        onReleased: {
-                            if (root.spacePointing) {
-                                root.endSpacePointing();
-                            } else {
-                                root.sendCharacter(" ");
-                            }
-                        }
-                        onCanceled: root.endSpacePointing()
-                    }
 
                     // A trackpad mark at the right end; a tap latches the
                     // keyboard as a trackpad, and a tap on it again lets go.
@@ -1001,18 +928,6 @@ InputPanelWindow {
                 color: "#F8F8FF"
                 opacity: root.precisionHeld ? 0.22 : 0
             }
-        }
-
-        // Pointing from the space bar, any further finger is the button.
-        MultiPointTouchArea {
-            z: 3
-            anchors.fill: parent
-            enabled: root.spacePointing
-            maximumTouchPoints: 1
-            touchPoints: [TouchPoint { id: buttonPoint }]
-            onPressed: root.pointerButton(true)
-            onReleased: root.pointerButton(false)
-            onCanceled: root.pointerButton(false)
         }
 
         PrecisionSurface {

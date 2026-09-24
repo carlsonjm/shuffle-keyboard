@@ -37,12 +37,11 @@ custom input engine.
   is the protected resting brand mark, not a generic text label. It resolves
   the user's live bare-Meta binding through KDE's global-shortcut service and
   invokes that configured action without hard-coding a particular applet.
-- The space bar is the pointer. A slide past 10 px turns the touch into
-  pointing at 2.4x, tracking beyond the key; a touch that lifts without sliding
-  types a space. While it points the keys dim but stay, and a second finger is
-  the button: down presses, up releases. A mark at the space bar's right end
-  latches the whole keyboard as a trackpad until tapped again. Copy, cut and
-  paste are Ctrl chords.
+- The pointer is a trackpad: the mark at the space bar's right end latches the
+  whole keyboard as one until tapped again, and the keys stay up while it is
+  latched. One finger moves, a tap clicks, a hold drags, two fingers scroll and
+  a two-finger tap right-clicks. The space bar only types. Copy, cut and paste
+  are Ctrl chords.
 - A drag down on the handle carries the keys away, and a tap puts them away.
 - Plasma's bottom panel yields while the keyboard is requested and restores
   its previous hiding mode afterward. Where the downstream Bottom Surface is
