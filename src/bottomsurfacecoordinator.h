@@ -75,10 +75,10 @@ public:
     Q_INVOKABLE void reclaimKeyboardFocus();
 
     /**
-     * A pull on the handle, in logical pixels travelled upward, while the
-     * finger is down and once when it lifts with its upward speed. The dock's
-     * pulls arrive the same way over the bus, so the keys follow a finger
-     * wherever the pull began.
+     * A pull on the handle: the finger's height above the output's bottom
+     * edge in logical pixels, while it is down and once when it lifts with
+     * its upward speed. The dock's pulls arrive the same way over the bus, so
+     * the keys follow a finger wherever the pull began.
      */
     Q_INVOKABLE void reportPull(double travel, bool active, double velocity);
 

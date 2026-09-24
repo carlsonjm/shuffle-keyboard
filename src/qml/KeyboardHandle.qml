@@ -338,8 +338,13 @@ HandleWindow {
                     reach.lifted = true;
                     root.raise();
                 }
+                // The pull is the finger's height above the screen's bottom
+                // edge: this surface sits on the band, the press was within
+                // it, and the finger has gone on from there.
                 if (reach.lifted) {
-                    reach.travel = -lift.activeTranslation.y;
+                    reach.travel = BottomSurfaceCoordinator.bandHeight
+                        + root.gutter - lift.centroid.scenePressPosition.y
+                        - lift.activeTranslation.y;
                     reach.speed = -lift.centroid.velocity.y;
                     BottomSurfaceCoordinator.reportPull(reach.travel, true, 0);
                 }

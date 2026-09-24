@@ -77,7 +77,11 @@ InputPanelWindow {
     property real carry: 0
     property bool arriving: false
     property bool pullActive: false
+    // The finger's height above the screen's bottom edge.
     property real pullTravel: 0
+    // Where the handle sits in the keys' top strip, which is where the finger
+    // holds them.
+    readonly property real grabCentre: resizeHandle.height / 2
     // A pull that ended before the keys could rise, which way it went, and
     // when: a decision older than a moment belongs to a pull whose keys never
     // came.
@@ -93,7 +97,35 @@ InputPanelWindow {
     readonly property real openFraction: 0.25
     readonly property real flickSpeed: 400
 
+    // How far the keys sit below their resting place with the handle under
+    // the finger.
+    function carryUnder(height) {
+        return Math.max(0, Math.min(root.panelHeight, root.panelHeight - height - root.grabCentre));
+    }
+
+    // A released pull goes on at the finger's speed and slows to rest: an
+    // ease-out curve starts at three times its average speed, so matching
+    // that to the finger leaves no seam where the hand lets go.
+    function settleDuration(distance, speed) {
+        if (speed <= 0) {
+            return 240;
+        }
+        return Math.max(140, Math.min(320, 3000 * distance / speed));
+    }
+
+    // Temporary: what the keys heard of a pull and what state they were in,
+    // for the pass that finds why a pull from the dock is not followed.
+    property real lastLoggedTravel: -1000
+    function reportPull(what) {
+        console.log("Shuffle keys: " + what + " height " + Math.round(root.pullTravel)
+                    + " active " + root.pullActive + " arriving " + root.arriving
+                    + " seated " + root.seated + " reserving "
+                    + BottomSurfaceCoordinator.regionReserving + " visible " + root.visible
+                    + " carry " + Math.round(root.carry) + " of " + Math.round(root.panelHeight));
+    }
+
     function beginArrival() {
+        root.reportPull("keys shown,");
         carryMotion.stop();
         root.carry = root.panelHeight;
         root.arriving = true;
@@ -107,16 +139,18 @@ InputPanelWindow {
             return;
         }
         if (root.pullActive) {
-            root.carryTo(Math.max(0, root.panelHeight - root.pullTravel), 90);
+            root.carryTo(root.carryUnder(root.pullTravel), 110);
         } else if (root.pendingSettle && !root.pendingOpen
                    && Date.now() - root.pendingAt < 1000) {
             root.pendingSettle = false;
             root.putAway();
         } else {
+            const fromPull = root.pendingSettle;
             root.pendingSettle = false;
-            root.carryTo(0, 260);
+            root.carryTo(0, fromPull ? root.settleDuration(root.carry, root.pendingSpeed) : 240);
         }
     }
+    property real pendingSpeed: 0
 
     function carryTo(target, duration) {
         carryMotion.stop();
@@ -127,7 +161,8 @@ InputPanelWindow {
 
     function putAway() {
         root.closing = true;
-        root.carryTo(root.panelHeight, 180);
+        root.carryTo(root.panelHeight,
+                     root.settleDuration(root.panelHeight - root.carry, -root.pendingSpeed));
     }
     property bool closing: false
 
@@ -164,6 +199,9 @@ InputPanelWindow {
         }
     }
     onSeatedChanged: {
+        if (root.arriving) {
+            root.reportPull("seated changed,");
+        }
         if (root.seated && root.arriving) {
             seatSettle.restart();
         }
@@ -174,19 +212,27 @@ InputPanelWindow {
         function onKeyboardPulled(travel, active, velocity) {
             root.pullTravel = Math.max(0, travel);
             if (active) {
+                const first = !root.pullActive;
                 root.pullActive = true;
+                if (first || Math.abs(root.pullTravel - root.lastLoggedTravel) >= 40) {
+                    root.lastLoggedTravel = root.pullTravel;
+                    root.reportPull(first ? "pull began" : "pull moved");
+                }
                 if (root.arriving && root.seated && !seatSettle.running && !carryMotion.running) {
-                    root.carry = Math.max(0, root.panelHeight - root.pullTravel);
+                    root.carry = root.carryUnder(root.pullTravel);
                 } else {
                     root.advanceArrival();
                 }
                 return;
             }
+            root.reportPull("pull released at " + Math.round(velocity) + " px/s,");
+            root.lastLoggedTravel = -1000;
             if (!root.pullActive) {
                 return;
             }
             root.pullActive = false;
             root.pendingSettle = true;
+            root.pendingSpeed = Math.min(velocity, 4000);
             root.pendingOpen = root.pullTravel >= root.panelHeight * root.openFraction
                 || velocity >= root.flickSpeed;
             root.pendingAt = Date.now();
@@ -453,25 +499,39 @@ InputPanelWindow {
         border.width: 1
         border.color: "#333333"
 
+        // The keys' top edge carries the dock's handle: the bar that was
+        // pulled, at the dock row's place and width, so what the finger
+        // brought up is what it holds. Without the surface there is no dock
+        // row to match, and the bar keeps a width of its own.
         Rectangle {
             id: resizeHandle
             z: 20
             anchors.top: parent.top
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: 82
+            x: BottomSurfaceCoordinator.surfacePresent && BottomSurfaceCoordinator.dockWidth > 0
+               ? BottomSurfaceCoordinator.dockLeft : (parent.width - width) / 2
+            width: BottomSurfaceCoordinator.surfacePresent && BottomSurfaceCoordinator.dockWidth > 0
+                   ? BottomSurfaceCoordinator.dockWidth : 160
             height: 22
             color: "transparent"
 
             Rectangle {
                 anchors.centerIn: parent
-                width: 42
-                height: 4
-                radius: 2
-                color: "#747982"
-                opacity: 0.48
+                width: parent.width
+                height: 6
+                radius: 3
+                color: "#F8F8FF"
+                opacity: root.pullActive || grabArea.pressed ? 0.9 : 0.35
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 120
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
 
             MouseArea {
+                id: grabArea
                 anchors.fill: parent
                 cursorShape: Qt.SizeVerCursor
                 onPressed: mouse => {
