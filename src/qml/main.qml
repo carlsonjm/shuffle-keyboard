@@ -691,7 +691,10 @@ InputPanelWindow {
                 notchStep: 28
                 downIsPositive: true
                 name: "History"
-                readingIcons: ["edit-undo-symbolic", "edit-redo-symbolic"]
+                // The icon for the way the scrub is going: down undoes, up
+                // redoes; nothing before the first notch.
+                readingIcons: lastDirection > 0 ? ["edit-undo-symbolic"]
+                    : (lastDirection < 0 ? ["edit-redo-symbolic"] : [])
                 onStepped: direction => root.sendEditAction(direction > 0 ? "Undo" : "Redo")
                 onReleased: value = 0
             }

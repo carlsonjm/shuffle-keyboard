@@ -36,6 +36,8 @@ Item {
     property string name: ""
     property string reading: ""
     property var readingIcons: []
+    // The way the last notch went during this hold, or zero before the first.
+    property int lastDirection: 0
 
     // The line the notches sit on; nothing is drawn beyond it.
     readonly property real trackTop: height * 0.12
@@ -70,11 +72,13 @@ Item {
         const threshold = 0.5 + root.notchHold;
         if (offset > threshold && root.value < root.maximum) {
             root.value += 1;
+            root.lastDirection = 1;
             root.stepped(1);
             click.play();
             root.tryStep(windowY);
         } else if (offset < -threshold && root.value > root.minimum) {
             root.value -= 1;
+            root.lastDirection = -1;
             root.stepped(-1);
             click.play();
             root.tryStep(windowY);
@@ -98,6 +102,7 @@ Item {
         onPressed: mouse => {
             root.startY = windowY(mouse);
             root.startValue = root.value;
+            root.lastDirection = 0;
             root.refreshAnchor();
         }
         onPositionChanged: mouse => {
