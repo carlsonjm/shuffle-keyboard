@@ -28,24 +28,52 @@ InputPanelWindow {
     property real dragStartY: 0
     property real dragStartHeight: 0
     property bool resizeMoved: false
-    readonly property real squareDefaultHeight: Math.round(root.width * 4 / 13.5 + 24)
-    // Migrate the original compact prototype default to the square-key
-    // baseline selected during physical acceptance. The default follows
-    // rotation; an explicitly resized height remains the user's choice.
-    property real requestedHeight: PlasmaKeyboardSettings.keyboardHeight === 320
-                                   || PlasmaKeyboardSettings.keyboardHeight === 460
-                                   ? squareDefaultHeight : PlasmaKeyboardSettings.keyboardHeight
+    // The keyboard is a card: Kadunce's gutter at either side and nowhere
+    // else, rounded where it stands free, flush with the screen's bottom edge
+    // and lying over the window above it. Its top strip carries the handle
+    // with clear room between the handle and the keys.
+    readonly property real sideGutter: 10
+    readonly property real cardRadius: 18
+    readonly property real handleInset: 4
+    readonly property real handleThickness: 6
+    readonly property real handleClearance: 10
+    readonly property real topStrip: handleInset + handleThickness + handleClearance
+
+    // Key width is fixed and only key height moves, so the key columns and
+    // the space bar never shift when the height changes. The key block is
+    // about 80% of the width as first measured, sized up a tenth, and the
+    // side columns take what is left. A key is square at the default.
+    readonly property real keyBlockWidth: Math.round(root.width * 0.88)
+    readonly property real keyGap: Math.max(5, Math.min(10, keyBlockWidth * 0.007))
+    readonly property real outerGap: Math.max(6, Math.min(12, keyBlockWidth * 0.008))
+    readonly property real keyUnitWidth: Math.max(1, (keyBlockWidth + keyGap) / 12.5 - keyGap)
+    function heightForRows(row) {
+        return Math.round(root.topStrip + row * 4 + root.keyGap * 3 + root.outerGap);
+    }
+    readonly property real squareDefaultHeight: heightForRows(keyUnitWidth)
+    function persistKeyHeight() {
+        const row = (root.panelHeight - root.topStrip - root.keyGap * 3 - root.outerGap) / 4;
+        root.persistKeyRowHeight(Math.round(row));
+    }
+    // The saved height is a key height, since width no longer follows it; an
+    // unset one is the square default.
+    readonly property real savedHeight: PlasmaKeyboardSettings.keyRowHeight > 0
+                                        ? heightForRows(PlasmaKeyboardSettings.keyRowHeight)
+                                        : squareDefaultHeight
+    property real requestedHeight: savedHeight
     property int probeIndex: 0
     property int probeShortcutStep: 0
     property bool probeArmed: shuffleProbeDelay <= 0
     property bool probeTypingComplete: false
 
     readonly property bool precisionActive: precisionHeld
-    readonly property real minimumPanelHeight: Math.min(260, root.height * 0.48)
-    readonly property real maximumPanelHeight: Math.max(minimumPanelHeight, Math.min(720, root.height * 0.72))
+    // A row never shorter than the common minimum touch target, 48 px; never
+    // more than a quarter taller than a key is wide, and never over 55% of
+    // the screen, so the keys stay keys and the card leaves the work above it.
+    readonly property real minimumPanelHeight: heightForRows(48)
+    readonly property real maximumPanelHeight: Math.max(minimumPanelHeight,
+        Math.min(heightForRows(keyUnitWidth * 1.25), Math.round(root.height * 0.55)))
     readonly property real panelHeight: Math.round(Math.max(minimumPanelHeight, Math.min(maximumPanelHeight, requestedHeight)))
-    readonly property real outerGap: Math.max(6, Math.min(12, panelHeight * 0.025))
-    readonly property real keyGap: Math.max(5, Math.min(10, panelHeight * 0.02))
     readonly property int probeRepeat: shuffleProbeRepeat > 0 ? shuffleProbeRepeat : 1
     readonly property int probeLength: shuffleProbeText.length * probeRepeat
     readonly property var keyRows: {
@@ -81,7 +109,7 @@ InputPanelWindow {
     property real pullTravel: 0
     // Where the handle sits in the keys' top strip, which is where the finger
     // holds them.
-    readonly property real grabCentre: resizeHandle.height / 2
+    readonly property real grabCentre: root.handleInset + root.handleThickness / 2
     // A pull that ended before the keys could rise, which way it went, and
     // when: a decision older than a moment belongs to a pull whose keys never
     // came.
@@ -479,7 +507,7 @@ InputPanelWindow {
         running: shuffleProbeHeight > 0 && Qt.inputMethod.visible
         onTriggered: {
             root.requestedHeight = shuffleProbeHeight;
-            root.persistKeyboardHeight(root.panelHeight);
+            root.persistKeyHeight();
         }
     }
 
@@ -491,13 +519,24 @@ InputPanelWindow {
 
     Rectangle {
         id: panel
-        x: 0
+        x: root.sideGutter
         y: root.height - height + root.carry
-        width: root.width
+        width: root.width - root.sideGutter * 2
         height: root.panelHeight
-        color: "#141414"
-        border.width: 1
-        border.color: "#333333"
+        color: "transparent"
+
+        // Rounded at the top only: the lower corners run past the screen's
+        // edge, where nothing is drawn.
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            height: parent.height + root.cardRadius
+            radius: root.cardRadius
+            color: "#141414"
+            border.width: 1
+            border.color: "#333333"
+        }
 
         // The keys' top edge carries the dock's handle: the bar that was
         // pulled, at the dock row's place and width, so what the finger
@@ -508,17 +547,17 @@ InputPanelWindow {
             z: 20
             anchors.top: parent.top
             x: BottomSurfaceCoordinator.surfacePresent && BottomSurfaceCoordinator.dockWidth > 0
-               ? BottomSurfaceCoordinator.dockLeft : (parent.width - width) / 2
+               ? BottomSurfaceCoordinator.dockLeft - panel.x : (parent.width - width) / 2
             width: BottomSurfaceCoordinator.surfacePresent && BottomSurfaceCoordinator.dockWidth > 0
                    ? BottomSurfaceCoordinator.dockWidth : 160
-            height: 22
+            height: root.topStrip
             color: "transparent"
 
             Rectangle {
-                anchors.centerIn: parent
+                y: root.handleInset
                 width: parent.width
-                height: 6
-                radius: 3
+                height: root.handleThickness
+                radius: height / 2
                 color: "#F8F8FF"
                 opacity: root.pullActive || grabArea.pressed ? 0.9 : 0.35
 
@@ -589,10 +628,10 @@ InputPanelWindow {
                             root.carryTo(0, root.settleDuration(root.carry, -downSpeed));
                         }
                     }
-                    root.persistKeyboardHeight(root.panelHeight);
+                    root.persistKeyHeight();
                 }
                 onCanceled: {
-                    root.requestedHeight = PlasmaKeyboardSettings.keyboardHeight;
+                    root.requestedHeight = root.savedHeight;
                     root.carryTo(0, 200);
                 }
                 onClicked: {
@@ -607,7 +646,7 @@ InputPanelWindow {
         Item {
             id: keyboardBody
             anchors.fill: parent
-            anchors.topMargin: 22
+            anchors.topMargin: root.topStrip
             anchors.leftMargin: root.outerGap
             anchors.rightMargin: root.outerGap
             anchors.bottomMargin: root.outerGap
@@ -644,8 +683,7 @@ InputPanelWindow {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: Math.min(parent.width,
-                                totalUnits * (rowHeight + root.keyGap) - root.keyGap)
+                width: Math.min(parent.width, root.keyBlockWidth)
 
                 readonly property real rowHeight: (height - root.keyGap * 3) / 4
                 readonly property real totalUnits: 12.5
@@ -836,7 +874,7 @@ InputPanelWindow {
         PrecisionSurface {
             z: 1
             anchors.fill: parent
-            anchors.topMargin: 22
+            anchors.topMargin: root.topStrip
             anchors.leftMargin: root.outerGap
             anchors.rightMargin: root.outerGap
             anchors.bottomMargin: root.outerGap

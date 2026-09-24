@@ -101,6 +101,12 @@ void InputPanelWindow::persistKeyboardHeight(int height)
     PlasmaKeyboardSettings::self()->save();
 }
 
+void InputPanelWindow::persistKeyRowHeight(int height)
+{
+    PlasmaKeyboardSettings::self()->setKeyRowHeight(height);
+    PlasmaKeyboardSettings::self()->save();
+}
+
 void InputPanelWindow::persistKeyboardWidthPercent(int widthPercent)
 {
     PlasmaKeyboardSettings::self()->setKeyboardWidthPercent(widthPercent);

@@ -12,9 +12,14 @@ custom input engine.
 
 - Four large QWERTY rows with one invariant character pitch and the physically
   validated iPad-baseline stagger: Q at 1.00 units, A at 1.25, and Z at 1.75.
-- Hairline Ghost White key outlines on the Itasca `#141414` surface. The
-  typing block derives its width from row height so ordinary keys remain
-  square; a manually chosen height remains persisted.
+- Hairline Ghost White key outlines on the Itasca `#141414` surface, drawn as
+  a card: Kadunce's 10 px gutter at either side only, 18 px corners at the top,
+  flush with the screen's bottom edge and lying over the window above. The
+  dock's handle rides its top strip with 10 px clear above the keys.
+- The key block is fixed at 88% of the width and only key height changes, so
+  the keys and the space bar never move sideways. A key is square at the
+  default; rows stay between 48 px and a quarter taller than a key is wide,
+  and the card under 55% of the screen. The height is saved as a key height.
 - `123` and Tab fill the first two left edges. Shift fills the third, where a
   tap is one-shot Shift and a double tap locks Caps. Backspace and the muted
   Ghost White Enter share one aligned right edge; Enter fills the home-row gap
@@ -26,15 +31,15 @@ custom input engine.
   is the protected resting brand mark, not a generic text label. It resolves
   the user's live bare-Meta binding through KDE's global-shortcut service and
   invokes that configured action without hard-coding a particular applet.
-- The typing block is derived from the selected row height, keeping ordinary
-  keys square instead of stretching them across the panel. It is centered so
-  either edge supplies an unboxed Shuffle/edit hold surface.
+- The typing block is centered so either edge supplies an unboxed
+  Shuffle/edit hold surface.
 - Holding that surface temporarily disables and dims the visible keyboard while
   the full footprint becomes a precision surface. Releasing returns immediately
   to typing. A tap on either edge clicks at the current pointer position, so a
   natural double tap selects the word under the pointer. Two- and three-finger
   taps provide Copy and Cut; horizontal swipes provide Undo/Redo.
-- Persisted, directly draggable height with live KWin workspace updates.
+- Until the right scrub column exists, a drag up on the handle makes the keys
+  taller and a drag down carries them away.
 - Plasma's bottom panel yields while the keyboard is requested and restores
   its previous hiding mode afterward. Where the downstream Bottom Surface is
   installed the region is asked for instead of the panel being commanded, and
@@ -68,17 +73,11 @@ list exists so the current candidate's behavior is not mistaken for the target.
   redo on the left, key height on the right, each notched and close to invisible
   until touched. Undo and redo were the only edit gestures worth keeping; copy
   and cut return to modifier chords.
-- **Height stops changing width.** This is the sharpest conflict with what is
-  built. The typing block derives its width from the selected row height today,
-  so resizing rescales the keyboard. The direction holds width fixed and moves
-  only key height, so the gutter, the key columns and the space bar never move
-  and the window above grows by exactly what the keyboard gives back.
 - **The draggable top grab goes.** Height moves to the right scrub column, with a
   marked default, because a continuous drag loses the one size already known to
   be right. Show and hide then owns the top edge alone.
 
-Two more items follow from the suite rather than from this list. The keyboard
-takes Kadunce's 10 px gutter on every side so it aligns with an Active card. And
+One more item follows from the suite rather than from this list:
 `bottomsurfacecoordinator` asking Plasma's bottom panel to yield is replaced by
 asking the downstream Bottom Surface, which owns that region; the arrangement is
 specified in `../shuffle/docs/BOTTOM-SURFACE-CONTRACT.md` and this repository
