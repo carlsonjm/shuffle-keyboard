@@ -54,6 +54,9 @@ INTROSPECTION = """
     <method name='record'>
       <arg type='s' name='line' direction='in'/>
     </method>
+    <method name='setOutput'>
+      <arg type='s' name='output' direction='in'/>
+    </method>
   </interface>
 </node>
 """
@@ -68,6 +71,7 @@ class StandIn:
         self.right = 0
         self.reserving = True
         self.output_width = 1463
+        self.output = "Virtual-0"
         self.holder = None
         self.connection = None
 
@@ -76,7 +80,7 @@ class StandIn:
             {
                 "schema": "studio.warbler.shuffle.dock-extent",
                 "version": 1,
-                "output": output_name or "Virtual-1",
+                "output": output_name or self.output,
                 "presenting": self.presenting,
                 "obscured": self.obscured,
                 "reserving": self.reserving,
@@ -138,6 +142,14 @@ class StandIn:
                 self.connection.emit_signal(
                     None, PATH, "studio.warbler.BottomSurface",
                     "dockExtentChanged", GLib.Variant("(s)", ("Virtual-1",)),
+                )
+                invocation.return_value(None)
+                return
+            if method == "setOutput":
+                self.output = parameters[0]
+                self.connection.emit_signal(
+                    None, PATH, "studio.warbler.BottomSurface",
+                    "dockExtentChanged", GLib.Variant("(s)", (self.output,)),
                 )
                 invocation.return_value(None)
                 return

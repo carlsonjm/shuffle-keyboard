@@ -155,6 +155,45 @@ fi
 kill "${band_pid}" 2>/dev/null
 
 echo
+echo "It comes back whole when its display goes and returns"
+# Where the compositor has the handle now: its window is the one ten tall.
+handle_window() {
+    gdbus call --session --dest studio.warbler.BottomSurface --object-path /BottomSurface \
+        --method studio.warbler.test.Control.record "stage $1" > /dev/null 2>&1
+    gdbus call --session --dest org.kde.KWin --object-path /Scripting \
+        --method org.kde.kwin.Scripting.loadScript "${tests_dir}/handle-probe.js" "handle$1" > /dev/null 2>&1
+    gdbus call --session --dest org.kde.KWin --object-path /Scripting \
+        --method org.kde.kwin.Scripting.start > /dev/null 2>&1
+    sleep 1
+    # Whole means the full width of its display and the gutter's height.
+    sed -n "/record stage $1/,\$p" "${stand_in_log}" | grep -oE '[0-9.]+x10 on [A-Za-z0-9-]+' | tail -1
+}
+control() {
+    gdbus call --session --dest studio.warbler.BottomSurface --object-path /BottomSurface \
+        --method "studio.warbler.test.Control.$1" "${@:2}" > /dev/null 2>&1
+}
+# The tablet's own scale on the display the handle starts on, so the surface
+# the compositor makes on the other display is a different size, as on the Z13.
+kscreen-doctor output.Virtual-0.scale.1.75 > /dev/null 2>&1
+sleep 1.5
+check "it starts whole on its display" "$(handle_window scaled)" "836x10 on Virtual-0"
+# The display goes; the dock goes with it to the one that remains.
+kscreen-doctor output.Virtual-0.disable > /dev/null 2>&1
+control setOutput "'Virtual-1'"
+sleep 2
+check "with its display gone it is rebuilt whole under the dock" \
+    "$(handle_window unplugged)" "1463x10 on Virtual-1"
+kscreen-doctor output.Virtual-0.enable > /dev/null 2>&1
+control setOutput "'Virtual-0'"
+sleep 2
+check "with its display back it is whole there again" \
+    "$(handle_window replugged)" "836x10 on Virtual-0"
+# With no Kadunce to name the touch display, the handle's home is the dock's.
+control setOutput "'Virtual-1'"
+sleep 1.5
+check "with no card display named it follows the dock, whole" "$(handle_window moved)" "1463x10 on Virtual-1"
+
+echo
 echo "The compositor offers what the handle asks it for"
 if gdbus introspect --session --dest org.kde.KWin \
         --object-path /VirtualKeyboard 2>/dev/null | grep -q 'forceActivate'; then

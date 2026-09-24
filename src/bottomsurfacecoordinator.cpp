@@ -10,6 +10,8 @@
 #include <QDBusConnectionInterface>
 #include <QDBusInterface>
 #include <QDBusReply>
+#include <QGuiApplication>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTimer>
@@ -48,6 +50,13 @@ BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
                                           SIGNAL(keyboardRequested()));
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::syncKeyboardVisibility);
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::readExtent);
+    // A display coming or going can move the dock and the touch display. Both
+    // answer a moment after the output changes, so they are read again then.
+    const auto rereadSoon = [this] {
+        QTimer::singleShot(500, this, &BottomSurfaceCoordinator::readExtent);
+    };
+    connect(qGuiApp, &QGuiApplication::screenAdded, this, rereadSoon);
+    connect(qGuiApp, &QGuiApplication::screenRemoved, this, rereadSoon);
 }
 
 bool BottomSurfaceCoordinator::surfacePresent() const
@@ -75,6 +84,38 @@ bool BottomSurfaceCoordinator::regionObscured() const
     return m_regionObscured;
 }
 
+QString BottomSurfaceCoordinator::dockOutput() const
+{
+    return m_dockOutput;
+}
+
+QString BottomSurfaceCoordinator::handleHome() const
+{
+    return m_handleHome;
+}
+
+namespace
+{
+// The display Kadunce holds cards on, which is the one a touchscreen drives.
+// Empty when Kadunce is not running or has no such display.
+QString cardDisplay()
+{
+    QDBusInterface kadunce(QStringLiteral("org.kde.KWin"), QStringLiteral("/Kadunce"), QStringLiteral("studio.warbler.Kadunce"), QDBusConnection::sessionBus());
+    const QDBusReply<QString> reply = kadunce.call(QStringLiteral("workspaceContext"));
+    if (!reply.isValid()) {
+        return {};
+    }
+    const QJsonArray displays =
+        QJsonDocument::fromJson(reply.value().toUtf8()).object().value(QStringLiteral("displayContext")).toObject().value(QStringLiteral("displays")).toArray();
+    for (const QJsonValue &display : displays) {
+        if (display.toObject().value(QStringLiteral("role")).toString() == QLatin1String("tablet")) {
+            return display.toObject().value(QStringLiteral("name")).toString();
+        }
+    }
+    return {};
+}
+}
+
 void BottomSurfaceCoordinator::onExtentChanged(const QString &outputName)
 {
     Q_UNUSED(outputName)
@@ -92,6 +133,7 @@ void BottomSurfaceCoordinator::readExtent()
     bool obscured = false;
     bool reserving = true;
     bool usable = false;
+    QString output;
 
     if (present) {
         QDBusInterface surface(QString::fromLatin1(kSurfaceService),
@@ -109,6 +151,7 @@ void BottomSurfaceCoordinator::readExtent()
                 dockLeft = dock.value(QStringLiteral("left")).toInt();
                 dockWidth = dock.value(QStringLiteral("right")).toInt() - dockLeft;
                 obscured = payload.value(QStringLiteral("obscured")).toBool();
+                output = payload.value(QStringLiteral("output")).toString();
                 reserving = payload.value(QStringLiteral("reserving")).toBool(true);
             }
         }
@@ -124,9 +167,15 @@ void BottomSurfaceCoordinator::readExtent()
         Q_EMIT reservationRefreshRequested();
     }
 
-    if (m_surfacePresent == usable && m_bandHeight == bandHeight && m_dockLeft == dockLeft && m_dockWidth == dockWidth && m_regionObscured == obscured) {
+    const QString touchOutput = cardDisplay();
+    const QString home = touchOutput.isEmpty() ? output : touchOutput;
+
+    if (m_surfacePresent == usable && m_bandHeight == bandHeight && m_dockLeft == dockLeft && m_dockWidth == dockWidth && m_regionObscured == obscured
+        && m_dockOutput == output && m_handleHome == home) {
         return;
     }
+    m_dockOutput = output;
+    m_handleHome = home;
 
     m_surfacePresent = usable;
     m_bandHeight = bandHeight;

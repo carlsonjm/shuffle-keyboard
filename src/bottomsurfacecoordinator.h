@@ -33,6 +33,12 @@ class BottomSurfaceCoordinator : public QObject
     Q_PROPERTY(int dockLeft READ dockLeft NOTIFY extentChanged)
     Q_PROPERTY(int dockWidth READ dockWidth NOTIFY extentChanged)
     Q_PROPERTY(bool regionObscured READ regionObscured NOTIFY extentChanged)
+    /// The output the dock is on, as the surface publishes it.
+    Q_PROPERTY(QString dockOutput READ dockOutput NOTIFY extentChanged)
+    /// The output the handle belongs on: the one Kadunce holds cards on when
+    /// it is running, since that is the touch display, and otherwise the
+    /// dock's.
+    Q_PROPERTY(QString handleHome READ handleHome NOTIFY extentChanged)
 
 public:
     explicit BottomSurfaceCoordinator(QObject *parent = nullptr);
@@ -44,6 +50,8 @@ public:
     int dockLeft() const;
     int dockWidth() const;
     bool regionObscured() const;
+    QString dockOutput() const;
+    QString handleHome() const;
     bool requestedVisible() const;
     void setRequestedVisible(bool visible);
     QString error() const;
@@ -101,6 +109,8 @@ private:
     int m_bandHeight = 0;
     int m_dockLeft = 0;
     int m_dockWidth = 0;
+    QString m_dockOutput;
+    QString m_handleHome;
     bool m_regionObscured = false;
 
     /// Whether the surface still holds its reservation. A surface that does not

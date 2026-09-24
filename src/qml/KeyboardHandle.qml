@@ -40,6 +40,7 @@ HandleWindow {
         // With the keyboard up, the keyboard is the surface being used and the
         // dock this reports the width of has stepped aside.
         && !BottomSurfaceCoordinator.keyboardVisible
+        && root.onDockDisplay
 
     // Held through a blackout rather than following the bar out, because
     // letting it go would resize every window each time the region darkens and
@@ -48,7 +49,13 @@ HandleWindow {
         && BottomSurfaceCoordinator.surfacePresent
         && BottomSurfaceCoordinator.dockWidth > 0
         && !BottomSurfaceCoordinator.keyboardVisible
+        && root.onDockDisplay
         ? root.thickness : 0
+
+    // Only under the dock it measures: with the dock on another display there
+    // is nothing here for it to sit on.
+    readonly property bool onDockDisplay: BottomSurfaceCoordinator.dockOutput === ""
+        || BottomSurfaceCoordinator.dockOutput === root.screenName
 
     // The only dimension this window chooses. Its width is the output's,
     // because it is anchored to both side edges.
@@ -58,6 +65,8 @@ HandleWindow {
     visible: root.wanted || bar.opacity > 0
 
     color: "transparent"
+
+    home: BottomSurfaceCoordinator.handleHome
 
     // Over the application row and nowhere else. Everything outside this is
     // the rest of the bottom gutter, and belongs to whatever is beneath.
@@ -70,6 +79,7 @@ HandleWindow {
             return;
         }
         console.warn("handle placed=" + root.placed
+                    + " screen=" + root.screenName
                     + " visible=" + root.visible
                     + " left=" + bar.x
                     + " width=" + bar.width
@@ -83,6 +93,7 @@ HandleWindow {
     }
 
     onWantedChanged: root.reportPlacement()
+    onScreenNameChanged: root.reportPlacement()
     onInteractiveRegionChanged: root.reportPlacement()
 
     onVisibleChanged: {

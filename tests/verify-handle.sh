@@ -55,7 +55,7 @@ timeout 120s env \
     KEYBOARD_BIN="${keyboard_bin}" \
     QT_QPA_PLATFORM=wayland \
     dbus-run-session -- kwin_wayland \
-        --virtual --width 1463 --height 915 \
+        --virtual --width 1463 --height 915 --output-count 2 \
         --no-lockscreen --no-global-shortcuts --no-kactivities \
         --exit-with-session "${tests_dir}/handle-session.sh" \
     > "${probe_root}/compositor.log" 2>&1 || true

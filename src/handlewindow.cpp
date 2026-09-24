@@ -8,6 +8,8 @@
 #include <LayerShellQt/Window>
 
 #include <QGuiApplication>
+#include <QScreen>
+#include <QTimer>
 
 HandleWindow::HandleWindow(QWindow *parent)
     : QQuickWindow(parent)
@@ -51,6 +53,75 @@ HandleWindow::HandleWindow(QWindow *parent)
     // An output going away must not take the handle with it. The window is
     // reused on whichever output remains.
     layer->setCloseOnDismissed(false);
+
+    connect(this, &QWindow::screenChanged, this, &HandleWindow::screenNameChanged);
+    // An output leaving takes this window's surface with it, and Qt moves the
+    // window to another screen without building a proper one there: it
+    // vanished, or came back half-made in a corner. It is rebuilt instead,
+    // once the displays have settled.
+    connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen *removed) {
+        const bool lost = removed == screen();
+        QTimer::singleShot(0, this, [this, lost] {
+            rehome(lost);
+        });
+    });
+    connect(qGuiApp, &QGuiApplication::screenAdded, this, [this] {
+        QTimer::singleShot(0, this, [this] {
+            rehome(false);
+        });
+    });
+}
+
+QString HandleWindow::home() const
+{
+    return m_home;
+}
+
+void HandleWindow::setHome(const QString &home)
+{
+    if (home == m_home) {
+        return;
+    }
+    m_home = home;
+    Q_EMIT homeChanged();
+    rehome(false);
+}
+
+QString HandleWindow::screenName() const
+{
+    return screen() ? screen()->name() : QString();
+}
+
+void HandleWindow::rehome(bool screenLost)
+{
+    if (!m_placed) {
+        return;
+    }
+    QScreen *target = nullptr;
+    const auto screens = QGuiApplication::screens();
+    for (QScreen *candidate : screens) {
+        if (candidate->name() == m_home) {
+            target = candidate;
+        }
+    }
+    if (!target) {
+        target = screens.contains(screen()) ? screen() : QGuiApplication::primaryScreen();
+    }
+    if (!target || (target == screen() && !screenLost)) {
+        return;
+    }
+    // A layer surface cannot move between outputs; it is made again on the
+    // new one, with everything it asked for applied to the new surface.
+    const bool shown = isVisible();
+    if (shown) {
+        hide();
+    }
+    setScreen(target);
+    if (shown) {
+        show();
+        refreshInteractiveRegion();
+    }
+    Q_EMIT screenNameChanged();
 }
 
 bool HandleWindow::placed() const

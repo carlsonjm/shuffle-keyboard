@@ -46,6 +46,12 @@ class HandleWindow : public QQuickWindow
     Q_PROPERTY(QRect interactiveRegion READ interactiveRegion WRITE setInteractiveRegion NOTIFY interactiveRegionChanged)
     /// How much of the bottom edge this surface reserves from the work area.
     Q_PROPERTY(int reservation READ reservation WRITE setReservation NOTIFY reservationChanged)
+    /// The output this window belongs on. It is rebuilt there whenever that
+    /// changes or a display comes or goes, because a layer surface is tied to
+    /// one output and is not remade when that output leaves.
+    Q_PROPERTY(QString home READ home WRITE setHome NOTIFY homeChanged)
+    /// The output the window is on now.
+    Q_PROPERTY(QString screenName READ screenName NOTIFY screenNameChanged)
 
 public:
     explicit HandleWindow(QWindow *parent = nullptr);
@@ -61,11 +67,19 @@ public:
     /// window destroys it and a region set against the old one is gone.
     Q_INVOKABLE void refreshInteractiveRegion();
 
+    QString home() const;
+    void setHome(const QString &home);
+    QString screenName() const;
+
 Q_SIGNALS:
     void interactiveRegionChanged();
     void reservationChanged();
+    void homeChanged();
+    void screenNameChanged();
 
 private:
+    void rehome(bool screenLost);
+    QString m_home;
     bool m_placed = false;
     int m_reservation = 0;
     QRect m_interactiveRegion;

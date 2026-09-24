@@ -18,5 +18,6 @@ workspace.windowList().forEach(function (window) {
              "studio.warbler.test.Control",
              "record",
              "window " + frame.x + "," + frame.y
-                 + " " + frame.width + "x" + frame.height);
+                 + " " + frame.width + "x" + frame.height
+                 + " on " + (window.output ? window.output.name : "-"));
 });
