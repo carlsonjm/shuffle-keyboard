@@ -35,6 +35,10 @@ public:
     QString message() const;
 
     Q_INVOKABLE void ensureSession();
+    /// Opens the session ahead of use, but only where access was granted
+    /// before and restores without asking, so the first slide of the space
+    /// bar is not spent waiting and no prompt interrupts typing.
+    Q_INVOKABLE void warmIfGranted();
     Q_INVOKABLE void keepKeyboardVisible();
     Q_INVOKABLE void move(qreal dx, qreal dy);
     Q_INVOKABLE void scroll(qreal dx, qreal dy, bool finished = false);

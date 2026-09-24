@@ -104,6 +104,13 @@ void PrecisionController::ensureSession()
     }
 }
 
+void PrecisionController::warmIfGranted()
+{
+    if (!m_restoreToken.isEmpty()) {
+        ensureSession();
+    }
+}
+
 void PrecisionController::handleCreateResponse(uint response, const QVariantMap &results)
 {
     if (response != 0) {
