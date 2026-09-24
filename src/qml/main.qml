@@ -676,6 +676,7 @@ InputPanelWindow {
                 maximum: root.maximumPercent - root.defaultPercent
                 marksHome: true
                 home: 0
+                label: (root.defaultPercent + value) + "%"
                 onStepped: {
                     root.requestedHeight = root.heightForPercent(root.defaultPercent + value);
                 }
