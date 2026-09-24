@@ -99,10 +99,14 @@ InputPanelWindow {
                 ["←", "↑", "↓", "→"]];
     }
 
-    // Where the keys rest, not where they are drawn: a region that changes
-    // makes the compositor place the panel again, which it must not do on
-    // every frame of an arrival.
-    interactiveRegion: Qt.rect(panel.x, root.height - panel.height, panel.width, panel.height)
+    // The keys that are on screen, so what they cover grows as they rise and
+    // shrinks as they leave, and a card makes room at the pace the keys take
+    // it rather than all at once. The keys rise only once the dock has let
+    // its reservation go, so the compositor placing the panel again as this
+    // changes finds the same bottom edge every time. Never quite empty, since
+    // an empty region is no panel at all.
+    interactiveRegion: Qt.rect(panel.x, root.height - panel.height + Math.min(root.carry, panel.height - 2),
+                               panel.width, Math.max(2, panel.height - root.carry))
 
     // The arrival. The keys start below the screen's edge and rise from it,
     // under the finger when a pull brought them and on their own otherwise.
@@ -174,7 +178,7 @@ InputPanelWindow {
             return;
         }
         if (root.pullActive) {
-            root.carryTo(root.carryUnder(root.pullTravel), 110);
+            root.carryTo(root.carryUnder(root.pullTravel), 80);
         } else if (root.pendingSettle && !root.pendingOpen
                    && Date.now() - root.pendingAt < 1000) {
             root.pendingSettle = false;
@@ -222,7 +226,7 @@ InputPanelWindow {
     // says it has gone.
     Timer {
         id: seatSettle
-        interval: 60
+        interval: 40
         onTriggered: root.advanceArrival()
     }
     Timer {
