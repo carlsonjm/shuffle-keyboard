@@ -26,7 +26,6 @@ InputPanelWindow {
     property bool metaActive: false
     property bool precisionHeld: false
     property real dragStartY: 0
-    property real dragStartHeight: 0
     property bool resizeMoved: false
     // The keyboard is a card: Kadunce's gutter at either side and nowhere
     // else, rounded where it stands free, flush with the screen's bottom edge
@@ -40,25 +39,34 @@ InputPanelWindow {
     readonly property real topStrip: handleInset + handleThickness + handleClearance
 
     // Key width is fixed and only key height moves, so the key columns and
-    // the space bar never shift when the height changes. The key block is
-    // about 80% of the width as first measured, sized up a tenth, and the
-    // side columns take what is left. A key is square at the default.
-    readonly property real keyBlockWidth: Math.round(root.width * 0.88)
-    readonly property real keyGap: Math.max(5, Math.min(10, keyBlockWidth * 0.007))
-    readonly property real outerGap: Math.max(6, Math.min(12, keyBlockWidth * 0.008))
-    readonly property real keyUnitWidth: Math.max(1, (keyBlockWidth + keyGap) / 12.5 - keyGap)
-    function heightForRows(row) {
-        return Math.round(root.topStrip + row * 4 + root.keyGap * 3 + root.outerGap);
+    // the space bar never shift when the height changes. The card's height is
+    // a share of the screen's, from 35% to 55% in steps of one; the default,
+    // 45%, has square keys, which sets the key width, and the side columns
+    // take what is left.
+    readonly property int defaultPercent: 45
+    readonly property int minimumPercent: 35
+    readonly property int maximumPercent: 55
+    function heightForPercent(percent) {
+        return Math.round(root.height * percent / 100);
     }
-    readonly property real squareDefaultHeight: heightForRows(keyUnitWidth)
+    readonly property real keyGap: Math.max(5, Math.min(10, root.width * 0.0062))
+    readonly property real outerGap: Math.max(6, Math.min(12, root.width * 0.007))
+    function rowForHeight(height) {
+        return (height - root.topStrip - root.keyGap * 3 - root.outerGap) / 4;
+    }
+    readonly property real squareDefaultHeight: heightForPercent(defaultPercent)
+    readonly property real keyUnitWidth: Math.max(1, rowForHeight(squareDefaultHeight))
+    readonly property real keyBlockWidth: Math.round(12.5 * (keyUnitWidth + keyGap) - keyGap)
+    // The right column's notches are those steps, counted from the default.
+    readonly property int heightNotchNow: Math.round(root.panelHeight * 100 / root.height) - root.defaultPercent
     function persistKeyHeight() {
-        const row = (root.panelHeight - root.topStrip - root.keyGap * 3 - root.outerGap) / 4;
-        root.persistKeyRowHeight(Math.round(row));
+        const percent = root.defaultPercent + root.heightNotchNow;
+        root.persistHeightPercent(percent === root.defaultPercent ? 0 : percent);
     }
-    // The saved height is a key height, since width no longer follows it; an
-    // unset one is the square default.
-    readonly property real savedHeight: PlasmaKeyboardSettings.keyRowHeight > 0
-                                        ? heightForRows(PlasmaKeyboardSettings.keyRowHeight)
+    // The saved height is a share of the screen, since width no longer
+    // follows it; an unset one is the default.
+    readonly property real savedHeight: PlasmaKeyboardSettings.heightPercent > 0
+                                        ? heightForPercent(PlasmaKeyboardSettings.heightPercent)
                                         : squareDefaultHeight
     property real requestedHeight: savedHeight
     property int probeIndex: 0
@@ -67,12 +75,8 @@ InputPanelWindow {
     property bool probeTypingComplete: false
 
     readonly property bool precisionActive: precisionHeld
-    // A row never shorter than the common minimum touch target, 48 px; never
-    // more than a quarter taller than a key is wide, and never over 55% of
-    // the screen, so the keys stay keys and the card leaves the work above it.
-    readonly property real minimumPanelHeight: heightForRows(48)
-    readonly property real maximumPanelHeight: Math.max(minimumPanelHeight,
-        Math.min(heightForRows(keyUnitWidth * 1.25), Math.round(root.height * 0.55)))
+    readonly property real minimumPanelHeight: heightForPercent(minimumPercent)
+    readonly property real maximumPanelHeight: heightForPercent(maximumPercent)
     readonly property real panelHeight: Math.round(Math.max(minimumPanelHeight, Math.min(maximumPanelHeight, requestedHeight)))
     readonly property int probeRepeat: shuffleProbeRepeat > 0 ? shuffleProbeRepeat : 1
     readonly property int probeLength: shuffleProbeText.length * probeRepeat
@@ -572,9 +576,9 @@ InputPanelWindow {
             // The handle takes the keys away the way it brought them: a drag
             // down carries them under the finger and, past a quarter of the
             // way or on a flick, lets them go; otherwise they spring back. A
-            // tap puts them away the same way. Up still makes them taller
-            // until height has its own control. Positions are the window's,
-            // because the handle moves with the keys it is dragging.
+            // tap puts them away the same way. Height belongs to the right
+            // column, not here. Positions are the window's, because the
+            // handle moves with the keys it is dragging.
             MouseArea {
                 id: grabArea
                 anchors.fill: parent
@@ -590,7 +594,6 @@ InputPanelWindow {
 
                 onPressed: mouse => {
                     root.dragStartY = windowY(mouse);
-                    root.dragStartHeight = root.panelHeight;
                     root.resizeMoved = false;
                     carryMotion.stop();
                     lastY = root.dragStartY;
@@ -610,13 +613,7 @@ InputPanelWindow {
                     lastTime = now;
                     const rise = root.dragStartY - y;
                     if (Math.abs(rise) > 4) root.resizeMoved = true;
-                    if (rise >= 0) {
-                        root.carry = 0;
-                        root.requestedHeight = root.dragStartHeight + rise;
-                    } else {
-                        root.requestedHeight = root.dragStartHeight;
-                        root.carry = Math.min(root.panelHeight, -rise);
-                    }
+                    root.carry = Math.max(0, Math.min(root.panelHeight, -rise));
                 }
                 onReleased: {
                     if (root.carry > 0) {
@@ -628,12 +625,8 @@ InputPanelWindow {
                             root.carryTo(0, root.settleDuration(root.carry, -downSpeed));
                         }
                     }
-                    root.persistKeyHeight();
                 }
-                onCanceled: {
-                    root.requestedHeight = root.savedHeight;
-                    root.carryTo(0, 200);
-                }
+                onCanceled: root.carryTo(0, 200)
                 onClicked: {
                     if (!root.resizeMoved) {
                         root.pendingSpeed = 0;
@@ -654,27 +647,42 @@ InputPanelWindow {
 
             Behavior on opacity { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
 
-            // Centering leaves a reachable Shuffle hold surface for either
-            // pinky. Both surfaces hand off to the same full-footprint
-            // precision overlay.
-            EditGestureSurface {
+            // The width either side of the keys carries a scrub column: the
+            // edit history on the left, down back in time and up forward, each
+            // notch one step that happens as the finger passes it, so sliding
+            // back undoes the scrub; key height on the right, up taller, with
+            // the default marked.
+            ScrubColumn {
+                id: historyColumn
                 x: 0
                 y: 0
                 width: Math.max(0, keyField.x)
                 height: keyboardBody.height
-                onActionRequested: action => root.sendEditAction(action)
-                onPrecisionHoldRequested: root.precisionHeld = true
-                onPrecisionReleaseRequested: root.precisionHeld = false
+                notchStep: 28
+                downIsPositive: true
+                onStepped: direction => root.sendEditAction(direction > 0 ? "Undo" : "Redo")
+                onReleased: value = 0
             }
 
-            EditGestureSurface {
-                x: keyField.x + keyField.columnX(12.5)
+            ScrubColumn {
+                id: heightColumn
+                x: keyField.x + keyField.width
                 y: 0
                 width: Math.max(0, keyboardBody.width - x)
                 height: keyboardBody.height
-                onActionRequested: action => root.sendEditAction(action)
-                onPrecisionHoldRequested: root.precisionHeld = true
-                onPrecisionReleaseRequested: root.precisionHeld = false
+                notchStep: 14
+                value: root.heightNotchNow
+                minimum: root.minimumPercent - root.defaultPercent
+                maximum: root.maximumPercent - root.defaultPercent
+                marksHome: true
+                home: 0
+                onStepped: {
+                    root.requestedHeight = root.heightForPercent(root.defaultPercent + value);
+                }
+                onReleased: {
+                    value = Qt.binding(() => root.heightNotchNow);
+                    root.persistKeyHeight();
+                }
             }
 
             Item {

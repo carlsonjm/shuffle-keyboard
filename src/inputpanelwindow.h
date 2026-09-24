@@ -47,7 +47,7 @@ public:
     /// Qt's focus with it, and this puts it back.
     Q_INVOKABLE void reclaimFocus();
     Q_INVOKABLE void persistKeyboardHeight(int height);
-    Q_INVOKABLE void persistKeyRowHeight(int height);
+    Q_INVOKABLE void persistHeightPercent(int percent);
     Q_INVOKABLE void persistKeyboardWidthPercent(int widthPercent);
 
 Q_SIGNALS:

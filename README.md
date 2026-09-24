@@ -17,10 +17,15 @@ custom input engine.
   flush with the screen's bottom edge and lying over the window above. The
   dock's handle rides its top strip with 10 px clear above it and above the
   keys.
-- The key block is fixed at 88% of the width and only key height changes, so
-  the keys and the space bar never move sideways. A key is square at the
-  default; rows stay between 48 px and a quarter taller than a key is wide,
-  and the card under 55% of the screen. The height is saved as a key height.
+- Only key height changes, so the keys and the space bar never move sideways.
+  The card is 35% to 55% of the screen's height in steps of one, saved as that
+  share; the default, 45%, has square keys, which sets the key width.
+- The width either side of the keys carries a scrub column, close to invisible
+  until touched. Left is the edit history: down undoes and up redoes, a step per
+  notch as the finger passes it, so sliding back cancels. Right is height: up
+  is taller, a notch per percent, with the default marked. A notch holds until
+  the finger is 70% of the way past it, and clicks with the keyboard's quiet
+  tick.
 - `123` and Tab fill the first two left edges. Shift fills the third, where a
   tap is one-shot Shift and a double tap locks Caps. Backspace and the muted
   Ghost White Enter share one aligned right edge; Enter fills the home-row gap
@@ -32,15 +37,9 @@ custom input engine.
   is the protected resting brand mark, not a generic text label. It resolves
   the user's live bare-Meta binding through KDE's global-shortcut service and
   invokes that configured action without hard-coding a particular applet.
-- The typing block is centered so either edge supplies an unboxed
-  Shuffle/edit hold surface.
-- Holding that surface temporarily disables and dims the visible keyboard while
-  the full footprint becomes a precision surface. Releasing returns immediately
-  to typing. A tap on either edge clicks at the current pointer position, so a
-  natural double tap selects the word under the pointer. Two- and three-finger
-  taps provide Copy and Cut; horizontal swipes provide Undo/Redo.
-- Until the right scrub column exists, a drag up on the handle makes the keys
-  taller and a drag down carries them away.
+- There is no pointer between this slice and the space-bar pointer, which
+  replaces the retired edge hold; copy, cut and paste are Ctrl chords.
+- A drag down on the handle carries the keys away, and a tap puts them away.
 - Plasma's bottom panel yields while the keyboard is requested and restores
   its previous hiding mode afterward. Where the downstream Bottom Surface is
   installed the region is asked for instead of the panel being commanded, and
