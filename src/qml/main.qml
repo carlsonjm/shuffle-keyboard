@@ -64,7 +64,135 @@ InputPanelWindow {
                 ["←", "↑", "↓", "→"]];
     }
 
-    interactiveRegion: Qt.rect(panel.x, panel.y, panel.width, panel.height)
+    // Where the keys rest, not where they are drawn: a region that changes
+    // makes the compositor place the panel again, which it must not do on
+    // every frame of an arrival.
+    interactiveRegion: Qt.rect(panel.x, root.height - panel.height, panel.width, panel.height)
+
+    // The arrival. The keys start below the screen's edge and rise from it,
+    // under the finger when a pull brought them and on their own otherwise.
+    // They wait until the dock has left and given up its room, so they never
+    // rise into the dock's room while it is there, and the compositor has
+    // already placed them at the bottom rather than moving them mid-rise.
+    property real carry: 0
+    property bool arriving: false
+    property bool pullActive: false
+    property real pullTravel: 0
+    // A pull that ended before the keys could rise, which way it went, and
+    // when: a decision older than a moment belongs to a pull whose keys never
+    // came.
+    property bool pendingSettle: false
+    property bool pendingOpen: true
+    property real pendingAt: 0
+    property bool seatWaitOver: false
+    readonly property bool seated: root.seatWaitOver
+        || !BottomSurfaceCoordinator.surfacePresent
+        || !BottomSurfaceCoordinator.regionReserving
+
+    // Past a quarter of the way up, or a flick upward, a released pull opens.
+    readonly property real openFraction: 0.25
+    readonly property real flickSpeed: 400
+
+    function beginArrival() {
+        carryMotion.stop();
+        root.carry = root.panelHeight;
+        root.arriving = true;
+        root.seatWaitOver = false;
+        seatWait.restart();
+        root.advanceArrival();
+    }
+
+    function advanceArrival() {
+        if (!root.arriving || !root.seated || seatSettle.running) {
+            return;
+        }
+        if (root.pullActive) {
+            root.carryTo(Math.max(0, root.panelHeight - root.pullTravel), 90);
+        } else if (root.pendingSettle && !root.pendingOpen
+                   && Date.now() - root.pendingAt < 1000) {
+            root.pendingSettle = false;
+            root.putAway();
+        } else {
+            root.pendingSettle = false;
+            root.carryTo(0, 260);
+        }
+    }
+
+    function carryTo(target, duration) {
+        carryMotion.stop();
+        carryMotion.to = target;
+        carryMotion.duration = duration;
+        carryMotion.start();
+    }
+
+    function putAway() {
+        root.closing = true;
+        root.carryTo(root.panelHeight, 180);
+    }
+    property bool closing: false
+
+    NumberAnimation {
+        id: carryMotion
+        target: root
+        property: "carry"
+        easing.type: Easing.OutCubic
+        onFinished: {
+            if (root.closing) {
+                root.closing = false;
+                root.arriving = false;
+                Qt.inputMethod.hide();
+            } else if (root.carry === 0 && !root.pullActive) {
+                root.arriving = false;
+            }
+        }
+    }
+
+    // The compositor places the keys again a frame after the reservation
+    // goes; this is that frame's grace, and a limit for a surface that never
+    // says it has gone.
+    Timer {
+        id: seatSettle
+        interval: 60
+        onTriggered: root.advanceArrival()
+    }
+    Timer {
+        id: seatWait
+        interval: 450
+        onTriggered: {
+            root.seatWaitOver = true;
+            root.advanceArrival();
+        }
+    }
+    onSeatedChanged: {
+        if (root.seated && root.arriving) {
+            seatSettle.restart();
+        }
+    }
+
+    Connections {
+        target: BottomSurfaceCoordinator
+        function onKeyboardPulled(travel, active, velocity) {
+            root.pullTravel = Math.max(0, travel);
+            if (active) {
+                root.pullActive = true;
+                if (root.arriving && root.seated && !seatSettle.running && !carryMotion.running) {
+                    root.carry = Math.max(0, root.panelHeight - root.pullTravel);
+                } else {
+                    root.advanceArrival();
+                }
+                return;
+            }
+            if (!root.pullActive) {
+                return;
+            }
+            root.pullActive = false;
+            root.pendingSettle = true;
+            root.pendingOpen = root.pullTravel >= root.panelHeight * root.openFraction
+                || velocity >= root.flickSpeed;
+            root.pendingAt = Date.now();
+            root.advanceArrival();
+        }
+    }
 
     function keyCode(text) {
         if (text === " ") return Qt.Key_Space;
@@ -176,6 +304,14 @@ InputPanelWindow {
     }
 
     onVisibleChanged: {
+        if (visible) {
+            beginArrival();
+        } else {
+            carryMotion.stop();
+            arriving = false;
+            closing = false;
+            carry = 0;
+        }
         if (!visible) {
             clearOneShotModifiers();
             if (precisionActive) Qt.callLater(precisionController.keepKeyboardVisible);
@@ -310,7 +446,7 @@ InputPanelWindow {
     Rectangle {
         id: panel
         x: 0
-        y: root.height - height
+        y: root.height - height + root.carry
         width: root.width
         height: root.panelHeight
         color: "#141414"

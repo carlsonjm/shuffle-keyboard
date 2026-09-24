@@ -61,8 +61,10 @@ HandleWindow {
     // because it is anchored to both side edges.
     height: root.gutter
 
-    // Stays mapped while it fades, and only then goes.
-    visible: root.wanted || bar.opacity > 0
+    // Stays mapped while it fades, and only then goes. It also stays while a
+    // pull is under way: the keys coming up make it unwanted, and a surface
+    // that goes takes the finger's touch with it.
+    visible: root.wanted || bar.opacity > 0 || lift.active
 
     color: "transparent"
 
@@ -305,6 +307,10 @@ HandleWindow {
         // One raise per gesture. The threshold is crossed once on the way up
         // and the finger is still down afterwards.
         property bool lifted: false
+        // The pull as last seen while the finger moved, since a released
+        // point no longer carries its travel or speed.
+        property real travel: 0
+        property real speed: 0
 
         TapHandler {
             id: press
@@ -319,13 +325,23 @@ HandleWindow {
             xAxis.enabled: false
 
             onActiveChanged: if (!active) {
+                if (reach.lifted) {
+                    BottomSurfaceCoordinator.reportPull(reach.travel, false, reach.speed);
+                }
                 reach.lifted = false;
             }
 
+            // The keys follow the finger from the moment it arms, and learn on
+            // release how far and how fast it went.
             onActiveTranslationChanged: {
                 if (!reach.lifted && lift.activeTranslation.y <= -root.armDistance) {
                     reach.lifted = true;
                     root.raise();
+                }
+                if (reach.lifted) {
+                    reach.travel = -lift.activeTranslation.y;
+                    reach.speed = -lift.centroid.velocity.y;
+                    BottomSurfaceCoordinator.reportPull(reach.travel, true, 0);
                 }
             }
         }

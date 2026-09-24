@@ -46,6 +46,10 @@ custom input engine.
   the published dock extent, and leaves before the region goes solid. A pull
   never takes the focus from a text box that is ready to be typed into; only
   a cold start, with nothing ready, borrows it until the keyboard goes.
+- The keys arrive from the screen's edge once the dock has left and given up
+  its room. A pull on the handle or the dock carries them under the finger,
+  opening past a quarter of the way or on a flick upward and going back down
+  otherwise; any other raise brings them up on their own.
 
 ## Superseded by the 22 September direction
 

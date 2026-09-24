@@ -48,6 +48,12 @@ BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
                                           QStringLiteral("keyboardRequested"),
                                           this,
                                           SIGNAL(keyboardRequested()));
+    QDBusConnection::sessionBus().connect(QString::fromLatin1(kSurfaceService),
+                                          QString::fromLatin1(kSurfacePath),
+                                          QString::fromLatin1(kSurfaceInterface),
+                                          QStringLiteral("keyboardPull"),
+                                          this,
+                                          SLOT(onSurfacePull(double, bool, double)));
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::syncKeyboardVisibility);
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::readExtent);
     // A display coming or going can move the dock and the touch display. Both
@@ -165,6 +171,7 @@ void BottomSurfaceCoordinator::readExtent()
     if (m_regionReserving != reserving) {
         m_regionReserving = reserving;
         Q_EMIT reservationRefreshRequested();
+        Q_EMIT regionReservingChanged();
     }
 
     const QString touchOutput = cardDisplay();
@@ -250,6 +257,21 @@ void BottomSurfaceCoordinator::raiseKeyboard()
 void BottomSurfaceCoordinator::reclaimKeyboardFocus()
 {
     Q_EMIT keyboardFocusReclaimRequested();
+}
+
+void BottomSurfaceCoordinator::reportPull(double travel, bool active, double velocity)
+{
+    Q_EMIT keyboardPulled(travel, active, velocity);
+}
+
+void BottomSurfaceCoordinator::onSurfacePull(double travel, bool active, double velocity)
+{
+    Q_EMIT keyboardPulled(travel, active, velocity);
+}
+
+bool BottomSurfaceCoordinator::regionReserving() const
+{
+    return m_regionReserving;
 }
 
 void BottomSurfaceCoordinator::setKeyboardVisible(bool visible)

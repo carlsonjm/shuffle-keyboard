@@ -33,6 +33,10 @@ class BottomSurfaceCoordinator : public QObject
     Q_PROPERTY(int dockLeft READ dockLeft NOTIFY extentChanged)
     Q_PROPERTY(int dockWidth READ dockWidth NOTIFY extentChanged)
     Q_PROPERTY(bool regionObscured READ regionObscured NOTIFY extentChanged)
+    /// Whether the surface still holds its reservation. The keys arrive only
+    /// once it has gone, so they rise from the screen's edge rather than from
+    /// a band that is leaving.
+    Q_PROPERTY(bool regionReserving READ regionReserving NOTIFY regionReservingChanged)
     /// The output the dock is on, as the surface publishes it.
     Q_PROPERTY(QString dockOutput READ dockOutput NOTIFY extentChanged)
     /// The output the handle belongs on: the one Kadunce holds cards on when
@@ -70,6 +74,16 @@ public:
     /// another of this process's surfaces has held the compositor's focus.
     Q_INVOKABLE void reclaimKeyboardFocus();
 
+    /**
+     * A pull on the handle, in logical pixels travelled upward, while the
+     * finger is down and once when it lifts with its upward speed. The dock's
+     * pulls arrive the same way over the bus, so the keys follow a finger
+     * wherever the pull began.
+     */
+    Q_INVOKABLE void reportPull(double travel, bool active, double velocity);
+
+    bool regionReserving() const;
+
 Q_SIGNALS:
     void keyboardVisibleChanged();
     void requestedVisibleChanged();
@@ -77,6 +91,8 @@ Q_SIGNALS:
     void extentChanged();
     void reservationRefreshRequested();
     void keyboardFocusReclaimRequested();
+    void regionReservingChanged();
+    void keyboardPulled(double travel, bool active, double velocity);
     /// Someone reached for the keyboard from the dock rather than the handle.
     void keyboardRequested();
 
@@ -95,6 +111,7 @@ private:
 
 private Q_SLOTS:
     void syncKeyboardVisibility();
+    void onSurfacePull(double travel, bool active, double velocity);
     void onExtentChanged(const QString &outputName);
 
 private:
