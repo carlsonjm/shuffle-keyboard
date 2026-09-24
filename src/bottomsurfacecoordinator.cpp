@@ -47,6 +47,14 @@ BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
                                           SIGNAL(keyboardRequested()));
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::syncKeyboardVisibility);
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::readExtent);
+
+    m_arrivalGrace.setSingleShot(true);
+    m_arrivalGrace.setInterval(1000);
+    connect(&m_arrivalGrace, &QTimer::timeout, this, [this] {
+        if (!m_keyboardVisible) {
+            restoreBottomPanels();
+        }
+    });
 }
 
 bool BottomSurfaceCoordinator::surfacePresent() const
@@ -194,6 +202,11 @@ void BottomSurfaceCoordinator::setRequestedVisible(bool visible)
     const QDBusReply<bool> willShow = keyboard.call(QStringLiteral("willShowOnActive"));
     if (m_keyboardVisible || (willShow.isValid() && willShow.value())) {
         yieldBottomPanels();
+        // The compositor can still decline, as it does for a field an
+        // application focused on its own, and then no keys come to fill it.
+        if (!m_keyboardVisible) {
+            m_arrivalGrace.start();
+        }
     }
 }
 
@@ -224,9 +237,14 @@ void BottomSurfaceCoordinator::setKeyboardVisible(bool visible)
     m_keyboardVisible = visible;
     Q_EMIT keyboardVisibleChanged();
 
+    // The region follows the keys on screen, not the request for them. An
+    // application's field can stay focused, and so keep the request, after the
+    // compositor has put the keys down; waiting on the request then left the
+    // dock gone with nothing in its place.
     if (visible) {
+        m_arrivalGrace.stop();
         yieldBottomPanels();
-    } else if (!m_requestedVisible) {
+    } else {
         restoreBottomPanels();
     }
 }

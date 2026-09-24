@@ -134,6 +134,9 @@ wait_keyboard false
 check "the Keyboard is down" "$(keyboard visible)" "(<false>,)"
 sleep 0.5
 check "the application has the focus again" "$(focus_now)" "app"
+# The dock steps aside only while the keys are up. The application's field is
+# still focused, so this is the keys going, not the request.
+check "the dock comes back" "$(grep -oE '^yielded=[01]' "${stand_in_log}" | tail -1)" "yielded=0"
 
 echo
 echo "The Keyboard still types into an application afterwards"

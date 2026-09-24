@@ -6,6 +6,7 @@
 #pragma once
 
 #include <QObject>
+#include <QTimer>
 #include <qqmlintegration.h>
 
 /**
@@ -93,6 +94,10 @@ private:
     bool m_keyboardVisible = false;
     bool m_requestedVisible = false;
     QString m_savedPanels;
+
+    /// Running between yielding for keys the compositor said it would show
+    /// and those keys arriving. Keys that never arrive give the region back.
+    QTimer m_arrivalGrace;
 
     /// True while the surface is the one that yielded, so the release goes
     /// back the same way it was taken.
