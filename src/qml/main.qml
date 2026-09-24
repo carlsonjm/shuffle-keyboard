@@ -530,25 +530,76 @@ InputPanelWindow {
                 }
             }
 
+            // The handle takes the keys away the way it brought them: a drag
+            // down carries them under the finger and, past a quarter of the
+            // way or on a flick, lets them go; otherwise they spring back. A
+            // tap puts them away the same way. Up still makes them taller
+            // until height has its own control. Positions are the window's,
+            // because the handle moves with the keys it is dragging.
             MouseArea {
                 id: grabArea
                 anchors.fill: parent
                 cursorShape: Qt.SizeVerCursor
+
+                property real lastY: 0
+                property real lastTime: 0
+                property real downSpeed: 0
+
+                function windowY(mouse) {
+                    return mouse.y + resizeHandle.y + panel.y;
+                }
+
                 onPressed: mouse => {
-                    root.dragStartY = mouse.y;
+                    root.dragStartY = windowY(mouse);
                     root.dragStartHeight = root.panelHeight;
                     root.resizeMoved = false;
+                    carryMotion.stop();
+                    lastY = root.dragStartY;
+                    lastTime = Date.now();
+                    downSpeed = 0;
                 }
                 onPositionChanged: mouse => {
-                    if (pressed) {
-                        if (Math.abs(mouse.y - root.dragStartY) > 4) root.resizeMoved = true;
-                        root.requestedHeight = root.dragStartHeight + root.dragStartY - mouse.y;
+                    if (!pressed) {
+                        return;
+                    }
+                    const y = windowY(mouse);
+                    const now = Date.now();
+                    if (now > lastTime) {
+                        downSpeed = (y - lastY) * 1000 / (now - lastTime);
+                    }
+                    lastY = y;
+                    lastTime = now;
+                    const rise = root.dragStartY - y;
+                    if (Math.abs(rise) > 4) root.resizeMoved = true;
+                    if (rise >= 0) {
+                        root.carry = 0;
+                        root.requestedHeight = root.dragStartHeight + rise;
+                    } else {
+                        root.requestedHeight = root.dragStartHeight;
+                        root.carry = Math.min(root.panelHeight, -rise);
                     }
                 }
-                onReleased: root.persistKeyboardHeight(root.panelHeight)
-                onCanceled: root.requestedHeight = PlasmaKeyboardSettings.keyboardHeight
+                onReleased: {
+                    if (root.carry > 0) {
+                        root.pendingSpeed = -downSpeed;
+                        if (root.carry >= root.panelHeight * root.openFraction
+                                || downSpeed >= root.flickSpeed) {
+                            root.putAway();
+                        } else {
+                            root.carryTo(0, root.settleDuration(root.carry, -downSpeed));
+                        }
+                    }
+                    root.persistKeyboardHeight(root.panelHeight);
+                }
+                onCanceled: {
+                    root.requestedHeight = PlasmaKeyboardSettings.keyboardHeight;
+                    root.carryTo(0, 200);
+                }
                 onClicked: {
-                    if (!root.resizeMoved) Qt.inputMethod.hide();
+                    if (!root.resizeMoved) {
+                        root.pendingSpeed = 0;
+                        root.putAway();
+                    }
                 }
             }
         }
