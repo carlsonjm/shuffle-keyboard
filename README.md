@@ -13,7 +13,7 @@ custom input engine.
 - Four large QWERTY rows with one invariant character pitch and the physically
   validated iPad-baseline stagger: Q at 1.00 units, A at 1.25, and Z at 1.75.
 - Hairline Ghost White key outlines on the Itasca `#141414` surface, drawn as
-  a card: Kadunce's 10 px gutter at either side only, 18 px corners at the top,
+  a card: Kadunce's 10 px gutter at either side only, its 10 px corners at the top,
   flush with the screen's bottom edge and lying over the window above. The
   dock's handle rides its top strip with 10 px clear above it and above the
   keys.

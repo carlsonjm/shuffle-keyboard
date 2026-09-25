@@ -28,11 +28,11 @@ InputPanelWindow {
     property real dragStartY: 0
     property bool resizeMoved: false
     // The keyboard is a card: Kadunce's gutter at either side and nowhere
-    // else, rounded where it stands free, flush with the screen's bottom edge
-    // and lying over the window above it. Its top strip carries the handle
-    // with the same clear room above it as between it and the keys.
+    // else, rounded as a card is where it stands free, flush with the screen's
+    // bottom edge and lying over the window above it. Its top strip carries
+    // the handle with the same clear room above it as between it and the keys.
     readonly property real sideGutter: 10
-    readonly property real cardRadius: 18
+    readonly property real cardRadius: 10
     readonly property real handleInset: 10
     readonly property real handleThickness: 6
     readonly property real handleClearance: 10
@@ -393,10 +393,14 @@ InputPanelWindow {
             beginArrival();
             precisionController.warmIfGranted();
         } else {
+            // The carry stays where the keys were. The panel is still mapped
+            // while this runs, so returning it to zero would report the whole
+            // Keyboard for a moment after the keys have gone, and the card
+            // above would make room for keys that are not there. An arrival
+            // sets the carry afresh.
             carryMotion.stop();
             arriving = false;
             closing = false;
-            carry = 0;
         }
         if (!visible) {
             clearOneShotModifiers();
