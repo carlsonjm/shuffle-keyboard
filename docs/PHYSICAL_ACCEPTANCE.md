@@ -92,7 +92,7 @@ Record one line for each item as `Pass`, `Fail`, or `Note: …`.
 These need the Bottom Surface installed. On an ordinary Plasma panel there is
 no handle, which is the supported result and not a failure.
 
-- **It is there:** A translucent light bar sits directly on top of the dock,
+- **It is there:** A nearly white bar sits directly on top of the dock,
   as wide as the row of application icons, with the same even gap above it to
   the window as below it to the icons. Windows stop above it rather than
   running under it.

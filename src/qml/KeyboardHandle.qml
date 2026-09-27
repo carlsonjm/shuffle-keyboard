@@ -7,6 +7,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Window
+import org.kde.kirigami as Kirigami
 
 import org.kde.layershell as LayerShell
 import org.kde.plasma.keyboard
@@ -312,6 +313,10 @@ HandleWindow {
         property real travel: 0
         property real speed: 0
 
+        Accessible.role: Accessible.Button
+        Accessible.name: i18n("Show the keyboard")
+        Accessible.onPressAction: root.raise()
+
         TapHandler {
             id: press
 
@@ -354,8 +359,8 @@ HandleWindow {
 
     // Exactly over the application row, so the handle reports the dock's
     // extent rather than floating over it at some width of its own. It is
-    // light and translucent, so the wallpaper reads through it, and it
-    // brightens under the finger.
+    // nearly white at rest, so it holds its contrast over the wallpaper
+    // without an outline, and is fully white under the finger.
     Rectangle {
         id: bar
 
@@ -366,9 +371,10 @@ HandleWindow {
         radius: height / 2
 
         color: "#F8F8FF"
-        opacity: root.wanted ? (press.pressed || lift.active ? 0.9 : 0.35) : 0
+        opacity: root.wanted ? (press.pressed || lift.active ? 1 : 0.85) : 0
 
         Behavior on opacity {
+            enabled: Kirigami.Units.longDuration > 0
             NumberAnimation {
                 duration: 120
                 easing.type: Easing.OutCubic

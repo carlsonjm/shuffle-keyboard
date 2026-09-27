@@ -7,6 +7,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.VirtualKeyboard
+import org.kde.kirigami as Kirigami
 import QtQuick.VirtualKeyboard.Settings
 
 import org.kde.plasma.keyboard
@@ -667,9 +668,12 @@ InputPanelWindow {
                 height: root.handleThickness
                 radius: height / 2
                 color: "#F8F8FF"
-                opacity: root.pullActive || grabArea.pressed ? 0.9 : 0.35
+                // As the handle above the dock draws it: nearly white at
+                // rest, fully white under the finger.
+                opacity: root.pullActive || grabArea.pressed ? 1 : 0.85
 
                 Behavior on opacity {
+                    enabled: Kirigami.Units.longDuration > 0
                     NumberAnimation {
                         duration: 120
                         easing.type: Easing.OutCubic
@@ -687,6 +691,14 @@ InputPanelWindow {
                 id: grabArea
                 anchors.fill: parent
                 cursorShape: Qt.SizeVerCursor
+
+                Accessible.role: Accessible.Button
+                Accessible.name: i18n("Put the keyboard away")
+                Accessible.onPressAction: {
+                    BottomSurfaceCoordinator.announceHeading(0, 0);
+                    root.pendingSpeed = 0;
+                    root.putAway();
+                }
 
                 property real lastY: 0
                 property real lastTime: 0
