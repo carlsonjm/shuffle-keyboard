@@ -213,7 +213,11 @@ void BottomSurfaceCoordinator::syncKeyboardVisibility()
                             QStringLiteral("/VirtualKeyboard"),
                             QStringLiteral("org.kde.kwin.VirtualKeyboard"),
                             QDBusConnection::sessionBus());
-    setKeyboardVisible(keyboard.isValid() && keyboard.property("visible").toBool());
+    const bool visible = keyboard.isValid() && keyboard.property("visible").toBool();
+    setKeyboardVisible(visible);
+    // A compositor offering no keyboard interface cannot say, so the keys
+    // take themselves as shown.
+    Q_EMIT compositorVisibilityChecked(visible || !keyboard.isValid());
 }
 
 BottomSurfaceCoordinator::~BottomSurfaceCoordinator()

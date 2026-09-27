@@ -99,6 +99,10 @@ Q_SIGNALS:
     void keyboardPulled(double travel, bool active, double velocity);
     /// Someone reached for the keyboard from the dock rather than the handle.
     void keyboardRequested();
+    /// Every report of whether the compositor shows the keys, changed or not.
+    /// Two reports can arrive for keys shown and hidden again at once, and
+    /// the value read for both is the one at the time of reading.
+    void compositorVisibilityChecked(bool visible);
 
 private:
     void setKeyboardVisible(bool visible);

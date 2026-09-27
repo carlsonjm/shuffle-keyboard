@@ -181,6 +181,14 @@ InputPanelWindow {
         if (!root.arriving || !root.seated || seatSettle.running) {
             return;
         }
+        // Keys the compositor has not shown are not on screen: an application
+        // that focused its own field raised them, and Kadunce keeps those
+        // down. They rise once the compositor shows them, so they are seen
+        // rising rather than appearing where they rest. A finger decides for
+        // itself.
+        if (!root.pullActive && !root.compositorShown) {
+            return;
+        }
         if (root.pullActive) {
             root.carryTo(root.carryUnder(root.pullTravel), 80);
         } else if (root.pendingSettle && !root.pendingOpen
@@ -297,14 +305,31 @@ InputPanelWindow {
         }
     }
 
+    // Whether the compositor has shown these keys since the window last came
+    // up. Until it has, a report that they are hidden is about the keys
+    // before, and keys it has not shown are not on screen to rise.
+    property bool compositorShown: false
     // An application can ask the compositor to put the keys away without the
     // Keyboard being told. They go the same way, and come back if the
     // compositor shows them again before they are out.
     Connections {
         target: BottomSurfaceCoordinator
-        function onKeyboardVisibleChanged() {
-            if (BottomSurfaceCoordinator.keyboardVisible) root.returnFromLeaving();
-            else if (root.visible && !root.leaving && !root.precisionActive) root.slideAway();
+        function onCompositorVisibilityChecked(visible) {
+            if (visible) {
+                const first = !root.compositorShown;
+                root.compositorShown = true;
+                root.returnFromLeaving();
+                // Shown at last after waiting out of sight: the dock may only
+                // now be stepping aside, so the wait for it starts again.
+                if (first && root.arriving && !root.pullActive) {
+                    root.seatWaitOver = false;
+                    seatWait.restart();
+                    root.advanceArrival();
+                }
+            } else if (root.visible && root.compositorShown && !root.leaving && !root.precisionActive) {
+                root.compositorShown = false;
+                root.slideAway();
+            }
         }
     }
 
@@ -451,6 +476,7 @@ InputPanelWindow {
     }
 
     onVisibleChanged: {
+        root.compositorShown = false;
         if (visible) {
             beginArrival();
             precisionController.warmIfGranted();
