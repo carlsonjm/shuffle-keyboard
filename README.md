@@ -18,8 +18,9 @@ custom input engine.
   dock's handle rides its top strip with 10 px clear above it and above the
   keys.
 - Only key height changes, so the keys and the space bar never move sideways.
-  The card is 35% to 55% of the screen's height in steps of one, saved as that
-  share; the default, 45%, has square keys, which sets the key width.
+  The card is 32% to 52% of the screen's height in steps of one, saved as that
+  share; the default, 42%, has square keys, which sets the key width. It leaves
+  a browser above the keys room for its own minimum height, which 45% did not.
 - The width either side of the keys carries a scrub column, close to invisible
   until touched. Left is the edit history: down undoes and up redoes, a step per
   notch as the finger passes it, so sliding back cancels. Right is height: up

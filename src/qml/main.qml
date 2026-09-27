@@ -40,12 +40,13 @@ InputPanelWindow {
 
     // Key width is fixed and only key height moves, so the key columns and
     // the space bar never shift when the height changes. The card's height is
-    // a share of the screen's, from 35% to 55% in steps of one; the default,
-    // 45%, has square keys, which sets the key width, and the side columns
-    // take what is left.
-    readonly property int defaultPercent: 45
-    readonly property int minimumPercent: 35
-    readonly property int maximumPercent: 55
+    // a share of the screen's, from 32% to 52% in steps of one; the default,
+    // 42%, has square keys, which sets the key width, and the side columns
+    // take what is left. At 45% the room left above the keys was shorter than
+    // a browser would make itself (J, 26 September).
+    readonly property int defaultPercent: 42
+    readonly property int minimumPercent: 32
+    readonly property int maximumPercent: 52
     function heightForPercent(percent) {
         return Math.round(root.height * percent / 100);
     }
