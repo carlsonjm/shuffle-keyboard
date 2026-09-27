@@ -43,6 +43,12 @@ custom input engine.
   a two-finger tap right-clicks. The space bar only types. Copy, cut and paste
   are Ctrl chords.
 - A drag down on the handle carries the keys away, and a tap puts them away.
+  Keys that go because typing ended, or because an application asked the
+  compositor to put them away, slide out the same way before the window goes.
+- Before each motion with a destination, and on a press of the handle, the
+  keys tell Kadunce where they will rest and when (`keyboardHeading`), so the
+  card above follows them without its application being resized every frame.
+  With no Kadunce nothing answers and nothing changes.
 - Plasma's bottom panel yields while the keyboard is requested and restores
   its previous hiding mode afterward. Where the downstream Bottom Surface is
   installed the region is asked for instead of the panel being commanded, and

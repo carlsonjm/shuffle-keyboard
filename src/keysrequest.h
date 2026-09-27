@@ -40,3 +40,23 @@ inline void requestKeys(QObject *context)
         finished->deleteLater();
     });
 }
+
+/**
+ * Tells Kadunce where the keys are going: they come to rest `height` pixels
+ * tall above their screen's bottom edge, 0 when they leave, in `durationMs`.
+ *
+ * Kadunce draws the card above the keys following them on every frame and
+ * asks its application for a new size once a motion rather than once a frame,
+ * so it needs to know the destination before the keys arrive. With no
+ * Kadunce, or one that does not listen, nothing answers and nothing needs to.
+ */
+inline void announceKeys(double height, int durationMs)
+{
+    QDBusMessage message = QDBusMessage::createMethodCall(QStringLiteral("org.kde.KWin"),
+                                                          QStringLiteral("/Kadunce"),
+                                                          QStringLiteral("studio.warbler.Kadunce"),
+                                                          QStringLiteral("keyboardHeading"));
+    message << height << durationMs;
+    message.setAutoStartService(false);
+    QDBusConnection::sessionBus().send(message);
+}

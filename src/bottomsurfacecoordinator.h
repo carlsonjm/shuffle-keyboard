@@ -70,6 +70,10 @@ public:
      */
     Q_INVOKABLE void raiseKeyboard();
 
+    /// Where the keys are going: they rest `height` pixels tall above the
+    /// screen's bottom edge, 0 when leaving, in `durationMs`.
+    Q_INVOKABLE void announceHeading(double height, int durationMs);
+
     /// Ask the keyboard's own window to become Qt's focus window again, after
     /// another of this process's surfaces has held the compositor's focus.
     Q_INVOKABLE void reclaimKeyboardFocus();

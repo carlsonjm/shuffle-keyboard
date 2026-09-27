@@ -254,6 +254,11 @@ void BottomSurfaceCoordinator::raiseKeyboard()
     setError({});
 }
 
+void BottomSurfaceCoordinator::announceHeading(double height, int durationMs)
+{
+    announceKeys(height, durationMs);
+}
+
 void BottomSurfaceCoordinator::reclaimKeyboardFocus()
 {
     Q_EMIT keyboardFocusReclaimRequested();

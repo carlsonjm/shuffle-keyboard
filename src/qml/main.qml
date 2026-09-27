@@ -168,6 +168,10 @@ InputPanelWindow {
         carryMotion.stop();
         root.carry = root.panelHeight;
         root.arriving = true;
+        // Keys waiting for the dock to leave are on their way up, not at
+        // rest, so the window above is not made shorter for the moment they
+        // stand at the edge. A finger decides for itself where they go.
+        if (!root.pullActive) BottomSurfaceCoordinator.announceHeading(root.panelHeight, 700);
         root.seatWaitOver = false;
         seatWait.restart();
         root.advanceArrival();
@@ -186,24 +190,69 @@ InputPanelWindow {
         } else {
             const fromPull = root.pendingSettle;
             root.pendingSettle = false;
-            root.carryTo(0, fromPull ? root.settleDuration(root.carry, root.pendingSpeed) : 240);
+            root.travelTo(0, fromPull ? root.settleDuration(root.carry, root.pendingSpeed) : 240);
         }
     }
     property real pendingSpeed: 0
 
-    function carryTo(target, duration) {
+    function carryTo(target, duration, easing) {
         carryMotion.stop();
         carryMotion.to = target;
         carryMotion.duration = duration;
+        carryMotion.easing.type = easing === undefined ? Easing.OutCubic : easing;
         carryMotion.start();
+    }
+
+    // A motion with a destination: whatever draws the window above the keys
+    // is told where they will rest and when before they move, so it can
+    // follow them without asking the window for a new size on every frame.
+    function travelTo(target, duration, easing) {
+        BottomSurfaceCoordinator.announceHeading(root.panelHeight - target, duration);
+        root.carryTo(target, duration, easing);
     }
 
     function putAway() {
         root.closing = true;
-        root.carryTo(root.panelHeight,
-                     root.settleDuration(root.panelHeight - root.carry, -root.pendingSpeed));
+        root.travelTo(root.panelHeight,
+                      root.settleDuration(root.panelHeight - root.carry, -root.pendingSpeed));
     }
     property bool closing: false
+
+    // Typing ended, so the keys go: down the way the handle carries them, and
+    // the window once they have. They start gently, so the window above has
+    // its height back before they uncover it. Keys held up for the precision
+    // surface, or already down, go at once as before.
+    property bool leaving: false
+    function slideAway() {
+        if (root.precisionActive || !root.visible || root.carry >= root.panelHeight) {
+            root.finishLeaving();
+            return;
+        }
+        root.leaving = true;
+        root.closing = false;
+        root.arriving = false;
+        root.travelTo(root.panelHeight, 280, Easing.InOutCubic);
+    }
+    // Out of sight: the window goes, and so does the input method's own
+    // visibility, which is what brings the window back when the keys are
+    // next asked for.
+    function finishLeaving() {
+        root.leaving = false;
+        if (Qt.inputMethod.visible) Qt.inputMethod.hide();
+        else root.visible = false;
+    }
+    // Asked for again on the way out: they come back up from where they are.
+    function returnFromLeaving() {
+        if (!root.leaving) return;
+        root.leaving = false;
+        root.travelTo(0, 240);
+    }
+    Connections {
+        target: Qt.inputMethod
+        function onVisibleChanged() {
+            if (Qt.inputMethod.visible) root.returnFromLeaving();
+        }
+    }
 
     NumberAnimation {
         id: carryMotion
@@ -211,7 +260,9 @@ InputPanelWindow {
         property: "carry"
         easing.type: Easing.OutCubic
         onFinished: {
-            if (root.closing) {
+            if (root.leaving) {
+                root.finishLeaving();
+            } else if (root.closing) {
                 root.closing = false;
                 root.arriving = false;
                 Qt.inputMethod.hide();
@@ -243,6 +294,17 @@ InputPanelWindow {
         }
         if (root.seated && root.arriving) {
             seatSettle.restart();
+        }
+    }
+
+    // An application can ask the compositor to put the keys away without the
+    // Keyboard being told. They go the same way, and come back if the
+    // compositor shows them again before they are out.
+    Connections {
+        target: BottomSurfaceCoordinator
+        function onKeyboardVisibleChanged() {
+            if (BottomSurfaceCoordinator.keyboardVisible) root.returnFromLeaving();
+            else if (root.visible && !root.leaving && !root.precisionActive) root.slideAway();
         }
     }
 
@@ -401,6 +463,7 @@ InputPanelWindow {
             carryMotion.stop();
             arriving = false;
             closing = false;
+            leaving = false;
         }
         if (!visible) {
             clearOneShotModifiers();
@@ -426,7 +489,9 @@ InputPanelWindow {
     Binding {
         target: BottomSurfaceCoordinator
         property: "requestedVisible"
-        value: Qt.inputMethod.visible || root.precisionActive
+        // Keys on their way out still hold the room, so the dock returns once
+        // they have gone rather than under them.
+        value: Qt.inputMethod.visible || root.leaving || root.precisionActive
         restoreMode: Binding.RestoreNone
     }
 
@@ -605,6 +670,10 @@ InputPanelWindow {
                 }
 
                 onPressed: mouse => {
+                    // A press on the handle ends with the keys put away,
+                    // tapped or carried, so the window above is told now and
+                    // has its height back before the finger uncovers it.
+                    BottomSurfaceCoordinator.announceHeading(0, 0);
                     root.dragStartY = windowY(mouse);
                     root.resizeMoved = false;
                     carryMotion.stop();
@@ -634,11 +703,11 @@ InputPanelWindow {
                                 || downSpeed >= root.flickSpeed) {
                             root.putAway();
                         } else {
-                            root.carryTo(0, root.settleDuration(root.carry, -downSpeed));
+                            root.travelTo(0, root.settleDuration(root.carry, -downSpeed));
                         }
                     }
                 }
-                onCanceled: root.carryTo(0, 200)
+                onCanceled: root.travelTo(0, 200)
                 onClicked: {
                     if (!root.resizeMoved) {
                         root.pendingSpeed = 0;

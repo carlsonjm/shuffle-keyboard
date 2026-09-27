@@ -107,7 +107,13 @@ InputListenerItem::InputListenerItem()
     });
     connect(&m_input, &InputPlugin::contentTypeChanged, this, &InputListenerItem::contentPurposeChanged);
     connect(QGuiApplication::inputMethod(), &QInputMethod::visibleChanged, this, [this] {
-        window()->setVisible(QGuiApplication::inputMethod()->isVisible());
+        const bool visible = QGuiApplication::inputMethod()->isVisible();
+        // Keys on screen leave the way the handle carries them, and the
+        // window goes once they have: the window says when.
+        if (!visible && window()->isVisible() && QMetaObject::invokeMethod(window(), "slideAway")) {
+            return;
+        }
+        window()->setVisible(visible);
     });
 
     connect(&m_input, &InputPlugin::keyPressed, this, [this](QKeyEvent *keyEvent) {
