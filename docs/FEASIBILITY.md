@@ -55,30 +55,18 @@ The compositor-keymap shortcut path was separately exercised with this stateful
 sequence: type `abc`, Select All, Copy, Cut, Paste, Undo, Redo, then type
 `DONE`. Qt, GTK, and Chromium each produced exactly `abcDONE`.
 
-## Workspace evidence
+## Row geometry
 
-On a 1280×800 virtual output, a maximized test client reported:
+The fixed pitch and the Q/A/Z stagger (`KEYBOARD-CONTRACT.md` § Layout) were
+chosen by an on-device comparison against a conventional four-row iPad layout
+built on this keyboard's exact delivery path. It found essentially no misses on
+the fixed pitch. Sharing that path isolated the earlier miss pattern to row
+geometry rather than to input delivery, and Shuffle adopted the same pitch and
+stagger. The comparison keyboard has been removed: it settled one question, and
+shipping a second virtual keyboard to answer it again is not worth carrying.
 
-- 450 px client height with the default 320 px keyboard;
-- 290 px after changing the keyboard to 480 px;
-- 770 px immediately after keyboard dismissal.
+## Physical acceptance
 
-The chosen 480 px value was present in the isolated `plasmakeyboardrc` after
-restart. With a normal 46 px Plasma bottom panel, the panel changed from `none`
-to `autohide` while the keyboard was visible and returned to `none` afterward.
-The client returned to the panel-reserved 724 px height after dismissal.
-
-## Remaining physical acceptance
-
-The first on-device geometry comparison found essentially no misses on a
-four-row fixed-pitch iPad layout built on this keyboard's exact delivery path.
-Sharing that path is what isolated the earlier miss pattern to row geometry
-rather than to input delivery, and Shuffle adopted the same Q/A/Z pitch and
-stagger and the full width proven by it. The comparison keyboard has since been
-removed: it settled one question, and shipping a second virtual keyboard to
-answer it again is not worth carrying.
-
-Automated tests cannot establish finger comfort, accidental Cut frequency,
-pointer feel, portal-consent ergonomics, or real panel animation quality. Those
-items require the contracted physical touch acceptance pass on the supported
-10–13 inch device before release.
+Automated tests cannot establish finger comfort, pointer feel, portal-consent
+ergonomics or real panel motion. [`PHYSICAL_ACCEPTANCE.md`](PHYSICAL_ACCEPTANCE.md)
+is that pass, on the supported 10–13 inch device, before release.

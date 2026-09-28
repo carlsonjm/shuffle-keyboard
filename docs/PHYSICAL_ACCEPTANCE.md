@@ -1,7 +1,8 @@
 # Shuffle Keyboard physical acceptance
 
 Use a supported 10–13 inch touch device in its normal Plasma Wayland session.
-Complete this pass without a physical keyboard or mouse after setup.
+Complete this pass without a physical keyboard or mouse after setup, except
+where a check asks for one.
 
 ## Install and enable
 
@@ -19,18 +20,22 @@ Complete this pass without a physical keyboard or mouse after setup.
 2. Open **System Settings → Keyboard → Virtual Keyboard**.
 3. Select **Shuffle Keyboard** and choose **Apply**.
 4. If it does not become available immediately, sign out and sign back in once.
-5. Tap a text field. The keyboard should replace the normal bottom panel.
+5. Tap a text field. The keys come up and the bottom panel or dock steps aside.
+
 To stop the test at any time, return to **Virtual Keyboard**, select **None**,
-and apply. The keyboard was intentionally left disabled before this acceptance
-pass.
+and apply.
 
 ## Pass / Fail / Note
 
-Record one line for each item as `Pass`, `Fail`, or `Note: …`.
+Record one line for each item as `Pass`, `Fail`, or `Note: …`. What each input
+does is [`INPUT.md`](INPUT.md); these checks test it on the device.
 
+- **Every input:** Go through `INPUT.md` row by row by touch, then again with a
+  mouse wherever a row can take a click. Each row does what it says. Name any
+  that does not.
 - **Invocation:** Tapping text fields opens the keyboard every time.
-- **Dismissal:** Tapping the centered top grab handle closes it; tapping a text
-  field opens it again.
+- **Put away:** Put the keys away from their handle ten times, by tap and by
+  drag. They go every time, and a text field brings them back every time.
 - **Panel handoff:** The normal bottom panel yields without overlap or visible
   bouncing and returns after dismissal.
 - **Dock handoff:** With the Bottom Surface installed instead, raising the
@@ -42,48 +47,47 @@ Record one line for each item as `Pass`, `Fail`, or `Note: …`.
   duplicated, reordered, or wrongly mapped.
 - **Repeated letters:** Type `bookkeeper committee coffee` at normal speed.
   Every repeated letter registers without deliberately slowing the second tap.
-- **Layers:** Tap Shift for one-shot capitalization; double-tap it for Caps
-  Lock; tap it again to unlock. `123` exposes numbers/symbols, Shift on that
-  layer exposes the remaining symbols and desktop navigation keys, and `ABC`
-  returns immediately.
+- **Space:** Type a paragraph at speed. Every tap on the space bar types one
+  space, and none latches the trackpad.
+- **Layers:** Run quickly through Shift, Caps, `123`, the second symbols layer
+  and `ABC` several times. Each behaves as `INPUT.md` § Keys says, and nothing
+  is left stuck on.
 - **Row stagger:** Q begins at 1.00 units, A at 1.25, and Z at 1.75. Every
   character key keeps the same pitch across all three rows.
 - **Lower row:** The lower row reads Shift, Z–M, comma, period, slash without
   clipping or unexpectedly narrow targets. Tap Shift followed by comma,
   period, and slash; they enter `<`, `>`, and `?` respectively, then return
   Shift to neutral after each character.
-- **Right controls:** Backspace and Enter share one aligned right edge. Enter
-  fills the home-row gap, is muted Ghost White with dark text, and neither
-  control moves QWERTY.
+- **Right controls:** Backspace, Enter, slash and the Tette Dot end on one
+  right edge. Enter fills the home-row gap and is muted Ghost White with dark
+  text, and no right-edge key moves a letter.
 - **Bottom row:** The order is Ctrl, Alt, large Space, Tette Dot; the dot works
   as the modifier-only `Meta` shortcut and opens Tettegouche.
-- **Square geometry:** Ordinary QWERTY keys are square and keep one fixed pitch.
-  There is no horizontal adjustment rail.
+- **Square geometry:** At the default height, ordinary letter keys are square.
+  At every other height only key height differs: no key, the space bar or a
+  scrub column moves sideways.
 - **Layer fit:** Both symbol layers preserve the unified shape with no overlap,
   clipping, unexpectedly narrow targets, or dead gaps that interrupt typing.
-- **Height:** On first launch, ordinary keys are approximately square. Drag the
-  centered top grab to both comfortable extremes. The app workspace follows
-  the edge continuously, and the chosen height survives a close/reopen.
-> The height, Shuffle-surface, Shuffle-transition, pointer-button and
-> edit-gesture steps below test the superseded interaction. They stay until the
-> 22 September direction is built, because they are the pass for the candidate
-> that exists; `../README.md` names what replaces each. Do not treat a pass here
-> as evidence for the direction, or a conflict with it as a defect in this build.
-
-- **Shuffle surfaces:** The centered keyboard leaves unoutlined hold space on
-  both edges. Either edge enters the same precision mode.
-- **Shuffle transition:** Hold that blank surface; the precision surface
-  appears only while held, dims and disables the visible keys, and accepts
-  pointer gestures over the complete keyboard footprint. Release returns to
-  typing. It never remains latched.
-- **Pointer buttons:** Move the pointer while holding either edge, then release.
-  A short tap on either edge clicks at the pointer; two quick taps select the
-  word under it. While the precision surface is held, a short one-finger tap
-  also clicks, a hold-drag selects text or moves an item, and a two-finger tap
-  produces a secondary click.
-- **Edit gestures:** On the blank surface, a two-finger tap copies, a
-  three-finger tap cuts, a left swipe undoes, and a right swipe redoes. None
-  fire while typing on an adjacent key.
+- **Height:** Scrub the right column to both ends and back to the bright
+  default notch. The keys follow notch by notch, the reading matches, and the
+  window above makes room at each height. The chosen height survives putting
+  the keys away, bringing them back, and signing out and in.
+- **History scrub:** Type a sentence in a KDE app and in a browser, scrub the
+  left column several notches toward undo, then part of the way back before
+  lifting. Exactly the notches still passed stay undone.
+- **Notch feel:** Each notch in either column clicks and holds briefly before it
+  gives. Note whether the hold reads as feedback or as delay.
+- **Terminal history:** In a terminal, the left column changes nothing and
+  interrupts nothing.
+- **Latch:** Tap the trackpad mark. The keys dim and stop typing, and they stay
+  up while the pointer clicks into other applications. Tap the mark again:
+  typing resumes at once, into whatever the last click focused.
+- **Pointer:** While latched, point, click, drag to select text, drag an item,
+  scroll a long page and right-click, in a KDE app and in a browser. Each lands
+  where the pointer is, and none needs a second try.
+- **Pointer permission:** The first latch asks once for permission to control
+  the pointer. After it is allowed it is not asked again, including after
+  signing out and in.
 - **Touch reach:** Type several sentences at normal speed. Note any intended
   key that lands left or right of the target.
 
@@ -121,14 +125,10 @@ no handle, which is the supported result and not a failure.
   how many attempts miss, and whether a miss lands on an application icon
   instead. A pull is the gesture; a tap has to land on the bar itself.
 
-## Row geometry is settled
+## Notes
 
-The fixed pitch and the Q/A/Z stagger were chosen by an on-device comparison
-against a conventional four-row iPad layout built on this keyboard's exact
-delivery path. That comparison found essentially no misses on the fixed pitch,
-and Shuffle adopted the same geometry, so it is not re-run and the comparison
-keyboard has been removed. A miss pattern found in this pass is therefore a
-finding about the Shuffle layout itself, not a question about which geometry to
-use.
+The row geometry is settled ([`FEASIBILITY.md`](FEASIBILITY.md) § Row
+geometry), so a miss pattern found in this pass is a finding about the Shuffle
+layout itself, not a question about which geometry to use.
 
 Include the application name and exact observed behavior in every failure note.

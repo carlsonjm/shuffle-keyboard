@@ -6,8 +6,9 @@ presentation. It owns no input engine: a touched key goes to Qt Virtual
 Keyboard, its input-method client hands the result to KWin, and KWin delivers it
 through the application's own text-input path.
 
-For every task, read this file, `README.md` for what the current candidate does,
-and `docs/FEASIBILITY.md` for why the base was chosen. Suite block order lives in
+For every task, read this file, `docs/KEYBOARD-CONTRACT.md` for what the
+Keyboard is, `docs/INPUT.md` for every input it handles, and
+`docs/FEASIBILITY.md` for why the base was chosen. Suite block order lives in
 `../kadunce/docs/ROADMAP-CC.md`, where this repository is Block 9; read it when
 that checkout is present, and say the suite plan was unavailable when it is not.
 
@@ -20,17 +21,22 @@ that checkout is present, and say the suite plan was unavailable when it is not.
   what ships, so a file that cannot say what it is cannot ship.
 - The commit hook refuses unformatted C++. `./verify.sh` checks the same thing
   first, so a formatting refusal never arrives after the work is done.
-- The layout's row geometry is settled: fixed pitch, Q at 1.00 units, A at 1.25,
-  Z at 1.75, established by an on-device comparison whose keyboard has since been
-  removed. Re-open it with evidence, not with a preference.
+- The row geometry in `docs/KEYBOARD-CONTRACT.md` is settled by the evidence in
+  `docs/FEASIBILITY.md`. Re-open it with evidence, not with a preference.
+
+## Documents
+
+- Every input the Keyboard handles is listed in `docs/INPUT.md` and described
+  nowhere else. Other documents cite it.
+- Each document owns one subject and states what is true now. History lives in
+  Git.
 
 ## Holds
 
 - J approves product behavior and visual direction before implementation begins.
   He sets intent, scope and sequencing and does not review code.
-- One implementation owner, which since 21 September is this workflow. The
-  keyboard was written elsewhere and handed over; changes arrive here as commits
-  against this repository, not as a folder from somewhere else. A second worker
+- One implementation owner: this workflow. Changes arrive as commits against
+  this repository, never as a folder copied from somewhere else. A second worker
   is read-only review or a disjoint file set.
 - Reproduce a defect and measure the property controlling it before changing it.
 - Run `./verify.sh` before treating a change as complete. It formats, checks

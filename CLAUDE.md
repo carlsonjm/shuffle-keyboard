@@ -27,7 +27,7 @@ is Block 9 in `../kadunce/docs/ROADMAP-CC.md`, and it is private because it has
 not been published yet, not because it can be closed: it carries KDE's licence,
 and whoever receives a build is entitled to its source.
 
-The Bottom Surface in `shuffle` will take over the panel handoff this keyboard
-currently arranges with Plasma's bottom panel directly. Until it exists,
-`bottomsurfacecoordinator` is that arrangement, and it is the one thing here
-that another repository is expected to replace.
+`bottomsurfacecoordinator` is where this repository meets `shuffle`: it asks
+the Bottom Surface for the bottom of the screen where one is installed, and
+falls back to Plasma's bottom panel where none is
+(`docs/KEYBOARD-CONTRACT.md` § The bottom of the screen).
