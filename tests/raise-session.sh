@@ -5,13 +5,13 @@
 # Runs inside the compositor verify-raise.sh starts, with the Keyboard as its
 # input method. Nothing here reaches the running session.
 #
-# A swipe up from the bottom bezel is Kadunce's: it asks the compositor for the
-# keys and announces the request. Plasma shows a raised keyboard only once a
-# text field has asked for it, so on a cold start the Keyboard raises by taking
-# typing focus into a field of its own. That is only acceptable if the focus
-# goes back where it was when the keyboard goes. An application holds the focus
-# here, a stand-in for Kadunce announces the request, and the compositor is
-# asked who holds the focus at each step.
+# A tap on the keys' tray entry asks for them through Kadunce, which asks the
+# compositor. Plasma shows a raised keyboard only once a text field has asked
+# for it, so on a cold start the Keyboard raises by taking typing focus into a
+# field of its own. That is only acceptable if the focus goes back where it was
+# when the keyboard goes. An application holds the focus here, a stand-in for
+# Kadunce answers the request, and the compositor is asked who holds the focus
+# at each step.
 
 set -uo pipefail
 
@@ -66,16 +66,19 @@ focus_now() {
     grep -oE 'record focus .*' "${stand_in_log}" | tail -1 | sed 's/^record focus //'
 }
 
-# What Kadunce does when a swipe up from the bottom bezel commits: it asks the
-# compositor for the keys, then announces the request. On a cold start the ask
-# shows nothing, and only the announcement is left to act on.
-bezel_swipe() {
-    if [[ "$1" == ask ]]; then
-        gdbus call --session --dest org.kde.KWin --object-path /VirtualKeyboard \
-            --method org.kde.kwin.VirtualKeyboard.forceActivate > /dev/null 2>&1
-    fi
+# The keys' entry in the system tray, by the name the Keyboard gave it.
+tray_entry() {
+    gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \
+        --method org.freedesktop.DBus.ListNames | grep -oE 'org\.kde\.StatusNotifierItem-[0-9]+-1' | head -1
+}
+
+# A tap on the entry. On a cold start Kadunce's ask of the compositor shows
+# nothing, and the Keyboard's own hold is left to raise the keys.
+tray_tap() {
     gdbus call --session --dest studio.warbler.test.Kadunce --object-path /Kadunce \
-        --method studio.warbler.test.Control.requestKeys > /dev/null 2>&1
+        --method studio.warbler.test.Control.setAsking "$([[ "$1" == ask ]] && echo true || echo false)" > /dev/null 2>&1
+    gdbus call --session --dest "$(tray_entry)" --object-path /StatusNotifierItem \
+        --method org.kde.StatusNotifierItem.Activate 0 0 > /dev/null 2>&1
 }
 
 keyboard() {
@@ -123,17 +126,22 @@ check "the application is focused" "$(focus_now)" "app"
 
 # A dock is published, so the keys take its region while they are up.
 control report true 60 544 920
+echo
+echo "The keys have an entry in the system tray"
+check "the entry is on the bus" "$([[ -n "$(tray_entry)" ]] && echo yes)" "yes"
+check "it is called Keyboard" "$(gdbus call --session --dest "$(tray_entry)" --object-path /StatusNotifierItem \
+    --method org.freedesktop.DBus.Properties.Get org.kde.StatusNotifierItem Title 2>/dev/null)" "(<'Keyboard'>,)"
 if [[ "${RAISE_PATH:-cold}" == direct ]]; then
     echo
-    echo "A bezel swipe raises the Keyboard and leaves the focus where it was"
-    bezel_swipe ask
+    echo "A tap on the tray entry raises the Keyboard and leaves the focus where it was"
+    tray_tap ask
     wait_keyboard true
     check "the Keyboard is up" "$(keyboard visible)" "(<true>,)"
     check "the application keeps the focus" "$(focus_now)" "app"
 else
     echo
     echo "A cold start raises the Keyboard by taking the focus"
-    bezel_swipe announce-only
+    tray_tap quiet
     wait_keyboard true
     check "the Keyboard is up" "$(keyboard visible)" "(<true>,)"
     check "a text field is what asked for it" "$(keyboard activeClientSupportsTextInput)" "(<true>,)"
@@ -177,22 +185,18 @@ else
 fi
 
 echo
-echo "A request with the keys already up changes nothing"
-bezel_swipe ask
-sleep 1
-check "the Keyboard is still up" "$(keyboard visible)" "(<true>,)"
+echo "A tap on the tray entry with the keys up puts them away"
+tray_tap ask
+wait_keyboard false
+check "the Keyboard is down" "$(keyboard visible)" "(<false>,)"
+sleep 0.5
 check "the application keeps the focus" "$(focus_now)" "app"
 
 echo
-echo "A bezel swipe with a text box ready leaves it the focus"
-gdbus call --session --dest org.kde.KWin --object-path /VirtualKeyboard \
-    --method org.freedesktop.DBus.Properties.Set \
-    org.kde.kwin.VirtualKeyboard active "<false>" > /dev/null 2>&1
-wait_keyboard false
-sleep 0.5
-bezel_swipe ask
+echo "A tap on the tray entry with a text box ready leaves it the focus"
+tray_tap ask
 wait_keyboard true
-check "the swipe brings the Keyboard up" "$(keyboard visible)" "(<true>,)"
+check "the tap brings the Keyboard up" "$(keyboard visible)" "(<true>,)"
 sleep 0.5
 check "the text box keeps the focus" "$(focus_now)" "app"
 

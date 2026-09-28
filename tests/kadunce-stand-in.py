@@ -3,12 +3,13 @@
 # SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
 """Kadunce, as far as the Keyboard's raise can tell.
 
-Kadunce is a compositor effect and announces a swipe up from the bottom bezel
-from the compositor's own bus name, which nothing else can hold. This answers
-under a name of its own on the same path and interface, and the Keyboard is
-told that name for the test. It emits the announcement when the session asks,
-and nothing more: asking the compositor for the keys, as Kadunce also does, is
-left to the session.
+The Keyboard asks for the keys through Kadunce, which marks the request as the
+person's and asks the compositor itself. Kadunce answers from the compositor's
+own bus name, which nothing else can hold, so this answers under a name of its
+own on the same path and interface, and the Keyboard is told that name for the
+test. Like Kadunce it asks the compositor for the keys; told to stay quiet, it
+answers without asking, as Kadunce's ask shows nothing straight after signing
+in.
 """
 
 import sys
@@ -25,10 +26,16 @@ PATH = "/Kadunce"
 INTROSPECTION = """
 <node>
   <interface name='studio.warbler.Kadunce'>
-    <signal name='keysRequested'/>
+    <method name='raiseKeyboard'/>
+    <method name='keyboardHeading'>
+      <arg type='d' direction='in'/>
+      <arg type='i' direction='in'/>
+    </method>
   </interface>
   <interface name='studio.warbler.test.Control'>
-    <method name='requestKeys'/>
+    <method name='setAsking'>
+      <arg type='b' direction='in'/>
+    </method>
   </interface>
 </node>
 """
@@ -38,10 +45,21 @@ def main():
     node = Gio.DBusNodeInfo.new_for_xml(INTROSPECTION)
     connection = Gio.bus_get_sync(Gio.BusType.SESSION, None)
 
-    def on_call(_connection, _sender, _path, interface, method, _parameters, invocation):
-        if interface == "studio.warbler.test.Control" and method == "requestKeys":
-            connection.emit_signal(None, PATH, "studio.warbler.Kadunce", "keysRequested", None)
-            print("keysRequested", flush=True)
+    asking = {"value": True}
+
+    def on_call(_connection, _sender, _path, interface, method, parameters, invocation):
+        if interface == "studio.warbler.test.Control" and method == "setAsking":
+            asking["value"] = parameters.unpack()[0]
+            invocation.return_value(None)
+            return
+        if interface == "studio.warbler.Kadunce" and method == "raiseKeyboard":
+            print("raiseKeyboard asking=%s" % asking["value"], flush=True)
+            if asking["value"]:
+                connection.call_sync("org.kde.KWin", "/VirtualKeyboard", "org.kde.kwin.VirtualKeyboard",
+                                     "forceActivate", None, None, Gio.DBusCallFlags.NONE, -1, None)
+            invocation.return_value(None)
+            return
+        if interface == "studio.warbler.Kadunce" and method == "keyboardHeading":
             invocation.return_value(None)
             return
         invocation.return_error_literal(

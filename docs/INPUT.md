@@ -12,11 +12,15 @@ than describe an input themselves.
 | Tap a text field | The keys rise from the screen's bottom edge. |
 | Leave the text field, or the application puts the keys away | The keys slide down and away. Asked for again on the way out, they come back from where they are. |
 
-## Bottom bezel
+## Tray entry
+
+The keys' entry in the system tray, called Keyboard, which Temperance can also
+show as a pill in Control Center.
 
 | Input | What happens |
 | --- | --- |
-| Swipe up from the bottom bezel, with Kadunce running | Kadunce takes the swipe and asks for the keys, and they rise on their own. A text box that was ready keeps the focus. Straight after signing in, with nothing ready, the keys still come up, and typing goes nowhere until a text box is tapped. Without Kadunce nothing happens. |
+| Tap or click the entry, with the keys down | The keys rise for the window in use; a text box that was ready keeps the focus. Straight after signing in, with nothing ready, they still come up, and typing goes nowhere until a text box is tapped. |
+| Tap or click the entry, with the keys up | The keys slide down and away, as the handle takes them. |
 
 ## Handle
 

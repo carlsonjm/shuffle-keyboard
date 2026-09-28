@@ -29,6 +29,8 @@ target_sources(plasma-keyboard PRIVATE
     bottomsurfacecoordinator.cpp
     bottomsurfacecoordinator.h
     keysrequest.h
+    keystrayentry.cpp
+    keystrayentry.h
     textinputhold.cpp
     textinputhold.h
     precisioncontroller.cpp

@@ -91,18 +91,16 @@ does is [`INPUT.md`](INPUT.md); these checks test it on the device.
 - **Touch reach:** Type several sentences at normal speed. Note any intended
   key that lands left or right of the target.
 
-## Raised from the bottom bezel
+## Raised from the tray entry
 
-These need Kadunce running, since the swipe is Kadunce's. Without it the bezel
-does not raise the keys, which is the supported result and not a failure.
-
-- **It rises:** With nothing selected for typing, swipe up from the bottom
-  bezel. Past a short way the keys rise on their own, and the card above makes
+- **It rises:** With nothing selected for typing, tap Keyboard in Control Center
+  or the tray. Control Center closes, the keys rise, and the card above makes
   room as they rise rather than after they arrive.
 - **It works straight after signing in:** Sign in and, before touching any text
-  field, swipe up from the bezel. The keys come up the first time.
+  field, tap the entry. The keys come up the first time.
 - **It keeps the focus where it is:** Tap into a text box, put the keys away,
-  then swipe up from the bezel. What you type goes into that same box.
+  then tap the entry. What you type goes into that same box.
+- **It puts them away:** With the keys up, tap the entry. They slide down.
 - **Nothing sits on the dock:** With the Bottom Surface installed and the keys
   down, there is no bar on top of the dock, and a maximized window reaches
   down to the dock itself.

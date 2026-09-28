@@ -457,6 +457,10 @@ InputPanelWindow {
         function onKeyboardFocusReclaimRequested() {
             root.reclaimFocus();
         }
+        // The keys' tray entry tapped while they are up.
+        function onPutAwayRequested() {
+            root.putAway();
+        }
     }
 
     PrecisionController { id: precisionController }

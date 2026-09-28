@@ -8,6 +8,8 @@
 #include <QObject>
 #include <qqmlintegration.h>
 
+class KeysTrayEntry;
+
 /**
  * The Keyboard's whole relationship with the Bottom Surface.
  *
@@ -77,10 +79,12 @@ Q_SIGNALS:
     void reservationRefreshRequested();
     void keyboardFocusReclaimRequested();
     void regionReservingChanged();
-    /// Kadunce says a swipe up from the bottom bezel asked for the keys. It
-    /// has asked the compositor for them itself; this is for a cold start,
-    /// where that ask alone shows nothing.
+    /// The keys' tray entry asked for them. The compositor has been asked
+    /// already; this is for a cold start, where that ask alone shows nothing.
     void keysRequested();
+    /// The keys' tray entry was tapped while they were up: they go, as the
+    /// handle takes them.
+    void putAwayRequested();
     /// Every report of whether the compositor shows the keys, changed or not.
     /// Two reports can arrive for keys shown and hidden again at once, and
     /// the value read for both is the one at the time of reading.
@@ -88,6 +92,7 @@ Q_SIGNALS:
 
 private:
     void setKeyboardVisible(bool visible);
+    void toggleKeysFromTray();
     QString evaluate(const QString &script);
     void yieldBottomPanels();
     void restoreBottomPanels();
@@ -104,6 +109,7 @@ private Q_SLOTS:
     void onExtentChanged(const QString &outputName);
 
 private:
+    KeysTrayEntry *m_trayEntry = nullptr;
     bool m_keyboardVisible = false;
     bool m_requestedVisible = false;
     QString m_savedPanels;

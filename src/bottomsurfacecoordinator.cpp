@@ -5,6 +5,7 @@
 
 #include "bottomsurfacecoordinator.h"
 #include "keysrequest.h"
+#include "keystrayentry.h"
 
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
@@ -24,16 +25,6 @@ constexpr auto kSurfaceService = "studio.warbler.BottomSurface";
 constexpr auto kSurfacePath = "/BottomSurface";
 constexpr auto kSurfaceInterface = "studio.warbler.BottomSurface";
 constexpr int kSupportedMajor = 1;
-
-// Kadunce, the compositor effect, when it is running. It says on the bus when
-// a swipe up from the bottom bezel asks for the keys. An isolated test names a
-// stand-in of its own in its place, since only the compositor can own this
-// name.
-QString kadunceService()
-{
-    const QString probe = qEnvironmentVariable("SHUFFLE_PROBE_KADUNCE_SERVICE");
-    return probe.isEmpty() ? QStringLiteral("org.kde.KWin") : probe;
-}
 }
 
 BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
@@ -51,12 +42,8 @@ BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
                                           QStringLiteral("dockExtentChanged"),
                                           this,
                                           SLOT(onExtentChanged(QString)));
-    QDBusConnection::sessionBus().connect(kadunceService(),
-                                          QStringLiteral("/Kadunce"),
-                                          QStringLiteral("studio.warbler.Kadunce"),
-                                          QStringLiteral("keysRequested"),
-                                          this,
-                                          SIGNAL(keysRequested()));
+    m_trayEntry = new KeysTrayEntry(this);
+    connect(m_trayEntry, &KeysTrayEntry::activated, this, &BottomSurfaceCoordinator::toggleKeysFromTray);
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::syncKeyboardVisibility);
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::readExtent);
     // A display coming or going can move the dock. The surface answers a
@@ -210,6 +197,16 @@ void BottomSurfaceCoordinator::raiseKeyboard()
     }
     requestKeys(this);
     setError({});
+}
+
+void BottomSurfaceCoordinator::toggleKeysFromTray()
+{
+    if (m_keyboardVisible) {
+        Q_EMIT putAwayRequested();
+        return;
+    }
+    raiseKeyboard();
+    Q_EMIT keysRequested();
 }
 
 void BottomSurfaceCoordinator::announceHeading(double height, int durationMs)

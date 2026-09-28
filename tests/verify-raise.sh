@@ -2,10 +2,10 @@
 # SPDX-FileCopyrightText: 2026 Shuffle Project
 # SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
 #
-# Raises the Keyboard the way a swipe up from the bottom bezel does, in a
-# compositor of its own, with the Keyboard as that compositor's input method and
-# an application holding the focus, and asks the compositor where the focus is
-# at each step. A stand-in for Kadunce makes the announcement Kadunce makes.
+# Raises the Keyboard the way a tap on its tray entry does, in a compositor of
+# its own, with the Keyboard as that compositor's input method and an
+# application holding the focus, and asks the compositor where the focus is at
+# each step. A stand-in for Kadunce answers as Kadunce does.
 # Nothing here reaches the running session: its own compositor, its own bus,
 # its own runtime and config directories, all thrown away afterwards.
 set -euo pipefail
@@ -42,9 +42,9 @@ keep="${SHUFFLE_RAISE_KEEP:-}"
 probe_roots=()
 trap 'cleanup; [[ -n "${keep}" ]] || for root in "${probe_roots[@]}"; do rm -rf -- "${root}"; done' EXIT
 
-# Runs the session once along one raise path: "direct", where Kadunce's own
-# ask of the compositor shows the keys and the focus stays where it was, or
-# "cold", where that ask shows nothing, as straight after signing in, so the
+# Runs the session once along one raise path: "direct", where Kadunce's ask of
+# the compositor shows the keys and the focus stays where it was, or "cold",
+# where that ask shows nothing, as straight after signing in, so the
 # focus-holding raise the Keyboard does for a cold start is the one exercised.
 run_path() {
     local path="$1"
@@ -93,7 +93,7 @@ run_path() {
 run_path direct
 run_path cold
 echo
-echo "A raise Kadunce announces leaves the focus where it was; a cold start"
+echo "A raise from the tray entry leaves the focus where it was; a cold start"
 echo "holds it only while the Keyboard is up."
 echo "Whether Plasma allows it straight after signing in needs a finger, and"
 echo "is not this."

@@ -117,18 +117,16 @@ editing stays with the history column and modifier chords.
 
 ## Showing and hiding
 
-The keys come up when a text field is tapped, and when a swipe up from the
-bottom bezel asks for them. Kadunce handles the swipe: it asks the compositor
-for the keys and announces that it has (`keysRequested`). The Keyboard makes
-sure they come.
+The keys come up when a text field is tapped, and when their entry in the system
+tray is tapped with them down; tapped with them up, it puts them away. The entry
+speaks the tray protocol itself, since this process loads no widget toolkit, and
+has no menu.
 
-A raise from the bezel never takes the focus from a text box that is ready to
-be typed into, and asking again while the keys are up changes nothing. Only a
-cold start needs the Keyboard: straight after signing in, before any text field
-has been touched, the compositor's ask alone shows nothing. Then the Keyboard
-borrows the focus with a field nobody sees until the keys go, and the focus
-returns to where it was. With no Kadunce nothing announces a swipe, and nothing
-happens.
+A raise from the tray entry never takes the focus from a text box that is ready
+to be typed into. Only a cold start needs more: straight after signing in,
+before any text field has been touched, the compositor's ask alone shows
+nothing. Then the Keyboard borrows the focus with a field nobody sees until the
+keys go, and the focus returns to where it was.
 
 They rise from the screen's bottom edge on their own and go back into it: under
 the finger when the handle takes them, and on their own otherwise. Keys going
@@ -143,9 +141,9 @@ Before each motion with a destination, and on a press of the handle, the keys
 tell Kadunce where they will rest and when (`keyboardHeading`). The Active card
 follows them, and its application is resized once, at rest, not every frame.
 With no Kadunce nothing answers and nothing changes. A request for the keys made
-on the person's behalf, from the precision surface, goes through Kadunce when it
-is running, so Kadunce knows it was asked; otherwise it goes to the compositor
-directly.
+on the person's behalf, from the tray entry or the precision surface, goes
+through Kadunce when it is running, so Kadunce knows it was asked; otherwise it
+goes to the compositor directly.
 
 ### The bottom of the screen
 

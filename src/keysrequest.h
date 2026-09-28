@@ -12,6 +12,17 @@
 #include <QObject>
 
 /**
+ * Kadunce, the compositor effect, when it is running. An isolated test names a
+ * stand-in of its own in its place, since only the compositor can own this
+ * name.
+ */
+inline QString kadunceService()
+{
+    const QString probe = qEnvironmentVariable("SHUFFLE_PROBE_KADUNCE_SERVICE");
+    return probe.isEmpty() ? QStringLiteral("org.kde.KWin") : probe;
+}
+
+/**
  * Asks for the keys on the person's behalf.
  *
  * Kadunce, when it is running, keeps down any keys nobody asked for, and a
@@ -28,7 +39,7 @@ inline void requestKeys(QObject *context)
                                                                                QStringLiteral("org.kde.kwin.VirtualKeyboard"),
                                                                                QStringLiteral("forceActivate")));
     };
-    const QDBusPendingCall call = QDBusConnection::sessionBus().asyncCall(QDBusMessage::createMethodCall(QStringLiteral("org.kde.KWin"),
+    const QDBusPendingCall call = QDBusConnection::sessionBus().asyncCall(QDBusMessage::createMethodCall(kadunceService(),
                                                                                                          QStringLiteral("/Kadunce"),
                                                                                                          QStringLiteral("studio.warbler.Kadunce"),
                                                                                                          QStringLiteral("raiseKeyboard")));
@@ -52,7 +63,7 @@ inline void requestKeys(QObject *context)
  */
 inline void announceKeys(double height, int durationMs)
 {
-    QDBusMessage message = QDBusMessage::createMethodCall(QStringLiteral("org.kde.KWin"),
+    QDBusMessage message = QDBusMessage::createMethodCall(kadunceService(),
                                                           QStringLiteral("/Kadunce"),
                                                           QStringLiteral("studio.warbler.Kadunce"),
                                                           QStringLiteral("keyboardHeading"));
