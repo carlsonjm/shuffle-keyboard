@@ -29,9 +29,9 @@ window above, since a gutter there would only cost rows.
 Its top strip carries the handle: 6 px thick, with 10 px clear above it and
 10 px between it and the keys. The handle is nearly white at rest and white
 under the finger. Where the Bottom Surface is installed it takes the place and
-width of the dock's application row, so the bar pulled up from the dock is the
-bar that holds the keys. Otherwise it is 160 px wide and centred. What it does
-when touched is [`INPUT.md`](INPUT.md) § Handle.
+width of the dock's application row, which the keys cover. Otherwise it is
+160 px wide and centred. What it does when touched is [`INPUT.md`](INPUT.md)
+§ Handle.
 
 Keys have hairline outlines, open spacing and floating Ghost White labels. A
 key that is on (Shift, Caps, Ctrl, Alt, a symbol layer) fills. There are no
@@ -117,11 +117,24 @@ editing stays with the history column and modifier chords.
 
 ## Showing and hiding
 
-The keys come up from the screen's bottom edge and go back into it: under the
-finger when a pull brings them or the handle takes them, and on their own
-otherwise. Keys going because typing ended, or because an application asked the
-compositor to put them away, leave the same way before the window goes. Asked
-for again on the way out, they come back from where they are.
+The keys come up when a text field is tapped, and when a swipe up from the
+bottom bezel asks for them. Kadunce handles the swipe: it asks the compositor
+for the keys and announces that it has (`keysRequested`). The Keyboard makes
+sure they come.
+
+A raise from the bezel never takes the focus from a text box that is ready to
+be typed into, and asking again while the keys are up changes nothing. Only a
+cold start needs the Keyboard: straight after signing in, before any text field
+has been touched, the compositor's ask alone shows nothing. Then the Keyboard
+borrows the focus with a field nobody sees until the keys go, and the focus
+returns to where it was. With no Kadunce nothing announces a swipe, and nothing
+happens.
+
+They rise from the screen's bottom edge on their own and go back into it: under
+the finger when the handle takes them, and on their own otherwise. Keys going
+because typing ended, or because an application asked the compositor to put
+them away, leave the same way before the window goes. Asked for again on the
+way out, they come back from where they are.
 
 They rise only once the dock has left and given up its room, so they never rise
 into it.
@@ -130,9 +143,9 @@ Before each motion with a destination, and on a press of the handle, the keys
 tell Kadunce where they will rest and when (`keyboardHeading`). The Active card
 follows them, and its application is resized once, at rest, not every frame.
 With no Kadunce nothing answers and nothing changes. A request for the keys made
-on the person's behalf, from the handle or the precision surface, goes through
-Kadunce when it is running, so Kadunce knows it was asked; otherwise it goes to
-the compositor directly.
+on the person's behalf, from the precision surface, goes through Kadunce when it
+is running, so Kadunce knows it was asked; otherwise it goes to the compositor
+directly.
 
 ### The bottom of the screen
 
@@ -142,26 +155,8 @@ what giving it up means. The region goes back once the keys have gone. Where no
 Bottom Surface answers, Plasma's bottom panels autohide while the keys are up
 and return to their previous hiding mode afterwards. `bottomsurfacecoordinator`
 is this whole boundary; the surface's side of it is the Bottom Surface contract
-in the `shuffle` repository.
-
-### The handle above the dock
-
-Where the Bottom Surface is installed, a handle sits directly on top of the dock
-while the keys are down, as wide as the dock's application row and on the
-dock's display. It is a surface of the Keyboard's own, because the Keyboard's
-window is an input panel and the compositor unmaps it exactly when the handle is
-needed.
-
-While shown, the handle reserves its own 6 px, so windows stop above it. It
-takes touches over the bar only, leaving the rest of that gap to whatever is
-beneath. It goes while the keys are up, and before the bottom strip goes solid
-black for a full-screen window. It keeps its reservation through the blackout,
-so windows are not resized each time the strip darkens. On an ordinary Plasma
-panel there is no handle.
-
-A raise from the handle never takes the focus from a text box that is ready to
-be typed into. Only a cold start, with nothing ready, borrows the focus with a
-field nobody sees until the keys go; the focus then returns to where it was.
+in the `shuffle` repository. The Keyboard puts nothing of its own on the
+surface's band, so windows stop at the band.
 
 ## Engineering constraints
 

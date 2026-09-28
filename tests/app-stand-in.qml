@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
 
 // An ordinary application window holding the focus, so a probe can see
-// whether a raise from the handle hands it back, and whether the Keyboard
+// whether a raise from the bottom bezel hands it back, and whether the Keyboard
 // still types into an application afterwards. Its field takes the focus when
 // the file named on the command line appears.
 

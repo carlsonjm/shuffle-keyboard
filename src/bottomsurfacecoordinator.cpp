@@ -11,7 +11,6 @@
 #include <QDBusInterface>
 #include <QDBusReply>
 #include <QGuiApplication>
-#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTimer>
@@ -25,6 +24,16 @@ constexpr auto kSurfaceService = "studio.warbler.BottomSurface";
 constexpr auto kSurfacePath = "/BottomSurface";
 constexpr auto kSurfaceInterface = "studio.warbler.BottomSurface";
 constexpr int kSupportedMajor = 1;
+
+// Kadunce, the compositor effect, when it is running. It says on the bus when
+// a swipe up from the bottom bezel asks for the keys. An isolated test names a
+// stand-in of its own in its place, since only the compositor can own this
+// name.
+QString kadunceService()
+{
+    const QString probe = qEnvironmentVariable("SHUFFLE_PROBE_KADUNCE_SERVICE");
+    return probe.isEmpty() ? QStringLiteral("org.kde.KWin") : probe;
+}
 }
 
 BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
@@ -42,22 +51,16 @@ BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
                                           QStringLiteral("dockExtentChanged"),
                                           this,
                                           SLOT(onExtentChanged(QString)));
-    QDBusConnection::sessionBus().connect(QString::fromLatin1(kSurfaceService),
-                                          QString::fromLatin1(kSurfacePath),
-                                          QString::fromLatin1(kSurfaceInterface),
-                                          QStringLiteral("keyboardRequested"),
+    QDBusConnection::sessionBus().connect(kadunceService(),
+                                          QStringLiteral("/Kadunce"),
+                                          QStringLiteral("studio.warbler.Kadunce"),
+                                          QStringLiteral("keysRequested"),
                                           this,
-                                          SIGNAL(keyboardRequested()));
-    QDBusConnection::sessionBus().connect(QString::fromLatin1(kSurfaceService),
-                                          QString::fromLatin1(kSurfacePath),
-                                          QString::fromLatin1(kSurfaceInterface),
-                                          QStringLiteral("keyboardPull"),
-                                          this,
-                                          SLOT(onSurfacePull(double, bool, double)));
+                                          SIGNAL(keysRequested()));
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::syncKeyboardVisibility);
     QTimer::singleShot(0, this, &BottomSurfaceCoordinator::readExtent);
-    // A display coming or going can move the dock and the touch display. Both
-    // answer a moment after the output changes, so they are read again then.
+    // A display coming or going can move the dock. The surface answers a
+    // moment after the output changes, so it is read again then.
     const auto rereadSoon = [this] {
         QTimer::singleShot(500, this, &BottomSurfaceCoordinator::readExtent);
     };
@@ -85,43 +88,6 @@ int BottomSurfaceCoordinator::dockWidth() const
     return m_dockWidth;
 }
 
-bool BottomSurfaceCoordinator::regionObscured() const
-{
-    return m_regionObscured;
-}
-
-QString BottomSurfaceCoordinator::dockOutput() const
-{
-    return m_dockOutput;
-}
-
-QString BottomSurfaceCoordinator::handleHome() const
-{
-    return m_handleHome;
-}
-
-namespace
-{
-// The display Kadunce holds cards on, which is the one a touchscreen drives.
-// Empty when Kadunce is not running or has no such display.
-QString cardDisplay()
-{
-    QDBusInterface kadunce(QStringLiteral("org.kde.KWin"), QStringLiteral("/Kadunce"), QStringLiteral("studio.warbler.Kadunce"), QDBusConnection::sessionBus());
-    const QDBusReply<QString> reply = kadunce.call(QStringLiteral("workspaceContext"));
-    if (!reply.isValid()) {
-        return {};
-    }
-    const QJsonArray displays =
-        QJsonDocument::fromJson(reply.value().toUtf8()).object().value(QStringLiteral("displayContext")).toObject().value(QStringLiteral("displays")).toArray();
-    for (const QJsonValue &display : displays) {
-        if (display.toObject().value(QStringLiteral("role")).toString() == QLatin1String("tablet")) {
-            return display.toObject().value(QStringLiteral("name")).toString();
-        }
-    }
-    return {};
-}
-}
-
 void BottomSurfaceCoordinator::onExtentChanged(const QString &outputName)
 {
     Q_UNUSED(outputName)
@@ -136,10 +102,8 @@ void BottomSurfaceCoordinator::readExtent()
     int bandHeight = 0;
     int dockLeft = 0;
     int dockWidth = 0;
-    bool obscured = false;
     bool reserving = true;
     bool usable = false;
-    QString output;
 
     if (present) {
         QDBusInterface surface(QString::fromLatin1(kSurfaceService),
@@ -156,8 +120,6 @@ void BottomSurfaceCoordinator::readExtent()
                 const QJsonObject dock = payload.value(QStringLiteral("dock")).toObject();
                 dockLeft = dock.value(QStringLiteral("left")).toInt();
                 dockWidth = dock.value(QStringLiteral("right")).toInt() - dockLeft;
-                obscured = payload.value(QStringLiteral("obscured")).toBool();
-                output = payload.value(QStringLiteral("output")).toString();
                 reserving = payload.value(QStringLiteral("reserving")).toBool(true);
             }
         }
@@ -174,21 +136,13 @@ void BottomSurfaceCoordinator::readExtent()
         Q_EMIT regionReservingChanged();
     }
 
-    const QString touchOutput = cardDisplay();
-    const QString home = touchOutput.isEmpty() ? output : touchOutput;
-
-    if (m_surfacePresent == usable && m_bandHeight == bandHeight && m_dockLeft == dockLeft && m_dockWidth == dockWidth && m_regionObscured == obscured
-        && m_dockOutput == output && m_handleHome == home) {
+    if (m_surfacePresent == usable && m_bandHeight == bandHeight && m_dockLeft == dockLeft && m_dockWidth == dockWidth) {
         return;
     }
-    m_dockOutput = output;
-    m_handleHome = home;
-
     m_surfacePresent = usable;
     m_bandHeight = bandHeight;
     m_dockLeft = dockLeft;
     m_dockWidth = dockWidth;
-    m_regionObscured = obscured;
     Q_EMIT extentChanged();
 }
 
@@ -266,16 +220,6 @@ void BottomSurfaceCoordinator::announceHeading(double height, int durationMs)
 void BottomSurfaceCoordinator::reclaimKeyboardFocus()
 {
     Q_EMIT keyboardFocusReclaimRequested();
-}
-
-void BottomSurfaceCoordinator::reportPull(double travel, bool active, double velocity)
-{
-    Q_EMIT keyboardPulled(travel, active, velocity);
-}
-
-void BottomSurfaceCoordinator::onSurfacePull(double travel, bool active, double velocity)
-{
-    Q_EMIT keyboardPulled(travel, active, velocity);
 }
 
 bool BottomSurfaceCoordinator::regionReserving() const

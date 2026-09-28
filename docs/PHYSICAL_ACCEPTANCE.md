@@ -91,39 +91,21 @@ does is [`INPUT.md`](INPUT.md); these checks test it on the device.
 - **Touch reach:** Type several sentences at normal speed. Note any intended
   key that lands left or right of the target.
 
-## The handle above the dock
+## Raised from the bottom bezel
 
-These need the Bottom Surface installed. On an ordinary Plasma panel there is
-no handle, which is the supported result and not a failure.
+These need Kadunce running, since the swipe is Kadunce's. Without it the bezel
+does not raise the keys, which is the supported result and not a failure.
 
-- **It is there:** A nearly white bar sits directly on top of the dock,
-  as wide as the row of application icons, with the same even gap above it to
-  the window as below it to the icons. Windows stop above it rather than
-  running under it.
-- **It grows with the row:** Open another application. The line widens with
-  the row and stays centered on it.
-- **It raises:** Tap the line with nothing selected for typing. The keyboard
-  comes up.
-- **It raises on a pull:** Put a finger on the line and drag upward. The
-  keyboard comes up before the finger has gone far.
+- **It rises:** With nothing selected for typing, swipe up from the bottom
+  bezel. Past a short way the keys rise on their own, and the card above makes
+  room as they rise rather than after they arrive.
 - **It works straight after signing in:** Sign in and, before touching any text
-  field, pull the handle. The keyboard comes up the first time.
-- **It keeps the focus where it is:** Tap into a text box, put the keyboard
-  away, then pull the handle. What you type goes into that same box.
-- **It gives the focus back:** Raise the keyboard from the handle, dismiss it,
-  and type on a physical keyboard. The text goes to the application that had
-  the focus before, and nothing is lost.
-- **It gets out of the way:** With the keyboard up, the line is gone.
-- **It comes back:** Dismiss the keyboard. The line returns with the dock.
-- **It leaves before the dark:** Put a window full screen until the bottom
-  strip goes solid black. The line goes first; there is never a black strip
-  with a line floating over it.
-- **It does not take taps that are not for it:** Tap in the same gap but well
-  to the left and to the right of the line. Whatever is underneath gets the
-  tap and the keyboard stays down.
-- **Reaching for it:** Pull the bar up ten times at a natural speed and note
-  how many attempts miss, and whether a miss lands on an application icon
-  instead. A pull is the gesture; a tap has to land on the bar itself.
+  field, swipe up from the bezel. The keys come up the first time.
+- **It keeps the focus where it is:** Tap into a text box, put the keys away,
+  then swipe up from the bezel. What you type goes into that same box.
+- **Nothing sits on the dock:** With the Bottom Surface installed and the keys
+  down, there is no bar on top of the dock, and a maximized window reaches
+  down to the dock itself.
 
 ## Notes
 

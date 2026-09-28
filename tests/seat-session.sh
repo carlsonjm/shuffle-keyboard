@@ -86,7 +86,7 @@ if ! wait_for "${stand_in_log}" '^ready'; then
     echo FAIL > "${PROBE_ROOT}/result"
     exit 1
 fi
-control report true false 60 544 920
+control report true 60 544 920
 
 QML_XHR_ALLOW_FILE_READ=1 qml6 "${tests_dir}/seat-band-stand-in.qml" -- "${band_flag}" \
     > "${PROBE_ROOT}/band.log" 2>&1 &

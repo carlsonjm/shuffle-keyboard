@@ -13,7 +13,7 @@ namespace
 // What an isolated session reads to see the order things happen in.
 void probe(const char *what)
 {
-    static const bool enabled = qEnvironmentVariableIntValue("SHUFFLE_PROBE_HANDLE") != 0;
+    static const bool enabled = qEnvironmentVariableIntValue("SHUFFLE_PROBE_HOLD") != 0;
     if (enabled) {
         qWarning("textinput %s at %lld", what, static_cast<long long>(QDateTime::currentMSecsSinceEpoch() % 100000));
     }

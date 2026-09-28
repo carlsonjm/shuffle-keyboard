@@ -12,16 +12,21 @@ than describe an input themselves.
 | Tap a text field | The keys rise from the screen's bottom edge. |
 | Leave the text field, or the application puts the keys away | The keys slide down and away. Asked for again on the way out, they come back from where they are. |
 
-## Handle
+## Bottom bezel
 
 | Input | What happens |
 | --- | --- |
-| Tap the handle above the dock | The keys come up. A text box that was ready keeps the focus; with none ready, typing goes nowhere until one is tapped. The handle is there only while the keys are down and the Bottom Surface is installed. |
-| Pull up on the handle above the dock, or from the dock's application row | The keys come up under the finger. Let go past a quarter of the way, or with a flick upward, and they open; otherwise they go back down. The focus is kept as a tap keeps it. |
-| Tap beside the handle above the dock | Whatever is beneath takes the tap, and the keys stay down. |
-| Tap the handle on the keys | The keys slide down and away. |
-| Drag the handle on the keys down | The keys follow the finger. Let go past a quarter of the way, or with a flick downward, and they go; otherwise they spring back. |
-| Activate a handle with a screen reader | "Show the keyboard" brings the keys up; "Put the keyboard away" puts them away. |
+| Swipe up from the bottom bezel, with Kadunce running | Kadunce takes the swipe and asks for the keys, and they rise on their own. A text box that was ready keeps the focus. Straight after signing in, with nothing ready, the keys still come up, and typing goes nowhere until a text box is tapped. Without Kadunce nothing happens. |
+
+## Handle
+
+The handle is the bar along the keys' top edge, so it only puts them away.
+
+| Input | What happens |
+| --- | --- |
+| Tap the handle | The keys slide down and away. |
+| Drag the handle down | The keys follow the finger. Let go past a quarter of the way, or with a flick downward, and they go; otherwise they spring back. |
+| Activate the handle with a screen reader | "Put the keyboard away" puts the keys away. |
 
 ## Keys
 

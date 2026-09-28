@@ -29,8 +29,6 @@ target_sources(plasma-keyboard PRIVATE
     bottomsurfacecoordinator.cpp
     bottomsurfacecoordinator.h
     keysrequest.h
-    handlewindow.cpp
-    handlewindow.h
     textinputhold.cpp
     textinputhold.h
     precisioncontroller.cpp
@@ -101,7 +99,7 @@ ecm_target_qml_sources(plasma-keyboard SOURCES
     qml/LanguagePopupDelegate.qml
     qml/DiacriticsOverlay.qml
     qml/OverlayWindow.qml
-    qml/KeyboardHandle.qml
+    qml/ColdStartHold.qml
 )
 ecm_finalize_qml_module(plasma-keyboard)
 

@@ -5,16 +5,19 @@
 # Runs inside the compositor verify-raise.sh starts, with the Keyboard as its
 # input method. Nothing here reaches the running session.
 #
-# Plasma shows a raised keyboard only once a text field has asked for it, so
-# the handle raises by taking typing focus into a field of its own. That is
-# only acceptable if the focus goes back where it was when the keyboard goes.
-# An application holds the focus here, the handle raises, and the compositor
-# is asked who holds the focus at each step.
+# A swipe up from the bottom bezel is Kadunce's: it asks the compositor for the
+# keys and announces the request. Plasma shows a raised keyboard only once a
+# text field has asked for it, so on a cold start the Keyboard raises by taking
+# typing focus into a field of its own. That is only acceptable if the focus
+# goes back where it was when the keyboard goes. An application holds the focus
+# here, a stand-in for Kadunce announces the request, and the compositor is
+# asked who holds the focus at each step.
 
 set -uo pipefail
 
 tests_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 stand_in_log="${PROBE_ROOT}/stand-in.log"
+kadunce_log="${PROBE_ROOT}/kadunce.log"
 script_count=0
 
 pass=0
@@ -63,6 +66,18 @@ focus_now() {
     grep -oE 'record focus .*' "${stand_in_log}" | tail -1 | sed 's/^record focus //'
 }
 
+# What Kadunce does when a swipe up from the bottom bezel commits: it asks the
+# compositor for the keys, then announces the request. On a cold start the ask
+# shows nothing, and only the announcement is left to act on.
+bezel_swipe() {
+    if [[ "$1" == ask ]]; then
+        gdbus call --session --dest org.kde.KWin --object-path /VirtualKeyboard \
+            --method org.kde.kwin.VirtualKeyboard.forceActivate > /dev/null 2>&1
+    fi
+    gdbus call --session --dest studio.warbler.test.Kadunce --object-path /Kadunce \
+        --method studio.warbler.test.Control.requestKeys > /dev/null 2>&1
+}
+
 keyboard() {
     gdbus call --session --dest org.kde.KWin --object-path /VirtualKeyboard \
         --method org.freedesktop.DBus.Properties.Get \
@@ -90,6 +105,13 @@ if ! wait_for "${stand_in_log}" '^ready'; then
     exit 1
 fi
 
+python3 "${tests_dir}/kadunce-stand-in.py" > "${kadunce_log}" 2>&1 &
+if ! wait_for "${kadunce_log}" '^ready'; then
+    echo "The Kadunce stand-in never took its name." >&2
+    echo FAIL > "${PROBE_ROOT}/result"
+    exit 1
+fi
+
 QML_XHR_ALLOW_FILE_READ=1 qml6 "${tests_dir}/app-stand-in.qml" -- "${PROBE_ROOT}/app-type" \
     > "${PROBE_ROOT}/app.log" 2>&1 &
 app_pid=$!
@@ -99,28 +121,28 @@ echo
 echo "An application holds the focus"
 check "the application is focused" "$(focus_now)" "app"
 
-# Publishing a dock is what puts the handle on screen, and the probe raises
-# from it a moment later, the way a finger would.
+# A dock is published, so the keys take its region while they are up.
+control report true 60 544 920
 if [[ "${RAISE_PATH:-cold}" == direct ]]; then
     echo
-    echo "The handle raises the Keyboard and leaves the focus where it was"
-    control report true false 60 544 920
+    echo "A bezel swipe raises the Keyboard and leaves the focus where it was"
+    bezel_swipe ask
     wait_keyboard true
     check "the Keyboard is up" "$(keyboard visible)" "(<true>,)"
     check "the application keeps the focus" "$(focus_now)" "app"
 else
     echo
     echo "A cold start raises the Keyboard by taking the focus"
-    control report true false 60 544 920
+    bezel_swipe announce-only
     wait_keyboard true
     check "the Keyboard is up" "$(keyboard visible)" "(<true>,)"
     check "a text field is what asked for it" "$(keyboard activeClientSupportsTextInput)" "(<true>,)"
     focus="$(focus_now)"
     if [[ "${focus}" != "app" && "${focus}" != "none" ]]; then
-        printf '  ok   %s\n' "the handle holds the focus while it is up (${focus})"
+        printf '  ok   %s\n' "the Keyboard holds the focus while it is up (${focus})"
         pass=$((pass + 1))
     else
-        printf '  FAIL %s\n         got: %s\n' "the handle holds the focus while it is up" "${focus}"
+        printf '  FAIL %s\n         got: %s\n' "the Keyboard holds the focus while it is up" "${focus}"
         fail=$((fail + 1))
     fi
 fi
@@ -140,8 +162,8 @@ check "the dock comes back" "$(grep -oE '^yielded=[01]' "${stand_in_log}" | tail
 
 echo
 echo "The Keyboard still types into an application afterwards"
-# The handle's focus moved this process's own focus with it. If it did not
-# come back, the Keyboard would show for a text field and type nowhere.
+# The hold's focus moved this process's own focus with it. If it did not come
+# back, the Keyboard would show for a text field and type nowhere.
 echo type > "${PROBE_ROOT}/app-type"
 wait_keyboard true
 check "a text field in the application raises it" "$(keyboard visible)" "(<true>,)"
@@ -155,20 +177,24 @@ else
 fi
 
 echo
-echo "A pull that starts on the dock raises it the same way"
+echo "A request with the keys already up changes nothing"
+bezel_swipe ask
+sleep 1
+check "the Keyboard is still up" "$(keyboard visible)" "(<true>,)"
+check "the application keeps the focus" "$(focus_now)" "app"
+
+echo
+echo "A bezel swipe with a text box ready leaves it the focus"
 gdbus call --session --dest org.kde.KWin --object-path /VirtualKeyboard \
     --method org.freedesktop.DBus.Properties.Set \
     org.kde.kwin.VirtualKeyboard active "<false>" > /dev/null 2>&1
 wait_keyboard false
 sleep 0.5
-control requestKeyboard
+bezel_swipe ask
 wait_keyboard true
-check "the dock's request brings the Keyboard up" "$(keyboard visible)" "(<true>,)"
-if [[ "${RAISE_PATH:-cold}" == direct ]]; then
-    # The application's text box was ready, so the pull types into it and
-    # nothing else takes the focus.
-    check "a pull with a text box ready leaves it the focus" "$(focus_now)" "app"
-fi
+check "the swipe brings the Keyboard up" "$(keyboard visible)" "(<true>,)"
+sleep 0.5
+check "the text box keeps the focus" "$(focus_now)" "app"
 
 kill "${app_pid}" 2>/dev/null
 

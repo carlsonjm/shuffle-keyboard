@@ -4,8 +4,8 @@
 """A Bottom Surface, as far as the Keyboard can tell.
 
 The real one is a Plasma containment and needs a shell to exist inside. The
-Keyboard reads three things from it and calls two methods on it, and this
-answers exactly those, from the contract that the downstream repository owns.
+Keyboard reads its extent and calls two methods on it, and this answers
+exactly those, from the contract that the downstream repository owns.
 It is a stand-in for the producer, never for the Keyboard's own half.
 """
 
@@ -37,25 +37,19 @@ INTROSPECTION = """
     <signal name='dockExtentChanged'>
       <arg type='s' name='outputName'/>
     </signal>
-    <signal name='keyboardRequested'/>
   </interface>
   <interface name='studio.warbler.test.Control'>
     <method name='report'>
       <arg type='b' name='presenting' direction='in'/>
-      <arg type='b' name='obscured' direction='in'/>
       <arg type='i' name='band' direction='in'/>
       <arg type='i' name='left' direction='in'/>
       <arg type='i' name='right' direction='in'/>
     </method>
-    <method name='requestKeyboard'/>
     <method name='setReserving'>
       <arg type='b' name='reserving' direction='in'/>
     </method>
     <method name='record'>
       <arg type='s' name='line' direction='in'/>
-    </method>
-    <method name='setOutput'>
-      <arg type='s' name='output' direction='in'/>
     </method>
   </interface>
 </node>
@@ -65,7 +59,6 @@ INTROSPECTION = """
 class StandIn:
     def __init__(self):
         self.presenting = False
-        self.obscured = False
         self.band = 0
         self.left = 0
         self.right = 0
@@ -82,7 +75,6 @@ class StandIn:
                 "version": 1,
                 "output": output_name or self.output,
                 "presenting": self.presenting,
-                "obscured": self.obscured,
                 "reserving": self.reserving,
                 "band": {"height": self.band},
                 "dock": {
@@ -123,17 +115,10 @@ class StandIn:
 
         if interface == "studio.warbler.test.Control":
             if method == "report":
-                self.presenting, self.obscured, self.band, self.left, self.right = parameters
+                self.presenting, self.band, self.left, self.right = parameters
                 self.connection.emit_signal(
                     None, PATH, "studio.warbler.BottomSurface",
                     "dockExtentChanged", GLib.Variant("(s)", ("Virtual-1",)),
-                )
-                invocation.return_value(None)
-                return
-            if method == "requestKeyboard":
-                self.connection.emit_signal(
-                    None, PATH, "studio.warbler.BottomSurface",
-                    "keyboardRequested", None,
                 )
                 invocation.return_value(None)
                 return
@@ -142,14 +127,6 @@ class StandIn:
                 self.connection.emit_signal(
                     None, PATH, "studio.warbler.BottomSurface",
                     "dockExtentChanged", GLib.Variant("(s)", ("Virtual-1",)),
-                )
-                invocation.return_value(None)
-                return
-            if method == "setOutput":
-                self.output = parameters[0]
-                self.connection.emit_signal(
-                    None, PATH, "studio.warbler.BottomSurface",
-                    "dockExtentChanged", GLib.Variant("(s)", (self.output,)),
                 )
                 invocation.return_value(None)
                 return

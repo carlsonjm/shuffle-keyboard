@@ -110,41 +110,24 @@ InputPanelWindow {
     interactiveRegion: Qt.rect(panel.x, root.height - panel.height + Math.min(root.carry, panel.height - 2),
                                panel.width, Math.max(2, panel.height - root.carry))
 
-    // The arrival. The keys start below the screen's edge and rise from it,
-    // under the finger when a pull brought them and on their own otherwise.
-    // They wait until the dock has left and given up its room, so they never
-    // rise into the dock's room while it is there, and the compositor has
-    // already placed them at the bottom rather than moving them mid-rise.
+    // The arrival. The keys start below the screen's edge and rise from it on
+    // their own. They wait until the dock has left and given up its room, so
+    // they never rise into the dock's room while it is there, and the
+    // compositor has already placed them at the bottom rather than moving
+    // them mid-rise.
     property real carry: 0
     property bool arriving: false
-    property bool pullActive: false
-    // The finger's height above the screen's bottom edge.
-    property real pullTravel: 0
-    // Where the handle sits in the keys' top strip, which is where the finger
-    // holds them.
-    readonly property real grabCentre: root.handleInset + root.handleThickness / 2
-    // A pull that ended before the keys could rise, which way it went, and
-    // when: a decision older than a moment belongs to a pull whose keys never
-    // came.
-    property bool pendingSettle: false
-    property bool pendingOpen: true
-    property real pendingAt: 0
     property bool seatWaitOver: false
     readonly property bool seated: root.seatWaitOver
         || !BottomSurfaceCoordinator.surfacePresent
         || !BottomSurfaceCoordinator.regionReserving
 
-    // Past a quarter of the way up, or a flick upward, a released pull opens.
+    // Past a quarter of the way down, or a flick downward, a released drag on
+    // the handle puts the keys away.
     readonly property real openFraction: 0.25
     readonly property real flickSpeed: 400
 
-    // How far the keys sit below their resting place with the handle under
-    // the finger.
-    function carryUnder(height) {
-        return Math.max(0, Math.min(root.panelHeight, root.panelHeight - height - root.grabCentre));
-    }
-
-    // A released pull goes on at the finger's speed and slows to rest: an
+    // A released drag goes on at the finger's speed and slows to rest: an
     // ease-out curve starts at three times its average speed, so matching
     // that to the finger leaves no seam where the hand lets go.
     function settleDuration(distance, speed) {
@@ -154,26 +137,14 @@ InputPanelWindow {
         return Math.max(140, Math.min(320, 3000 * distance / speed));
     }
 
-    // Temporary: what the keys heard of a pull and what state they were in,
-    // for the pass that finds why a pull from the dock is not followed.
-    property real lastLoggedTravel: -1000
-    function reportPull(what) {
-        console.log("Shuffle keys: " + what + " height " + Math.round(root.pullTravel)
-                    + " active " + root.pullActive + " arriving " + root.arriving
-                    + " seated " + root.seated + " reserving "
-                    + BottomSurfaceCoordinator.regionReserving + " visible " + root.visible
-                    + " carry " + Math.round(root.carry) + " of " + Math.round(root.panelHeight));
-    }
-
     function beginArrival() {
-        root.reportPull("keys shown,");
         carryMotion.stop();
         root.carry = root.panelHeight;
         root.arriving = true;
         // Keys waiting for the dock to leave are on their way up, not at
         // rest, so the window above is not made shorter for the moment they
-        // stand at the edge. A finger decides for itself where they go.
-        if (!root.pullActive) BottomSurfaceCoordinator.announceHeading(root.panelHeight, 700);
+        // stand at the edge.
+        BottomSurfaceCoordinator.announceHeading(root.panelHeight, 700);
         root.seatWaitOver = false;
         seatWait.restart();
         root.advanceArrival();
@@ -186,23 +157,14 @@ InputPanelWindow {
         // Keys the compositor has not shown are not on screen: an application
         // that focused its own field raised them, and Kadunce keeps those
         // down. They rise once the compositor shows them, so they are seen
-        // rising rather than appearing where they rest. A finger decides for
-        // itself.
-        if (!root.pullActive && !root.compositorShown) {
+        // rising rather than appearing where they rest.
+        if (!root.compositorShown) {
             return;
         }
-        if (root.pullActive) {
-            root.carryTo(root.carryUnder(root.pullTravel), 80);
-        } else if (root.pendingSettle && !root.pendingOpen
-                   && Date.now() - root.pendingAt < 1000) {
-            root.pendingSettle = false;
-            root.putAway();
-        } else {
-            const fromPull = root.pendingSettle;
-            root.pendingSettle = false;
-            root.travelTo(0, fromPull ? root.settleDuration(root.carry, root.pendingSpeed) : 240);
-        }
+        root.travelTo(0, 240);
     }
+    // The speed a drag on the handle was released at, which the keys carry on
+    // at as they go.
     property real pendingSpeed: 0
 
     function carryTo(target, duration, easing) {
@@ -276,7 +238,7 @@ InputPanelWindow {
                 root.closing = false;
                 root.arriving = false;
                 Qt.inputMethod.hide();
-            } else if (root.carry === 0 && !root.pullActive) {
+            } else if (root.carry === 0) {
                 root.arriving = false;
             }
         }
@@ -299,9 +261,6 @@ InputPanelWindow {
         }
     }
     onSeatedChanged: {
-        if (root.arriving) {
-            root.reportPull("seated changed,");
-        }
         if (root.seated && root.arriving) {
             seatSettle.restart();
         }
@@ -323,7 +282,7 @@ InputPanelWindow {
                 root.returnFromLeaving();
                 // Shown at last after waiting out of sight: the dock may only
                 // now be stepping aside, so the wait for it starts again.
-                if (first && root.arriving && !root.pullActive) {
+                if (first && root.arriving) {
                     root.seatWaitOver = false;
                     seatWait.restart();
                     root.advanceArrival();
@@ -332,39 +291,6 @@ InputPanelWindow {
                 root.compositorShown = false;
                 root.slideAway();
             }
-        }
-    }
-
-    Connections {
-        target: BottomSurfaceCoordinator
-        function onKeyboardPulled(travel, active, velocity) {
-            root.pullTravel = Math.max(0, travel);
-            if (active) {
-                const first = !root.pullActive;
-                root.pullActive = true;
-                if (first || Math.abs(root.pullTravel - root.lastLoggedTravel) >= 40) {
-                    root.lastLoggedTravel = root.pullTravel;
-                    root.reportPull(first ? "pull began" : "pull moved");
-                }
-                if (root.arriving && root.seated && !seatSettle.running && !carryMotion.running) {
-                    root.carry = root.carryUnder(root.pullTravel);
-                } else {
-                    root.advanceArrival();
-                }
-                return;
-            }
-            root.reportPull("pull released at " + Math.round(velocity) + " px/s,");
-            root.lastLoggedTravel = -1000;
-            if (!root.pullActive) {
-                return;
-            }
-            root.pullActive = false;
-            root.pendingSettle = true;
-            root.pendingSpeed = Math.min(velocity, 4000);
-            root.pendingOpen = root.pullTravel >= root.panelHeight * root.openFraction
-                || velocity >= root.flickSpeed;
-            root.pendingAt = Date.now();
-            root.advanceArrival();
         }
     }
 
@@ -511,9 +437,9 @@ InputPanelWindow {
         if (shuffleProbeLayer > 1) shiftActive = true;
     }
 
-    // One boundary for the whole process. The keyboard and the handle are
-    // separate surfaces and both speak to the same region, and two clients
-    // each believing they hold it is the state the boundary exists to prevent.
+    // One boundary for the whole process. The keys and the cold-start hold are
+    // separate surfaces, and two clients each believing they hold the region
+    // is the state the boundary exists to prevent.
     Binding {
         target: BottomSurfaceCoordinator
         property: "requestedVisible"
@@ -647,9 +573,8 @@ InputPanelWindow {
             border.color: "#333333"
         }
 
-        // The keys' top edge carries the dock's handle: the bar that was
-        // pulled, at the dock row's place and width, so what the finger
-        // brought up is what it holds. Without the surface there is no dock
+        // The keys' top edge carries the handle, at the dock row's place and
+        // width, the row the keys cover. Without the surface there is no dock
         // row to match, and the bar keeps a width of its own.
         Rectangle {
             id: resizeHandle
@@ -668,9 +593,8 @@ InputPanelWindow {
                 height: root.handleThickness
                 radius: height / 2
                 color: "#F8F8FF"
-                // As the handle above the dock draws it: nearly white at
-                // rest, fully white under the finger.
-                opacity: root.pullActive || grabArea.pressed ? 1 : 0.85
+                // Nearly white at rest, fully white under the finger.
+                opacity: grabArea.pressed ? 1 : 0.85
 
                 Behavior on opacity {
                     enabled: Kirigami.Units.longDuration > 0
@@ -681,10 +605,10 @@ InputPanelWindow {
                 }
             }
 
-            // The handle takes the keys away the way it brought them: a drag
-            // down carries them under the finger and, past a quarter of the
-            // way or on a flick, lets them go; otherwise they spring back. A
-            // tap puts them away the same way. Height belongs to the right
+            // The handle takes the keys away: a drag down carries them under
+            // the finger and, past a quarter of the way or on a flick, lets
+            // them go; otherwise they spring back. A tap puts them away the
+            // same way. Height belongs to the right
             // column, not here. Positions are the window's, because the
             // handle moves with the keys it is dragging.
             MouseArea {

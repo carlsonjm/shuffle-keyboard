@@ -19,8 +19,8 @@ class TextInputHoldInput;
  * A text field the compositor can see, held by the Keyboard itself.
  *
  * Plasma lets a raised keyboard show only after a text field has asked for it
- * while touch was the last input, so a raise from the handle alone does
- * nothing until the user has touched some field. The Keyboard's own fields
+ * while touch was the last input, so a raise Kadunce asks for from the bottom
+ * bezel does nothing until the user has touched some field. The Keyboard's own fields
  * cannot ask: this process runs Qt's virtual keyboard in-process, so Qt never
  * speaks text input to the compositor on its behalf. This speaks it directly,
  * enabling a text input on whichever of this process's surfaces holds the

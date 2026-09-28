@@ -99,22 +99,20 @@ int main(int argc, char **argv)
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbePrecision"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_PRECISION"));
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeDismiss"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_DISMISS") != 0);
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeLayer"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_LAYER"));
-    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeHandle"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_HANDLE") != 0);
-    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeRaise"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_RAISE"));
-    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeColdStart"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_COLD_START") != 0);
 
-    // The keyboard is an input panel; the drag handle is not. They are two
+    // The keyboard is an input panel; the cold-start hold is not. They are two
     // surfaces with two shell protocols, so which one arrived has to be known
     // before anything is done to it.
     const QUrl keyboardUrl(QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/main.qml"));
-    const QUrl handleUrl(QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/KeyboardHandle.qml"));
+    const QUrl holdUrl(QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/ColdStartHold.qml"));
 
-    QObject::connect(&view, &QQmlApplicationEngine::objectCreated, &application, [previewMode, previewScreenshot, handleUrl](QObject *object, const QUrl &url) {
-        if (url == handleUrl) {
-            // The handle places and shows itself. A keyboard without one still
-            // types, so this is reported and not fatal.
+    QObject::connect(&view, &QQmlApplicationEngine::objectCreated, &application, [previewMode, previewScreenshot, holdUrl](QObject *object, const QUrl &url) {
+        if (url == holdUrl) {
+            // The hold shows itself, and only for a raise. A keyboard without
+            // it still types and still comes up for a text field, so this is
+            // reported and not fatal.
             if (!object) {
-                qCWarning(PlasmaKeyboard) << "Shuffle Keyboard is running without its drag handle.";
+                qCWarning(PlasmaKeyboard) << "Shuffle Keyboard is running without its cold-start raise.";
             }
             return;
         }
@@ -150,7 +148,7 @@ int main(int argc, char **argv)
 
     // Loaded after the keyboard, so a failure here cannot cost the keyboard
     // itself.
-    view.load(handleUrl);
+    view.load(holdUrl);
 
     qCDebug(PlasmaKeyboard) << "Starting Shuffle Keyboard";
 

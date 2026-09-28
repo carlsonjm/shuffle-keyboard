@@ -15,8 +15,7 @@ Checking it:
 | --- | --- |
 | `../verify.sh` | Formatting, licence headers, build and tests. Run before treating a change as complete. |
 | `../install-keyboard.sh` | Builds and replaces the installed Keyboard in your own prefix, and refuses if what landed is not what was built. Restarts nothing: the compositor holds the copy it started for the life of the session. |
-| `../tests/verify-handle.sh` | Runs the drag handle in a compositor of its own: its own bus, runtime and config, all discarded afterwards. It answers whether a process whose other window is an input panel can also own a layer surface, and where the compositor puts it against a reserved band. |
-| `../tests/verify-raise.sh` | Raises the Keyboard from its handle in a compositor of its own, with an application holding the focus, and asks the compositor where the focus is at each step. |
+| `../tests/verify-raise.sh` | Raises the Keyboard the way a swipe up from the bottom bezel does, in a compositor of its own, with a stand-in for Kadunce announcing it and an application holding the focus. Asks the compositor where the focus is at each step, with a text box ready and on a cold start. |
 | `../tests/verify-seat.sh` | Seats the Keyboard in a compositor of its own over a band that reserves the bottom of the output and then gives it up, and asks where the compositor put it. |
 
 Suite block order lives in `../../kadunce/docs/ROADMAP-CC.md`. This repository
