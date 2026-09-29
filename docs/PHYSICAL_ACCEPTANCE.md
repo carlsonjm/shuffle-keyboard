@@ -6,10 +6,10 @@ where a check asks for one.
 
 ## Install and enable
 
-1. Open a terminal and run:
+1. Open a terminal in this checkout and run:
 
    ```sh
-   /home/ghostiepost/Projects/Shuffle/shuffle-keyboard/install-keyboard.sh
+   ./install-keyboard.sh
    ```
 
    It builds, replaces the copy in your own prefix, and checks that what

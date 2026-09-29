@@ -26,8 +26,9 @@ that checkout is present, and say the suite plan was unavailable when it is not.
 
 ## Documents
 
-- Every input the Keyboard handles is listed in `docs/INPUT.md` and described
-  nowhere else. Other documents cite it.
+- Every input the Keyboard handles is defined in `docs/INPUT.md`, which opens
+  with its controls map: each destination by name, with the touch that reaches
+  it. Other documents cite it; a README quick start may repeat the map's rows.
 - Each document owns one subject and states what is true now. History lives in
   Git.
 

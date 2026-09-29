@@ -1,16 +1,30 @@
 # Shuffle Keyboard
 
 Shuffle Keyboard is the touch keyboard and precision pointer for Shuffle on KDE
-Plasma 6: four large rows, a history and a height scrub column either side, and
-a trackpad latch, drawn as a card over the window above. It is a fork of KDE's
-Plasma Keyboard 6.7.5 and keeps its input delivery, Qt Virtual Keyboard and
-KWin's input-method path, with no input engine of its own.
+Plasma 6: four large rows, a history and a height scrub column on either side,
+and a trackpad latch, drawn as a card over the window above.
+
+## Controls
+
+| Task | Touch | Keyboard |
+| --- | --- | --- |
+| Shuffle Keyboard | Tap a text field | — |
+| Precision surface | Tap the trackpad mark at the space bar's right end | — |
+
+Keyboard in the system tray, or in Control Center, brings the keys up at any
+time. Tap the handle along their top edge, or drag it down, to put them away.
+Every input is in [`docs/INPUT.md`](docs/INPUT.md).
 
 - What it is: [`docs/KEYBOARD-CONTRACT.md`](docs/KEYBOARD-CONTRACT.md)
-- Every input and what it does: [`docs/INPUT.md`](docs/INPUT.md)
 - Why this base: [`docs/FEASIBILITY.md`](docs/FEASIBILITY.md)
 - The by-hand pass on a touch device:
   [`docs/PHYSICAL_ACCEPTANCE.md`](docs/PHYSICAL_ACCEPTANCE.md)
+
+## Built on KDE's Plasma Keyboard
+
+It is a fork of KDE's Plasma Keyboard 6.7.5 and keeps its input delivery, Qt
+Virtual Keyboard and KWin's input-method path, with no input engine of its own.
+It carries KDE's licence.
 
 ## Build
 

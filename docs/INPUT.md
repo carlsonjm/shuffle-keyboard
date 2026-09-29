@@ -1,18 +1,24 @@
 # Shuffle Keyboard input
 
-This is every input Shuffle Keyboard handles, and what the person sees it do.
-Each section is one surface and each row one input; a row whose input starts
-with `Planned:` is agreed but not built. Other documents cite this list rather
-than describe an input themselves.
+Every input Shuffle Keyboard handles, destination by destination, and what you
+see it do. Other documents cite this list rather than describe an input
+themselves.
 
-## Text fields
+| Task | Touch | Keyboard |
+| --- | --- | --- |
+| Shuffle Keyboard | Tap a text field | — |
+| Precision surface | Tap the trackpad mark at the space bar's right end | — |
+
+## Shuffle Keyboard
+
+### Text fields
 
 | Input | What happens |
 | --- | --- |
 | Tap a text field | The keys rise from the screen's bottom edge. |
 | Leave the text field, or the application puts the keys away | The keys slide down and away. Asked for again on the way out, they come back from where they are. |
 
-## Tray entry
+### Tray entry
 
 The keys' entry in the system tray, called Keyboard, which Temperance can also
 show as a pill in Control Center.
@@ -22,24 +28,24 @@ show as a pill in Control Center.
 | Tap or click the entry, with the keys down | The keys rise for the window in use; a text box that was ready keeps the focus. Straight after signing in, with nothing ready, they still come up, and typing goes nowhere until a text box is tapped. |
 | Tap or click the entry, with the keys up | The keys slide down and away, as the handle takes them. |
 
-## Handle
+### Handle
 
 The handle is the bar along the keys' top edge, so it only puts them away.
 
 | Input | What happens |
 | --- | --- |
 | Tap the handle | The keys slide down and away. |
-| Drag the handle down | The keys follow the finger. Let go past a quarter of the way, or with a flick downward, and they go; otherwise they spring back. |
+| Drag the handle down | The keys follow your finger. Let go past a quarter of the way, or with a flick downward, and they go; otherwise they spring back. |
 | Activate the handle with a screen reader | "Put the keyboard away" puts the keys away. |
 
-## Keys
+### Keys
 
 | Input | What happens |
 | --- | --- |
-| Tap a letter, digit or mark | Types it as the finger lifts. |
+| Tap a letter, digit or mark | Types it as your finger lifts. |
 | Slide off a key before lifting | Nothing is typed. |
 | Tap the same key twice quickly | Types it twice. |
-| Hold any key but Backspace | Types it once, as the finger lifts. There is no repeat and no accent popup. |
+| Hold any key but Backspace | Types it once, as your finger lifts. There is no repeat and no accent popup. |
 | Tap Shift | The next key is shifted: a capital letter, or `<`, `>` or `?` from comma, period or slash. Shift then lets go; tapping it again first cancels it. |
 | Double-tap Shift | Caps Lock: letters stay capitals until Shift is tapped again. |
 | Tap Shift with Caps Lock on | Caps Lock and Shift both let go. |
@@ -47,7 +53,7 @@ The handle is the bar along the keys' top edge, so it only puts them away.
 | Tap Shift on the symbols layer | The second symbols layer, for one key: the remaining brackets and marks, Tab, Esc, Del, Home, End, Page Up, Page Down and the arrows. Tapping Shift again returns to the first. |
 | Tap `ABC` | The letters return. |
 | Tap Backspace | Deletes one character. |
-| Hold Backspace | Keeps deleting until the finger lifts. |
+| Hold Backspace | Keeps deleting until you lift your finger. |
 | Tap Enter | Enter: a new line, or whatever Enter does in that application. |
 | Tap Tab | Tab. |
 | Tap the space bar | A space. The space bar only types; its right end is the trackpad mark. |
@@ -55,7 +61,7 @@ The handle is the bar along the keys' top edge, so it only puts them away.
 | Tap Ctrl, then C, X or V | Copy, cut or paste, as the application defines them. Any other key makes its own chord, and Shift and Alt combine the same way, so Ctrl, Shift, C copies in a terminal. |
 | Tap the Tette Dot | Whatever the bare Meta key opens in Plasma. |
 
-## Scrub columns
+### Scrub columns
 
 | Input | What happens |
 | --- | --- |
