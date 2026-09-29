@@ -22,7 +22,8 @@ and remembers the answer.
 ## The card
 
 The keyboard is a card: the Itasca `#141414` surface with a hairline border and
-10 px rounded top corners. It keeps Kadunce's 10 px gutter at either side and
+8 px rounded top corners, the suite's paper tier, as are its keys and the
+precision surface. It keeps Kadunce's 10 px gutter at either side and
 nowhere else. It sits flush with the screen's bottom edge and lies over the
 window above, since a gutter there would only cost rows.
 

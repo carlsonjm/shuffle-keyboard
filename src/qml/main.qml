@@ -33,7 +33,7 @@ InputPanelWindow {
     // bottom edge and lying over the window above it. Its top strip carries
     // the handle with the same clear room above it as between it and the keys.
     readonly property real sideGutter: 10
-    readonly property real cardRadius: 10
+    readonly property real cardRadius: 8
     readonly property real handleInset: 10
     readonly property real handleThickness: 6
     readonly property real handleClearance: 10

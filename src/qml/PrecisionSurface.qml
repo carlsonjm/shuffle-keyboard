@@ -13,7 +13,7 @@ Rectangle {
     property bool keyboardUnderlayVisible: false
 
     color: keyboardUnderlayVisible ? "transparent" : "#12151A"
-    radius: keyboardUnderlayVisible ? 0 : 18
+    radius: keyboardUnderlayVisible ? 0 : 8
     border.width: keyboardUnderlayVisible ? 0 : 1
     border.color: "#30353C"
 

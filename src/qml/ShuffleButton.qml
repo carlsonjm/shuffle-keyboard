@@ -31,7 +31,8 @@ Rectangle {
     signal canceled()
     signal held()
 
-    radius: Math.max(8, Math.min(12, height * 0.14))
+    // Keys are paper: round keys would read as dots.
+    radius: 8
     scale: pointer.pressed ? 0.99 : 1
     color: active ? activeColor : (pointer.pressed ? pressedColor : restingColor)
     border.width: showOutline ? 1 : 0
