@@ -23,7 +23,7 @@ difference before committing any of it.
 
 One of five repositories. `kadunce`, `tettegouche` and `temperance` are the
 public components; `shuffle` downstream assembles the product. This repository
-is Block 9 in `../kadunce/docs/ROADMAP-CC.md`, and it is private because it has
+is Block 9 in `../shuffle/docs/suite/ROADMAP-CC.md`, and it is private because it has
 not been published yet, not because it can be closed: it carries KDE's licence,
 and whoever receives a build is entitled to its source.
 
