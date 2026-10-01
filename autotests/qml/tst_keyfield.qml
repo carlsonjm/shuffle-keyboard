@@ -77,38 +77,31 @@ Item {
             compare(find("char", "q").x / pitch, 1);
             compare(find("char", "a").x / pitch, 1.25);
             compare(find("char", "z").x / pitch, 1.75);
-            compare(field.implicitWidth, 16 * pitch - field.keyGap);
+            compare(field.implicitWidth, 12.5 * pitch - field.keyGap);
         }
 
         function test_every_character_key_is_one_unit() {
             for (const key of field.keys) {
-                if (key.kind === "char") compare(key.w, field.unitWidth, key.ch);
+                if (key.kind === "char" && key.ch !== "/") compare(key.w, field.unitWidth, key.ch);
             }
+            compare(find("char", "/").w, 1.75 * field.unitPitch - field.keyGap);
         }
 
         function test_right_edge_is_shared() {
             const edge = k => k.x + k.w;
             const right = edge(find("delete"));
             compare(edge(find("enter")), right);
-            compare(edge(field.keys.filter(k => k.kind === "shift")[1]), right);
-            compare(edge(find("right")), right);
+            compare(edge(find("char", "/")), right);
+            compare(edge(find("hide")), right);
             compare(right, field.implicitWidth);
         }
 
         function test_rows_read_as_the_contract() {
             const row = r => field.keys.filter(k => k.row === r).map(k => k.kind === "char" ? k.ch : k.kind).join(" ");
-            compare(row(0), "esc q w e r t y u i o p [ ] \\ delete");
-            compare(row(1), "tab a s d f g h j k l ; ' - enter");
-            compare(row(2), "shift z x c v b n m , . / = shift");
-            compare(row(3), "ctrl dot alt space num hide left up down right");
-        }
-
-        function test_up_and_down_share_one_unit() {
-            const up = find("up"), down = find("down");
-            compare(up.x, down.x);
-            compare(up.w, field.unitWidth);
-            verify(up.h < field.rowHeight / 2);
-            compare(down.y + down.h, up.y + field.rowHeight);
+            compare(row(0), "num q w e r t y u i o p delete");
+            compare(row(1), "tab a s d f g h j k l enter");
+            compare(row(2), "shift z x c v b n m , . /");
+            compare(row(3), "ctrl alt space dot hide");
         }
 
         // ---- Keys ----
@@ -151,7 +144,7 @@ Item {
         }
 
         function test_shift_types_each_marks_ansi_shift() {
-            const marks = { ",": "<", ".": ">", "/": "?", "[": "{", "]": "}", "\\": "|", ";": ":", "'": "\"", "-": "_", "=": "+" };
+            const marks = { ",": "<", ".": ">", "/": "?" };
             for (const mark in marks) {
                 tap(find("shift"));
                 field.lastShiftTap = 0;
@@ -160,15 +153,14 @@ Item {
             compare(texts(), Object.keys(marks).map(m => marks[m]));
         }
 
-        function test_double_shift_is_caps_lock_on_either_side() {
-            const right = field.keys.filter(k => k.kind === "shift")[1];
-            tap(right);
-            tap(right);
+        function test_double_shift_is_caps_lock() {
+            tap(find("shift"));
+            tap(find("shift"));
             verify(field.capsActive);
             tapChar("a");
             tapChar("b");
             compare(texts(), ["A", "B"]);
-            tap(right);
+            tap(find("shift"));
             verify(!field.capsActive && !field.shiftActive);
         }
 
@@ -183,26 +175,9 @@ Item {
         function test_go_tab_and_esc() {
             tap(find("enter"));
             tap(find("tab"));
+            tap(find("num"));
             tap(find("esc"));
             compare(keysSent().map(k => k[0]), [Qt.Key_Return, Qt.Key_Tab, Qt.Key_Escape]);
-        }
-
-        function test_arrows_and_shift_selection() {
-            tap(find("left"));
-            tap(find("up"));
-            tap(find("shift"));
-            tap(find("right"));
-            tap(find("down"));
-            compare(keysSent(), [[Qt.Key_Left, 0], [Qt.Key_Up, 0], [Qt.Key_Right, Qt.ShiftModifier], [Qt.Key_Down, 0]]);
-        }
-
-        function test_held_arrow_repeats() {
-            const c = centre(find("right"));
-            touchEvent(field).press(0, field, c.x, c.y).commit();
-            wait(700);
-            touchEvent(field).release(0, field, c.x, c.y).commit();
-            verify(sent.count >= 3, "repeated " + sent.count);
-            verify(keysSent().every(k => k[0] === Qt.Key_Right));
         }
 
         function test_hide_and_tette_dot() {
@@ -219,16 +194,27 @@ Item {
             tap(find("num"));
             compare(field.activeLayer, "symbols");
             compare(field.labelFor(find("num")), "ABC");
+            const row = r => field.keys.filter(k => k.row === r).map(k => k.kind === "char" ? k.ch : k.kind).join(" ");
+            compare(row(0), "num 1 2 3 4 5 6 7 8 9 0 delete");
+            compare(row(1), "esc - = [ ] \\ ; ' ` / enter");
+            compare(row(2), "emoji ! @ # $ % ^ & * ( )");
             tapChar("1");
-            tap(find("left"));
-            tap(find("up"));
-            tap(find("down"));
-            tap(find("right"));
             tap(find("delete"));
-            compare(keysSent().map(k => k[0]),
-                    ["1".charCodeAt(0), Qt.Key_Home, Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_End, Qt.Key_Delete]);
+            compare(keysSent().map(k => k[0]), ["1".charCodeAt(0), Qt.Key_Backspace]);
             tap(find("num"));
             compare(field.activeLayer, "letters");
+        }
+
+        function test_symbols_flick_to_their_ansi_shift() {
+            tap(find("num"));
+            const marks = { "-": "_", "=": "+", "[": "{", "]": "}", "\\": "|", ";": ":", "'": "\"", "`": "~", "/": "?" };
+            for (const mark in marks) {
+                const c = centre(find("char", mark));
+                touchEvent(field).press(0, field, c.x, c.y).commit();
+                touchEvent(field).move(0, field, c.x, c.y + field.flickDistance).commit();
+                touchEvent(field).release(0, field, c.x, c.y + field.flickDistance).commit();
+            }
+            compare(texts(), Object.keys(marks).map(m => marks[m]));
         }
 
         function test_emoji_is_on_the_symbols_layer() {
@@ -261,11 +247,11 @@ Item {
 
         function test_flick_leaves_shift_pending() {
             tap(find("shift"));
-            const sc = centre(find("char", ";"));
+            const sc = centre(find("char", ","));
             touchEvent(field).press(0, field, sc.x, sc.y).commit();
             touchEvent(field).move(0, field, sc.x, sc.y + field.flickDistance).commit();
             touchEvent(field).release(0, field, sc.x, sc.y + field.flickDistance).commit();
-            compare(texts(), [":"]);
+            compare(texts(), ["<"]);
             verify(field.shiftActive);
         }
 
@@ -303,16 +289,6 @@ Item {
             touchEvent(field).move(0, field, r.x + d, r.y + d).commit();
             touchEvent(field).release(0, field, r.x + d, r.y + d).commit();
             verify(texts().indexOf("4") < 0);
-        }
-
-        function test_arrow_flicks_are_home_and_end() {
-            for (const kind of ["left", "right"]) {
-                const c = centre(find(kind));
-                touchEvent(field).press(0, field, c.x, c.y - 20).commit();
-                touchEvent(field).move(0, field, c.x, c.y - 20 + field.flickDistance).commit();
-                touchEvent(field).release(0, field, c.x, c.y - 20 + field.flickDistance).commit();
-            }
-            compare(keysSent().map(k => k[0]), [Qt.Key_Home, Qt.Key_End]);
         }
 
         // ---- Accents ----

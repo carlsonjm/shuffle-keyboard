@@ -29,18 +29,18 @@ InputPanelWindow {
     readonly property real cardRadius: 8
     readonly property real topStrip: 26
 
-    // The card is 42% of the screen's height, always: Shuffle's window roll
+    // The card is 44% of the screen's height, always: Shuffle's window roll
     // gives the Active card its room, so shorter keys would win nothing back.
     // The four rows set the key height, and a character key is as wide as it
-    // is tall unless sixteen of them would not fit inside the card, when they
+    // is tall unless a row of them would not fit inside the card, when they
     // all narrow together.
-    readonly property int heightPercent: 42
+    readonly property int heightPercent: 44
     readonly property real keyGap: Math.max(5, Math.min(10, root.width * 0.0062))
     readonly property real outerGap: Math.max(6, Math.min(12, root.width * 0.007))
     readonly property real panelHeight: Math.round(root.height * heightPercent / 100)
     readonly property real rowHeight: (panelHeight - root.topStrip - root.keyGap * 3 - root.outerGap) / 4
     readonly property real keyUnitWidth: Math.max(1, Math.min(rowHeight,
-        (root.width - root.sideGutter * 2 - root.outerGap * 2 + root.keyGap) / 16 - root.keyGap))
+        (root.width - root.sideGutter * 2 - root.outerGap * 2 + root.keyGap) / keyField.totalUnits - root.keyGap))
     property int probeIndex: 0
     property int probeShortcutStep: 0
     property bool probeArmed: shuffleProbeDelay <= 0

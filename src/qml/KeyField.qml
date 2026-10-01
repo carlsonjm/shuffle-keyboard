@@ -7,7 +7,8 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 
-// The keys: sixteen units across, four rows, and one surface that reads every
+// The keys: the original footprint, twelve and a half units across and centred
+// on the card, four rows, and one surface that reads every
 // finger on them at once (docs/KEYBOARD-CONTRACT.md § Layout, docs/INPUT.md
 // § Keys). It types nothing itself. What a touch means leaves as
 // keyRequested, which the window hands to the input method.
@@ -32,7 +33,7 @@ Item {
     signal hideRequested()
     signal metaRequested()
 
-    readonly property real totalUnits: 16
+    readonly property real totalUnits: 12.5
     readonly property real unitPitch: unitWidth + keyGap
     readonly property real rowHeight: (height - keyGap * 3) / 4
     implicitWidth: totalUnits * unitPitch - keyGap
@@ -55,7 +56,7 @@ Item {
 
     // Each mark's ANSI shift, typed by Shift and by a flick down.
     readonly property var ansiShift: ({
-        ",": "<", ".": ">", "/": "?", "[": "{", "]": "}", "\\": "|",
+        ",": "<", ".": ">", "/": "?", "[": "{", "]": "}", "\\": "|", "`": "~",
         ";": ":", "'": "\"", "-": "_", "=": "+"
     })
     readonly property var flicks: Object.assign({
@@ -68,25 +69,26 @@ Item {
         n: "ñń", c: "çć", s: "ßś", y: "ÿý"
     })
 
-    // Rows as [kind, span] for the named keys and a string for a run of
-    // one-unit character keys.
-    readonly property var bottomRow: [["ctrl", 1.25], ["dot", 1.25], ["alt", 1.25],
-                                      ["space", 6.75], ["num", 1.25], ["hide", 1.25],
-                                      ["left", 1], ["updown", 1], ["right", 1]]
+    // Rows as [kind, span] for the named keys, a string for a run of one-unit
+    // character keys, and ["char", ch, span] for a wider character key.
+    readonly property var bottomRow: [["ctrl", 1.5], ["alt", 1.5], ["space", 6.5], ["dot", 1.5], ["hide", 1.5]]
     readonly property var rowsByLayer: ({
         letters: [
-            [["esc", 1], "qwertyuiop[]\\", ["delete", 2]],
-            [["tab", 1.25], "asdfghjkl;'-", ["enter", 2.75]],
-            [["shift", 1.75], "zxcvbnm,./=", ["shift", 3.25]],
+            [["num", 1], "qwertyuiop", ["delete", 1.5]],
+            [["tab", 1.25], "asdfghjkl", ["enter", 2.25]],
+            [["shift", 1.75], "zxcvbnm,.", ["char", "/", 1.75]],
             bottomRow
         ],
+        // The marks the letters leave out, each with its ANSI shift on a
+        // flick down, as the letters carry theirs.
         symbols: [
-            [["esc", 1], "1234567890[]\\", ["delete", 2]],
-            [["tab", 1.25], "!@#$%^&*()_+", ["enter", 2.75]],
-            [["emoji", 1.75], "~`{}|<>€£¥°", ["shift", 3.25]],
+            [["num", 1], "1234567890", ["delete", 1.5]],
+            [["esc", 1.25], "-=[]\\;'`/", ["enter", 2.25]],
+            [["emoji", 1.75], "!@#$%^&*(", ["char", ")", 1.75]],
             bottomRow
         ],
-        emoji: [[], [], [], bottomRow]
+        // While emoji show, the bottom row's first key returns to the letters.
+        emoji: [[], [], [], [["num", 1.5]].concat(bottomRow.slice(1))]
     })
 
     function buildKeys(layerName, pitch, rowH, gap) {
@@ -102,6 +104,12 @@ Item {
                                    x: column * pitch, y: y, w: pitch - gap, h: rowH });
                         column += 1;
                     }
+                    continue;
+                }
+                if (item[0] === "char") {
+                    out.push({ id: r + ":" + column, kind: "char", ch: item[1], span: item[2], row: r,
+                               x: column * pitch, y: y, w: item[2] * pitch - gap, h: rowH });
+                    column += item[2];
                     continue;
                 }
                 const kind = item[0], span = item[1];
@@ -198,19 +206,14 @@ Item {
         keyRequested(key, "", modifiers);
     }
     function deleteOne() {
-        if (activeLayer === "symbols") sendSpecial(Qt.Key_Delete, "");
-        else sendSpecial(Qt.Key_Backspace, "");
+        sendSpecial(Qt.Key_Backspace, "");
     }
     function deleteWord() {
         if (terminal) keyRequested(Qt.Key_W, "w", Qt.ControlModifier);
         else keyRequested(Qt.Key_Backspace, "", Qt.ControlModifier);
     }
     function arrow(kind) {
-        if (activeLayer === "symbols") {
-            sendSpecial({ left: Qt.Key_Home, up: Qt.Key_PageUp, down: Qt.Key_PageDown, right: Qt.Key_End }[kind], "");
-        } else {
-            sendSpecial({ left: Qt.Key_Left, up: Qt.Key_Up, down: Qt.Key_Down, right: Qt.Key_Right }[kind], "");
-        }
+        sendSpecial({ left: Qt.Key_Left, up: Qt.Key_Up, down: Qt.Key_Down, right: Qt.Key_Right }[kind], "");
     }
     function tapShift() {
         const now = Date.now();
@@ -271,6 +274,7 @@ Item {
     }
 
     function flickable(key) {
+        if (activeLayer === "symbols") return key.kind === "char" && ansiShift[key.ch] !== undefined;
         return activeLayer === "letters" && ((key.kind === "char" && flicks[key.ch] !== undefined)
                                        || key.kind === "left" || key.kind === "right");
     }
@@ -327,7 +331,7 @@ Item {
                 while (state.ay >= caretStepY) { sendStep(Qt.Key_Down, Qt.NoModifier); state.ay -= caretStepY; }
                 while (state.ay <= -caretStepY) { sendStep(Qt.Key_Up, Qt.NoModifier); state.ay += caretStepY; }
             }
-        } else if (kind === "delete" && activeLayer !== "symbols" && !state.repeating) {
+        } else if (kind === "delete" && !state.repeating) {
             if (state.dx < -deleteStart) state.scrub = true;
             if (state.scrub) {
                 setMarks(state.dx < -deleteStart ? Math.floor((-state.dx - deleteStart) / deleteStep) + 1 : 0);
@@ -359,7 +363,7 @@ Item {
         }
         if (state.repeating) return;
         if (flickable(key) && flickProgress(state) >= 1) {
-            if (key.kind === "char") typeCharacter(flicks[key.ch], true);
+            if (key.kind === "char") typeCharacter(activeLayer === "symbols" ? ansiShift[key.ch] : flicks[key.ch], true);
             else sendSpecial(key.kind === "left" ? Qt.Key_Home : Qt.Key_End, "");
             return;
         }
@@ -422,7 +426,7 @@ Item {
                 while (now >= state.nextRepeat) {
                     state.repeats += 1;
                     // By characters, then by words.
-                    if (state.repeats <= 14 || activeLayer === "symbols") deleteOne();
+                    if (state.repeats <= 14) deleteOne();
                     else if (state.repeats % 3 === 0) deleteWord();
                     state.nextRepeat += 70;
                 }
@@ -507,22 +511,18 @@ Item {
         case "alt": return "Alt";
         case "space": return "Space";
         case "num": return activeLayer === "letters" ? "123" : "ABC";
-        case "delete": return activeLayer === "symbols" ? "Del" : (terminal && markCount > 0 ? String(markCount) : "");
-        case "left": return activeLayer === "symbols" ? "Home" : "";
-        case "right": return activeLayer === "symbols" ? "End" : "";
-        case "up": return activeLayer === "symbols" ? "PgUp" : "";
-        case "down": return activeLayer === "symbols" ? "PgDn" : "";
+        case "delete": return terminal && markCount > 0 ? String(markCount) : "";
         }
         return "";
     }
     function glyphFor(key) {
-        if (activeLayer === "symbols" && ["delete", "left", "right", "up", "down"].indexOf(key.kind) >= 0) return "";
         if (key.kind === "delete") return terminal && markCount > 0 ? "" : "delete";
         if (key.kind === "emoji") return "emoji";
         if (["left", "right", "up", "down", "hide"].indexOf(key.kind) >= 0) return key.kind;
         return "";
     }
     function secondaryFor(key) {
+        if (activeLayer === "symbols") return key.kind === "char" ? (ansiShift[key.ch] || "") : "";
         if (activeLayer !== "letters") return "";
         if (key.kind === "char") return flicks[key.ch] || "";
         if (key.kind === "left") return "Home";
