@@ -26,10 +26,8 @@ class BottomSurfaceCoordinator : public QObject
     Q_PROPERTY(bool requestedVisible READ requestedVisible WRITE setRequestedVisible NOTIFY requestedVisibleChanged)
     Q_PROPERTY(QString error READ error NOTIFY errorChanged)
 
-    // What the Bottom Surface is doing, for the handle on the keys, which
-    // takes the application row's place and width. All of it is absent-safe:
-    // with no surface on the bus these stay false and zero, and the handle
-    // keeps a width of its own.
+    // What the Bottom Surface is doing, read as the keys arrive. All of it
+    // is absent-safe: with no surface on the bus these stay false and zero.
     Q_PROPERTY(bool surfacePresent READ surfacePresent NOTIFY extentChanged)
     Q_PROPERTY(int bandHeight READ bandHeight NOTIFY extentChanged)
     Q_PROPERTY(int dockLeft READ dockLeft NOTIFY extentChanged)
@@ -82,8 +80,8 @@ Q_SIGNALS:
     /// The keys' tray entry asked for them. The compositor has been asked
     /// already; this is for a cold start, where that ask alone shows nothing.
     void keysRequested();
-    /// The keys' tray entry was tapped while they were up: they go, as the
-    /// handle takes them.
+    /// The keys' tray entry was tapped while they were up: they go, as Hide
+    /// puts them.
     void putAwayRequested();
     /// Every report of whether the compositor shows the keys, changed or not.
     /// Two reports can arrive for keys shown and hidden again at once, and
