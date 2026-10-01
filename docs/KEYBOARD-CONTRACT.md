@@ -53,6 +53,10 @@ are re-opened with evidence, not with a preference.
 | 3 | Shift 2.25, Z to M, comma, period, slash, `=`, Shift 2.75 |
 | 4 | Ctrl 1.25, Tette Dot 1.25, Alt 1.25, Emoji 1.25, Space 5.5, `123` 1.25, Hide 1.25, ←, ↑ over ↓, → |
 
+[`LAYOUT-MOCKUP.html`](LAYOUT-MOCKUP.html) draws this layout at the device's
+proportions and answers touch, for judging its shape by hand. Where it and this
+document differ, this document holds.
+
 The punctuation keys sit where a ThinkPad has them, so code and the shell need
 no trip to `123`. Delete, Go, the right Shift and → end on one right edge, and
 none of them moves a letter. There is no Caps key and no permanent number row.
