@@ -65,6 +65,10 @@ geometry rather than to input delivery, and Shuffle adopted the same pitch and
 stagger. The comparison keyboard has been removed: it settled one question, and
 shipping a second virtual keyboard to answer it again is not worth carrying.
 
+What was settled is the pitch and the steps between rows: the home row a
+quarter unit right of the top row, the bottom row a further half. The 16-unit
+block keeps both; where each row begins follows from the keys at its left end.
+
 ## Physical acceptance
 
 Automated tests cannot establish finger comfort, pointer feel, portal-consent

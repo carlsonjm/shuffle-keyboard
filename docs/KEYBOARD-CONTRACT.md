@@ -27,82 +27,97 @@ precision surface. It keeps Kadunce's 10 px gutter at either side and
 nowhere else. It sits flush with the screen's bottom edge and lies over the
 window above, since a gutter there would only cost rows.
 
-Its top strip carries the handle: 6 px thick, with 10 px clear above it and
-10 px between it and the keys. The handle is nearly white at rest and white
-under the finger. Where the Bottom Surface is installed it takes the place and
-width of the dock's application row, which the keys cover. Otherwise it is
-160 px wide and centred. What it does when touched is [`INPUT.md`](INPUT.md)
-§ Handle.
+The card is monochrome: Itasca's surface, Ghost White `#F8F8FF` and grey
+hairlines, with no accent colour. Keys have hairline outlines, open spacing
+and floating Ghost White labels. A key that is on (Shift, Caps, Ctrl, Alt)
+fills. There are no skeuomorphic keys, dense outlines or permanent toolbars.
 
-Keys have hairline outlines, open spacing and floating Ghost White labels. A
-key that is on (Shift, Caps, Ctrl, Alt, a symbol layer) fills. There are no
-skeuomorphic keys, dense outlines or permanent toolbars.
+Its top strip, 10 px above a 6 px band and 10 px below it, is kept clear for
+word predictions, which come after 1.0 (§ 1.0 boundaries). Nothing is drawn
+there and a touch there does nothing. There is no handle: the Hide key puts the
+keys away.
 
 ## Layout
 
-The key block is 12.5 units wide. Every character key is one unit, at one pitch
-on every row. Q begins at 1.00 units, A at 1.25 and Z at 1.75. This geometry was
-settled on the device ([`FEASIBILITY.md`](FEASIBILITY.md) § Row geometry) and is
-re-opened with evidence, not with a preference.
+The key block is 16 units wide and centred in the card. Every character key is
+one unit, at one pitch on every row. Q begins at 1.50 units, A at 1.75 and Z at
+2.25: the home row a quarter unit right of the top row and the bottom row a
+further half, the stagger settled on the device
+([`FEASIBILITY.md`](FEASIBILITY.md) § Row geometry). The pitch and the stagger
+are re-opened with evidence, not with a preference.
 
 | Row | Keys, with widths in units |
 | --- | --- |
-| 1 | `123` 1, Q to P, Backspace 1.5 |
-| 2 | Tab 1.25, A to L, Enter 2.25 |
-| 3 | Shift 1.75, Z to M, comma, period, slash 1.75 |
-| 4 | Ctrl 1.5, Alt 1.5, Space 8, Tette Dot 1.5 |
+| 1 | Esc 1.5, Q to P, `[`, `]`, `\`, Delete 1.5 |
+| 2 | Tab 1.75, A to L, `;`, `'`, `-`, Go 2.25 |
+| 3 | Shift 2.25, Z to M, comma, period, slash, `=`, Shift 2.75 |
+| 4 | Ctrl 1.25, Tette Dot 1.25, Alt 1.25, Emoji 1.25, Space 5.5, `123` 1.25, Hide 1.25, ←, ↑ over ↓, → |
 
-Backspace, Enter, slash and the Tette Dot end on one right edge, and none of
-them moves a letter. Enter fills the home row's gap and is muted Ghost White
-with dark text. Comma, period and slash show their shifted characters, `<`, `>`
-and `?`, above their own, so the commonest marks need no trip to `123`. Shift
-carries both one-shot Shift and Caps. There is no Caps key, no permanent number
-row and no arrow cluster.
+The punctuation keys sit where a ThinkPad has them, so code and the shell need
+no trip to `123`. Delete, Go, the right Shift and → end on one right edge, and
+none of them moves a letter. There is no Caps key and no permanent number row.
+
+Labels:
+
+- **Delete** is a left arrow with a stem. The four arrow keys are chevrons.
+- **Go** is Enter. It fills the home row's gap and is muted Ghost White with
+  dark text.
+- **Shift** is on both sides, and both carry one-shot Shift and Caps.
+- **Emoji** is a smiling face, outlined.
+- **Hide** is a keyboard over a downward chevron.
+- **↑ and ↓** are half height, stacked in one unit between ← and →, a
+  ThinkPad's inverted T. ← and → are full height.
+
+Every character key that has a second character shows it small and grey above
+its own, and a flick down types it ([`INPUT.md`](INPUT.md) § Flicks). The top
+row carries the digits. The home and bottom rows carry the rest of the shifted
+digits and a few common marks. Each punctuation key carries its ANSI shift,
+which Shift also types: `{` `}` `|` `:` `"` `_` `<` `>` `?` `+`. ← and → carry
+Home and End.
 
 The Tette Dot is a white dot: the protected resting brand mark, not a text
-label. It stands for the bare Meta key as the person has bound it, read live
-from KDE's global shortcuts rather than naming an applet.
+label. It sits between Ctrl and Alt, where a ThinkPad puts its system key, and
+stands for the bare Meta key as the person has bound it, read live from KDE's
+global shortcuts rather than naming an applet.
 
 The space bar is the widest key and carries the trackpad mark at its right end.
 What each key does is [`INPUT.md`](INPUT.md) § Keys.
 
-`123` swaps the letters for two symbol layers, and Shift moves between them.
-The first holds the digits and common punctuation. The second holds the
-remaining brackets and marks; Tab, Esc, Del, Home, End, Page Up and Page Down;
-and the four arrows. Both keep the card's shape, with no overlap, clipping or
-dead gaps.
+`123` swaps the letters for one symbols layer, and reads `ABC` while it shows.
+Its top row holds the digits with `[`, `]` and `\`, its home row
+`! @ # $ % ^ & * ( ) _ +`, and its bottom row `` ~ ` { } | < > € £ ¥ ° ``. On
+it the arrows become Home, Page Up, Page Down and End, and Delete becomes Del.
+It keeps the card's shape, with no overlap, clipping or dead gaps.
+
+Emoji swaps the three upper rows for an emoji panel, a sideways-scrolling grid
+under a row of categories, and reads `ABC` while it shows. The bottom row stays.
 
 ## Height
 
-Only key height changes. Key width is fixed, so the keys, the space bar and
-both scrub columns keep their places at every height.
+The card is 42% of the screen's height, always. The person does not change it:
+Shuffle's window roll gives the Active card its room (§ Showing and hiding), so
+there is no screen to win back with shorter keys.
 
-The card is 32% to 52% of the screen's height, in steps of one percent, and is
-saved as that share. The default, 42%, gives square keys. That key sets the key
-width, and the scrub columns take the width left either side. At 42% a browser
-above the keys keeps room for its own minimum height.
+At 42% the four rows set the key height, and a character key is as wide as it
+is tall. Where 16 square units would not fit inside the card's gutters, every
+key narrows together until they do, and the pitch stays one on every row. At
+42% a browser above the keys keeps room for its own minimum height.
 
-The keys hold no screen space of their own. The Active card makes room for them
-(§ Showing and hiding), so a shorter keyboard gives that card back height: the
-person trades accuracy for screen rather than picking a key size.
+## Editing
 
-## Scrub columns
+Editing is on the keys, not beside them:
 
-The width either side of the keys carries a scrub column, a vertical control
-that is a faint line until a finger arrives. The left column is the edit
-history; the right is key height ([`INPUT.md`](INPUT.md) § Scrub columns).
-Neither is on the top edge, which belongs to showing and hiding.
+- **The caret trackpad.** Holding the space bar, or sliding along it, turns the
+  key block into a surface that moves the text cursor with arrow keys, so it
+  works wherever arrow keys do, terminals included.
+- **The delete scrub.** A drag left from Delete marks characters to delete; a
+  flick left deletes a word.
+- **The arrows**, with Shift for selection.
+- **Modifier chords**: Ctrl, Z undoes and Ctrl, Shift, Z redoes, as the
+  application defines them.
 
-Touched, a column shows its notches with the current one lit, what it reads
-above them (the undo or redo icon, or the height as a percentage), and its name
-beneath. The height column's default notch is always bright. Each notch acts as
-the finger passes it, so the result shows while the finger is still down and a
-scrub can take itself back before it ends.
-
-The device has no haptics, so a notch is felt two other ways: it holds a little
-past halfway before it gives, as a detent does, and it clicks with the
-keyboard's quiet tick. A system without Qt Multimedia loses the click and
-nothing else.
+There is no history scrub. What each does is [`INPUT.md`](INPUT.md) § Caret
+trackpad and § Delete.
 
 ## Precision surface
 
@@ -110,11 +125,14 @@ The trackpad mark at the space bar's right end latches the whole keyboard as a
 trackpad; [`INPUT.md`](INPUT.md) § Precision surface is what each touch does.
 While latched, the keys dim and do not type, and they stay up whatever the
 pointer does. The mark stays live, and lit. The surface is the keyboard's
-full footprint below the handle, scrub columns included. Until the portal has
-granted pointer control, it says so in place of pointing.
+full footprint below the top strip. Until the portal has granted pointer
+control, it says so in place of pointing.
 
-The precision surface does not duplicate the system's Shuffle gestures, and
-editing stays with the history column and modifier chords.
+The mark and the caret trackpad share the space bar and do not overlap: a touch
+that begins on the mark latches the pointer, and a touch anywhere else on the
+space bar types a space or moves the text cursor. The precision surface does not
+duplicate the system's Shuffle gestures, and editing stays with the keys
+(§ Editing).
 
 ## Showing and hiding
 
@@ -129,16 +147,17 @@ before any text field has been touched, the compositor's ask alone shows
 nothing. Then the Keyboard borrows the focus with a field nobody sees until the
 keys go, and the focus returns to where it was.
 
-They rise from the screen's bottom edge on their own and go back into it: under
-the finger when the handle takes them, and on their own otherwise. Keys going
-because typing ended, or because an application asked the compositor to put
-them away, leave the same way before the window goes. Asked for again on the
+They rise from the screen's bottom edge on their own and go back into it,
+whether the Hide key, the tray entry, the end of typing or the application put
+them away. Keys going because
+typing ended, or because an application asked the compositor to put them away,
+leave before the window goes. Asked for again on the
 way out, they come back from where they are.
 
 They rise only once the dock has left and given up its room, so they never rise
 into it.
 
-Before each motion with a destination, and on a press of the handle, the keys
+Before each motion with a destination, and on a press of the Hide key, the keys
 tell Kadunce where they will rest and when (`keyboardHeading`). The Active card
 follows them, and its application is resized once, at rest, not every frame.
 With no Kadunce nothing answers and nothing changes. A request for the keys made
@@ -166,7 +185,7 @@ surface's band, so windows stop at the band.
 - Treat as blockers: dropped characters, wrong keymaps, focus loss, meaningful
   latency, unreliable show and hide, or a keyboard that moves a card or resizes
   any window but the Active card making its room.
-- Keep pointer, editing, height, keyboard and system gestures in explicit,
+- Keep pointer, editing, keyboard and system gestures in explicit,
   non-overlapping ownership.
 - Support lock and sign-in surfaces only where the system API permits safe
   integration.
@@ -175,14 +194,19 @@ surface's band, so windows stop at the band.
 
 Shuffle 1.0 does not implement autocorrect, prediction, swipe typing,
 dictation, custom dictionaries, AI writing, a multilingual IME or emoji
-infrastructure. Mature system capability may be integrated where it does not
-compromise input reliability.
+infrastructure. The emoji panel only commits the characters it shows; it has no
+search, no skin tones beyond what each character carries, and no font of its
+own. Mature system capability may be integrated where it does not compromise
+input reliability.
+
+The layout leaves room for what comes after 1.0. Predictions take the card's
+top strip. Dictation takes the Emoji key's place, and the emoji panel moves
+behind it.
 
 ## Acceptance
 
-A supported touch device types quickly without loss or wrong mapping, changes
-key height, enters and leaves the precision surface without focus loss, points
-and edits reliably, and returns immediately to typing. A history scrub can be
-taken back inside the gesture, and the notch hold reads as feedback rather than
-as delay on the device itself. The pass is
+A supported touch device types quickly without loss or wrong mapping, with
+two thumbs overlapping. It moves the text cursor from the space bar and deletes
+by scrub, enters and leaves the precision surface without focus loss, points
+and edits reliably, and returns immediately to typing. The pass is
 [`PHYSICAL_ACCEPTANCE.md`](PHYSICAL_ACCEPTANCE.md).

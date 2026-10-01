@@ -34,8 +34,8 @@ does is [`INPUT.md`](INPUT.md); these checks test it on the device.
   mouse wherever a row can take a click. Each row does what it says. Name any
   that does not.
 - **Invocation:** Tapping text fields opens the keyboard every time.
-- **Put away:** Put the keys away from their handle ten times, by tap and by
-  drag. They go every time, and a text field brings them back every time.
+- **Put away:** Put the keys away with Hide ten times. They go every time, and
+  a text field brings them back every time.
 - **Panel handoff:** The normal bottom panel yields without overlap or visible
   bouncing and returns after dismissal.
 - **Dock handoff:** With the Bottom Surface installed instead, raising the
@@ -47,38 +47,51 @@ does is [`INPUT.md`](INPUT.md); these checks test it on the device.
   duplicated, reordered, or wrongly mapped.
 - **Repeated letters:** Type `bookkeeper committee coffee` at normal speed.
   Every repeated letter registers without deliberately slowing the second tap.
+- **Overlapping thumbs:** Type `the quick brown fox` as fast as you can with
+  both thumbs, letting the next thumb land before the last one lifts. Every
+  letter arrives, in order.
 - **Space:** Type a paragraph at speed. Every tap on the space bar types one
-  space, and none latches the trackpad.
-- **Layers:** Run quickly through Shift, Caps, `123`, the second symbols layer
-  and `ABC` several times. Each behaves as `INPUT.md` § Keys says, and nothing
-  is left stuck on.
-- **Row stagger:** Q begins at 1.00 units, A at 1.25, and Z at 1.75. Every
+  space; none latches the trackpad and none starts the caret trackpad.
+- **Caret trackpad:** In a KDE app, a browser and a terminal, hold the space
+  bar, then move the cursor left, right, up and down; then do the same by
+  sliding along it. The cursor follows, nothing is typed, and the keys return
+  at lift with the cursor where it was left.
+- **Delete scrub:** In a KDE app and a browser, drag left from Delete across
+  five characters, slide back two and lift. Exactly three are deleted. In a
+  terminal the count shows on the key and three Backspaces arrive. Flick left
+  from Delete: one word goes.
+- **Flicks:** Flick each key in the top row down for its digit, and every
+  punctuation key for its shift. Each types the grey character above it, and a
+  flick never types the key's own character as well.
+- **Accents:** Hold e, slide to `é` and lift. It types `é`; lifting off the
+  accents types nothing.
+- **Layers:** Run quickly through Shift, Caps, `123`, the emoji panel and `ABC`
+  several times. Each behaves as `INPUT.md` § Keys says, and nothing is left
+  stuck on.
+- **Arrows:** Tap each arrow, then Shift and each arrow, in a KDE app and a
+  browser. Each moves or selects one step. On the symbols layer they are Home,
+  Page Up, Page Down and End, and Delete is Del.
+- **Row stagger:** Q begins at 1.50 units, A at 1.75, and Z at 2.25. Every
   character key keeps the same pitch across all three rows.
-- **Lower row:** The lower row reads Shift, Z–M, comma, period, slash without
-  clipping or unexpectedly narrow targets. Tap Shift followed by comma,
-  period, and slash; they enter `<`, `>`, and `?` respectively, then return
-  Shift to neutral after each character.
-- **Right controls:** Backspace, Enter, slash and the Tette Dot end on one
-  right edge. Enter fills the home-row gap and is muted Ghost White with dark
-  text, and no right-edge key moves a letter.
-- **Bottom row:** The order is Ctrl, Alt, large Space, Tette Dot; the dot works
-  as the modifier-only `Meta` shortcut and opens Tettegouche.
-- **Square geometry:** At the default height, ordinary letter keys are square.
-  At every other height only key height differs: no key, the space bar or a
-  scrub column moves sideways.
-- **Layer fit:** Both symbol layers preserve the unified shape with no overlap,
-  clipping, unexpectedly narrow targets, or dead gaps that interrupt typing.
-- **Height:** Scrub the right column to both ends and back to the bright
-  default notch. The keys follow notch by notch, the reading matches, and the
-  window above makes room at each height. The chosen height survives putting
-  the keys away, bringing them back, and signing out and in.
-- **History scrub:** Type a sentence in a KDE app and in a browser, scrub the
-  left column several notches toward undo, then part of the way back before
-  lifting. Exactly the notches still passed stay undone.
-- **Notch feel:** Each notch in either column clicks and holds briefly before it
-  gives. Note whether the hold reads as feedback or as delay.
-- **Terminal history:** In a terminal, the left column changes nothing and
-  interrupts nothing.
+- **Rows:** The rows read as `KEYBOARD-CONTRACT.md` § Layout lists them,
+  without clipping or unexpectedly narrow targets. Tap Shift, either side,
+  followed by comma, period, slash and `[`; they enter `<`, `>`, `?` and `{`,
+  then return Shift to neutral after each character.
+- **Right controls:** Delete, Go, the right Shift and → end on one right edge.
+  Go fills the home-row gap and is muted Ghost White with dark text, and no
+  right-edge key moves a letter.
+- **Bottom row:** The order is Ctrl, Tette Dot, Alt, Emoji, large Space, `123`,
+  Hide, then ←, ↑ over ↓, →. The dot works as the modifier-only `Meta`
+  shortcut and opens Tettegouche.
+- **Half-height arrows:** Tap ↑ and ↓ twenty times each by thumb without
+  looking. Note any that lands on the other.
+- **Square geometry:** Ordinary letter keys are square, or narrowed together
+  only as far as the 16-unit block needs to fit the card.
+- **Layer fit:** The symbols layer and the emoji panel keep the card's shape
+  with no overlap, clipping, unexpectedly narrow targets, or dead gaps that
+  interrupt typing.
+- **Top strip:** Nothing is drawn above the keys, and touching the strip does
+  nothing.
 - **Latch:** Tap the trackpad mark. The keys dim and stop typing, and they stay
   up while the pointer clicks into other applications. Tap the mark again:
   typing resumes at once, into whatever the last click focused.

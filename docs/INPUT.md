@@ -26,53 +26,85 @@ show as a pill in Control Center.
 | Input | What happens |
 | --- | --- |
 | Tap or click the entry, with the keys down | The keys rise for the window in use; a text box that was ready keeps the focus. Straight after signing in, with nothing ready, they still come up, and typing goes nowhere until a text box is tapped. |
-| Tap or click the entry, with the keys up | The keys slide down and away, as the handle takes them. |
+| Tap or click the entry, with the keys up | The keys slide down and away, as Hide puts them. |
 
-### Handle
-
-The handle is the bar along the keys' top edge, so it only puts them away.
+### Hide key
 
 | Input | What happens |
 | --- | --- |
-| Tap the handle | The keys slide down and away. |
-| Drag the handle down | The keys follow your finger. Let go past a quarter of the way, or with a flick downward, and they go; otherwise they spring back. |
-| Activate the handle with a screen reader | "Put the keyboard away" puts the keys away. |
+| Tap Hide | The keys slide down and away. |
+| Activate Hide with a screen reader | "Put the keyboard away" puts the keys away. |
 
 ### Keys
 
 | Input | What happens |
 | --- | --- |
-| Tap a letter, digit or mark | Types it as your finger lifts. |
-| Slide off a key before lifting | Nothing is typed. |
+| Tap a letter, digit or mark | Types it as your finger lifts, or as soon as another finger lands, whichever comes first. Overlapping thumbs keep their order. |
+| Slide off a key before lifting | Nothing is typed, unless the slide is a flick down (§ Flicks). |
 | Tap the same key twice quickly | Types it twice. |
-| Hold any key but Backspace | Types it once, as your finger lifts. There is no repeat and no accent popup. |
-| Tap Shift | The next key is shifted: a capital letter, or `<`, `>` or `?` from comma, period or slash. Shift then lets go; tapping it again first cancels it. |
-| Double-tap Shift | Caps Lock: letters stay capitals until Shift is tapped again. |
+| Hold a, e, i, o, u, n, c, s or y | Its accents appear above it. Slide to one and lift to type it; lift off them to type nothing. |
+| Hold any other key but Delete or an arrow | Types it once, as your finger lifts. There is no repeat. |
+| Tap Shift, either side | The next key is shifted: a capital letter, or the ANSI shift of a mark, such as `<` from comma or `{` from `[`. Shift then lets go; tapping it again first cancels it. |
+| Double-tap Shift, either side | Caps Lock: letters stay capitals until Shift is tapped again. |
 | Tap Shift with Caps Lock on | Caps Lock and Shift both let go. |
-| Tap `123` | The digits and common marks replace the letters until `ABC` is tapped. A pending Shift, Ctrl or Alt lets go. |
-| Tap Shift on the symbols layer | The second symbols layer, for one key: the remaining brackets and marks, Tab, Esc, Del, Home, End, Page Up, Page Down and the arrows. Tapping Shift again returns to the first. |
+| Tap `123` | The symbols layer replaces the letters until `ABC` is tapped. A pending Shift, Ctrl or Alt lets go. |
 | Tap `ABC` | The letters return. |
-| Tap Backspace | Deletes one character. |
-| Hold Backspace | Keeps deleting until you lift your finger. |
-| Tap Enter | Enter: a new line, or whatever Enter does in that application. |
+| Tap Emoji | The emoji panel replaces the three upper rows. The key reads `ABC`; tap it to return to the letters. |
+| Tap an emoji | Types it. The panel stays. |
+| Swipe across the emoji panel, or tap a category | The panel scrolls sideways. |
+| Tap Delete | Deletes one character. On the symbols layer it is Del and deletes the character after the cursor. |
+| Hold Delete still | Keeps deleting until you lift your finger, by characters and then by words. |
+| Tap Go | Enter: a new line, or whatever Enter does in that application. |
+| Tap Esc | Esc. |
 | Tap Tab | Tab. |
-| Tap the space bar | A space. The space bar only types; its right end is the trackpad mark. |
+| Tap ←, →, ↑ or ↓ | The arrow key. With Shift pending, Shift and the arrow, which selects in most applications. On the symbols layer they are Home, Page Up, Page Down and End. |
+| Hold an arrow | Repeats until you lift your finger. |
+| Tap the space bar | A space. Its right end is the trackpad mark (§ Precision surface). |
 | Tap Ctrl or Alt | It lights and applies to the next key, then lets go. Tapping it again first cancels it. |
-| Tap Ctrl, then C, X or V | Copy, cut or paste, as the application defines them. Any other key makes its own chord, and Shift and Alt combine the same way, so Ctrl, Shift, C copies in a terminal. |
+| Tap Ctrl, then C, X, V or Z | Copy, cut, paste or undo, as the application defines them. Any other key makes its own chord, and Shift and Alt combine the same way, so Ctrl, Shift, C copies in a terminal and Ctrl, Shift, Z redoes. |
 | Tap the Tette Dot | Whatever the bare Meta key opens in Plasma. |
 
-### Scrub columns
+### Flicks
+
+A key with a small grey character above its own types that character when
+flicked down. As the finger moves down, the grey character grows into the
+key's centre, so the flick shows what it will type before it lifts.
 
 | Input | What happens |
 | --- | --- |
-| Touch either column | It shows its notches, what it reads and its name. At rest it is a faint line. |
-| Drag down the left column | Undo, one step per notch, each with a click. The icon above shows undo. |
-| Drag up the left column | Redo, one step per notch, each with a click. The icon above shows redo. |
-| Slide back along the left column before lifting | Each notch passed back reverses one step, so a scrub can take itself back. |
-| Drag the left column in a terminal | Nothing happens. |
-| Drag up the right column | Taller keys, one percent of the screen's height per notch, up to 52%. The keys change as each notch passes, and the reading shows the height. |
-| Drag down the right column | Shorter keys, down to 32%. |
-| Lift from the right column | The height is kept for next time. The default, 42%, is the bright notch. |
+| Flick Q to P down | 1 to 0. |
+| Flick A to L down | `!` `@` `#` `$` `%` `^` `&` `*` `(`. |
+| Flick Z to M down | `)` `~` `` ` `` `€` `£` `§` `…`. |
+| Flick a punctuation key down | Its ANSI shift: `{` `}` `\|` `:` `"` `_` `<` `>` `?` `+`. |
+| Flick ← or → down | Home or End. |
+| Move down less than half a flick, then lift | The key's own character, as a tap. |
+
+A flick types its character as it is, whatever Shift says, and a pending Shift
+stays pending.
+
+### Caret trackpad
+
+| Input | What happens |
+| --- | --- |
+| Hold the space bar still for a third of a second | The keys go quiet, their labels nearly gone, and the whole key block moves the text cursor. Nothing is typed. |
+| Slide along the space bar | The same, at once, with no wait. |
+| Move sideways | Left or Right, one character per step. |
+| Move up or down | Up or Down, one line per larger step. |
+| Lift | The cursor stays where it is and the keys return. |
+| Touch the trackpad mark | Not the caret trackpad: the mark latches the precision surface. |
+
+Every step is an arrow key, so it moves the cursor wherever arrow keys do,
+terminals included.
+
+### Delete
+
+| Input | What happens |
+| --- | --- |
+| Drag left from Delete | The characters before the cursor are marked, one more for each step the finger moves. |
+| Slide back toward Delete | Marks come off one step at a time. Back at the key, nothing is marked. |
+| Lift after a drag | The marked characters are deleted. |
+| Flick left from Delete | Deletes the word before the cursor, as Ctrl, Backspace does in that application. |
+| Drag in an application that does not share its text, such as a terminal | The count shows on the key in place of a mark, and lifting sends that many Backspaces. |
 
 ## Precision surface
 

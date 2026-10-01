@@ -1,8 +1,9 @@
 # Shuffle Keyboard
 
 Shuffle Keyboard is the touch keyboard and precision pointer for Shuffle on KDE
-Plasma 6: four large rows, a history and a height scrub column on either side,
-and a trackpad latch, drawn as a card over the window above.
+Plasma 6: four large rows across the card with a ThinkPad's punctuation and
+arrows, flick keys, a caret trackpad on the space bar and a pointer trackpad
+latch, drawn as a card over the window above.
 
 ## Controls
 
@@ -12,7 +13,7 @@ and a trackpad latch, drawn as a card over the window above.
 | Precision surface | Tap the trackpad mark at the space bar's right end | — |
 
 Keyboard in the system tray, or in Control Center, brings the keys up at any
-time. Tap the handle along their top edge, or drag it down, to put them away.
+time. Tap Hide, beside `123`, to put them away.
 Every input is in [`docs/INPUT.md`](docs/INPUT.md).
 
 - What it is: [`docs/KEYBOARD-CONTRACT.md`](docs/KEYBOARD-CONTRACT.md)
