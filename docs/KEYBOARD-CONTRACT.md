@@ -39,73 +39,73 @@ keys away.
 
 ## Layout
 
-The key block is 16 units wide and centred in the card. Every character key is
-one unit, at one pitch on every row. Q begins at 1.50 units, A at 1.75 and Z at
-2.25: the home row a quarter unit right of the top row and the bottom row a
-further half, the stagger settled on the device
-([`FEASIBILITY.md`](FEASIBILITY.md) § Row geometry). The pitch and the stagger
-are re-opened with evidence, not with a preference.
+The key block is the original footprint: twelve and a half units wide and
+centred in the card, with the card's surface clear at either side, where the
+hands hold the device. Every character key is one unit, at one pitch on every
+row, except the slash, which fills the bottom row's end. Q begins at 1 unit, A
+at 1.25 and Z at 1.75: the home row a quarter unit right of the top row and the
+bottom row a further half. So placed, the gap between the hands, between T and
+Y, sits at the card's centre ([`FEASIBILITY.md`](FEASIBILITY.md) § Row
+geometry). The footprint, pitch and stagger are re-opened with evidence, not
+with a preference.
 
 | Row | Keys, with widths in units |
 | --- | --- |
-| 1 | Esc 1.5, Q to P, `[`, `]`, `\`, Delete 1.5 |
-| 2 | Tab 1.75, A to L, `;`, `'`, `-`, Go 2.25 |
-| 3 | Shift 2.25, Z to M, comma, period, slash, `=`, Shift 2.75 |
-| 4 | Ctrl 1.25, Tette Dot 1.25, Alt 1.25, Emoji 1.25, Space 5.5, `123` 1.25, Hide 1.25, ←, ↑ over ↓, → |
+| 1 | `123` 1, Q to P, Delete 1.5 |
+| 2 | Tab 1.25, A to L, Go 2.25 |
+| 3 | Shift 1.75, Z to M, comma, period, slash 1.75 |
+| 4 | Ctrl 1.5, Alt 1.5, Space 6.5, Tette Dot 1.5, Hide 1.5 |
 
-[`LAYOUT-MOCKUP.html`](LAYOUT-MOCKUP.html) draws this layout at the device's
-proportions and answers touch, for judging its shape by hand. Where it and this
-document differ, this document holds.
-
-The punctuation keys sit where a ThinkPad has them, so code and the shell need
-no trip to `123`. Delete, Go, the right Shift and → end on one right edge, and
-none of them moves a letter. There is no Caps key and no permanent number row.
+Delete, Go, the slash and Hide end on one right edge, and none of them moves a
+letter. There is no Caps key, no right Shift, no arrow key and no permanent
+number row.
 
 Labels:
 
-- **Delete** is a left arrow with a stem. The four arrow keys are chevrons.
+- **Delete** is a left arrow with a stem.
 - **Go** is Enter. It fills the home row's gap and is muted Ghost White with
   dark text.
-- **Shift** is on both sides, and both carry one-shot Shift and Caps.
-- **Emoji** is a smiling face, outlined.
+- **Shift** carries one-shot Shift and Caps.
 - **Hide** is a keyboard over a downward chevron.
-- **↑ and ↓** are half height, stacked in one unit between ← and →, a
-  ThinkPad's inverted T. ← and → are full height.
 
-Every character key that has a second character shows it small and grey above
-its own, and a flick down types it ([`INPUT.md`](INPUT.md) § Flicks). The top
-row carries the digits. The home and bottom rows carry the rest of the shifted
-digits and a few common marks. Each punctuation key carries its ANSI shift,
-which Shift also types: `{` `}` `|` `:` `"` `_` `<` `>` `?` `+`. ← and → carry
-Home and End.
+Every letter, the comma, the period and the slash show a second character
+small and grey above their own, and a flick down types it
+([`INPUT.md`](INPUT.md) § Flicks). The top row carries the digits, the home row
+`!` to `(`, and the bottom row `)` `~` `` ` `` `€` `£` `§` `…`, then the
+comma, period and slash their ANSI shifts `<` `>` `?`, which Shift also types.
 
 The Tette Dot is a white dot: the protected resting brand mark, not a text
-label. It sits between Ctrl and Alt, where a ThinkPad puts its system key, and
-stands for the bare Meta key as the person has bound it, read live from KDE's
-global shortcuts rather than naming an applet.
+label. It sits right of the space bar and stands for the bare Meta key as the
+person has bound it, read live from KDE's global shortcuts rather than naming
+an applet.
 
 The space bar is the widest key and carries the trackpad mark at its right end.
 What each key does is [`INPUT.md`](INPUT.md) § Keys.
 
 `123` swaps the letters for one symbols layer, and reads `ABC` while it shows.
-Its top row holds the digits with `[`, `]` and `\`, its home row
-`! @ # $ % ^ & * ( ) _ +`, and its bottom row `` ~ ` { } | < > € £ ¥ ° ``. On
-it the arrows become Home, Page Up, Page Down and End, and Delete becomes Del.
-It keeps the card's shape, with no overlap, clipping or dead gaps.
+Its top row holds the digits. Its home row holds Esc in Tab's place, then the
+marks the letters leave out, `-` `=` `[` `]` `\` `;` `'` `` ` `` `/`, each with
+its ANSI shift small and grey above it for a flick down: `_` `+` `{` `}` `|`
+`:` `"` `~` `?`. Its bottom row holds Emoji in Shift's place, then `!` to `)`.
+Delete is Backspace on every layer. The layer keeps the card's shape, with no
+overlap, clipping or dead gaps.
 
 Emoji swaps the three upper rows for an emoji panel, a sideways-scrolling grid
-under a row of categories, and reads `ABC` while it shows. The bottom row stays.
+under a row of categories. The bottom row stays, its first key reading `ABC`
+to return to the letters.
 
 ## Height
 
-The card is 42% of the screen's height, always. The person does not change it:
-Shuffle's window roll gives the Active card its room (§ Showing and hiding), so
-there is no screen to win back with shorter keys.
+The card is 44% of the screen's height, always, set by J on 1 October 2026 for
+room to test. The person does not change it: Shuffle's window roll gives the
+Active card its room (§ Showing and hiding), so there is no screen to win back
+with shorter keys. At 45% the room left above the keys was shorter than a
+browser makes itself (J, 26 September).
 
-At 42% the four rows set the key height, and a character key is as wide as it
-is tall. Where 16 square units would not fit inside the card's gutters, every
-key narrows together until they do, and the pitch stays one on every row. At
-42% a browser above the keys keeps room for its own minimum height.
+At 44% the four rows set the key height, and a character key is as wide as it
+is tall. Where twelve and a half square units would not fit inside the card's
+gutters, every key narrows together until they do, and the pitch stays one on
+every row.
 
 ## Editing
 
@@ -116,7 +116,6 @@ Editing is on the keys, not beside them:
   works wherever arrow keys do, terminals included.
 - **The delete scrub.** A drag left from Delete marks characters to delete; a
   flick left deletes a word.
-- **The arrows**, with Shift for selection.
 - **Modifier chords**: Ctrl, Z undoes and Ctrl, Shift, Z redoes, as the
   application defines them.
 

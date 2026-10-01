@@ -43,22 +43,20 @@ show as a pill in Control Center.
 | Slide off a key before lifting | Nothing is typed, unless the slide is a flick down (§ Flicks). |
 | Tap the same key twice quickly | Types it twice. |
 | Hold a, e, i, o, u, n, c, s or y | Its accents appear above it. Slide to one and lift to type it; lift off them to type nothing. |
-| Hold any other key but Delete or an arrow | Types it once, as your finger lifts. There is no repeat. |
-| Tap Shift, either side | The next key is shifted: a capital letter, or the ANSI shift of a mark, such as `<` from comma or `{` from `[`. Shift then lets go; tapping it again first cancels it. |
-| Double-tap Shift, either side | Caps Lock: letters stay capitals until Shift is tapped again. |
+| Hold any other key but Delete | Types it once, as your finger lifts. There is no repeat. |
+| Tap Shift | The next key is shifted: a capital letter, or the ANSI shift of comma, period or slash, `<` `>` `?`. Shift then lets go; tapping it again first cancels it. |
+| Double-tap Shift | Caps Lock: letters stay capitals until Shift is tapped again. |
 | Tap Shift with Caps Lock on | Caps Lock and Shift both let go. |
 | Tap `123` | The symbols layer replaces the letters until `ABC` is tapped. A pending Shift, Ctrl or Alt lets go. |
 | Tap `ABC` | The letters return. |
-| Tap Emoji | The emoji panel replaces the three upper rows. The key reads `ABC`; tap it to return to the letters. |
+| Tap Emoji, on the symbols layer | The emoji panel replaces the three upper rows. The bottom row's first key reads `ABC`; tap it to return to the letters. |
 | Tap an emoji | Types it. The panel stays. |
 | Swipe across the emoji panel, or tap a category | The panel scrolls sideways. |
-| Tap Delete | Deletes one character. On the symbols layer it is Del and deletes the character after the cursor. |
+| Tap Delete | Deletes the character before the cursor, on every layer. |
 | Hold Delete still | Keeps deleting until you lift your finger, by characters and then by words. |
 | Tap Go | Enter: a new line, or whatever Enter does in that application. |
-| Tap Esc | Esc. |
+| Tap Esc, on the symbols layer | Esc. |
 | Tap Tab | Tab. |
-| Tap ←, →, ↑ or ↓ | The arrow key. With Shift pending, Shift and the arrow, which selects in most applications. On the symbols layer they are Home, Page Up, Page Down and End. |
-| Hold an arrow | Repeats until you lift your finger. |
 | Tap the space bar | A space. Its right end is the trackpad mark (§ Precision surface). |
 | Tap Ctrl or Alt | It lights and applies to the next key, then lets go. Tapping it again first cancels it. |
 | Tap Ctrl, then C, X, V or Z | Copy, cut, paste or undo, as the application defines them. Any other key makes its own chord, and Shift and Alt combine the same way, so Ctrl, Shift, C copies in a terminal and Ctrl, Shift, Z redoes. |
@@ -68,16 +66,17 @@ show as a pill in Control Center.
 
 A key with a small grey character above its own types that character when
 flicked down. As the finger moves down, the grey character grows into the
-key's centre, so the flick shows what it will type before it lifts.
+key's centre, and the flick types once it has fully grown, nearly half a key's
+height down. A move mostly sideways is not a flick.
 
 | Input | What happens |
 | --- | --- |
 | Flick Q to P down | 1 to 0. |
 | Flick A to L down | `!` `@` `#` `$` `%` `^` `&` `*` `(`. |
 | Flick Z to M down | `)` `~` `` ` `` `€` `£` `§` `…`. |
-| Flick a punctuation key down | Its ANSI shift: `{` `}` `\|` `:` `"` `_` `<` `>` `?` `+`. |
-| Flick ← or → down | Home or End. |
-| Move down less than half a flick, then lift | The key's own character, as a tap. |
+| Flick comma, period or slash down | Its ANSI shift: `<` `>` `?`. |
+| Flick a mark on the symbols layer down | Its ANSI shift: `_` `+` `{` `}` `\|` `:` `"` `~` `?`. |
+| Move down less than a full flick, then lift | The key's own character, as a tap, even if the finger has left the key's bottom edge. |
 
 A flick types its character as it is, whatever Shift says, and a pending Shift
 stays pending.

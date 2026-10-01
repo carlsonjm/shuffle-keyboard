@@ -6,7 +6,6 @@
 | [`../AGENTS.md`](../AGENTS.md) | Startup, working contract and holds |
 | [`KEYBOARD-CONTRACT.md`](KEYBOARD-CONTRACT.md) | What the Keyboard is: card, layout, height, editing, precision surface, showing and hiding |
 | [`INPUT.md`](INPUT.md) | Every input the Keyboard handles, and what it does |
-| [`LAYOUT-MOCKUP.html`](LAYOUT-MOCKUP.html) | The layout to touch: open it in a browser on the device, beside the current layout for comparison |
 | [`FEASIBILITY.md`](FEASIBILITY.md) | Why this base, the delivery evidence, and what settled the row geometry |
 | [`PHYSICAL_ACCEPTANCE.md`](PHYSICAL_ACCEPTANCE.md) | The by-hand pass: install, typing, inputs, delivery |
 

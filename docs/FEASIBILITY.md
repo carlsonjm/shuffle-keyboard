@@ -66,8 +66,19 @@ stagger. The comparison keyboard has been removed: it settled one question, and
 shipping a second virtual keyboard to answer it again is not worth carrying.
 
 What was settled is the pitch and the steps between rows: the home row a
-quarter unit right of the top row, the bottom row a further half. The 16-unit
-block keeps both; where each row begins follows from the keys at its left end.
+quarter unit right of the top row, the bottom row a further half.
+
+Where the block sits was settled on 1 October 2026 by a typing test on the
+device: two thumbs, the same kind of sentence on each layout in alternating
+order, and every touch recorded against the key it was meant for. A 16-unit
+block carrying a ThinkPad's punctuation right of the letters put the gap
+between the hands well left of the card's centre. Moved to where the thumbs
+landed, it still hit the wrong key on 6.4% of aimed touches against 2.6% on
+the original twelve-and-a-half-unit footprint, and on 9% against 1% for the
+right thumb: with marks right of the letters, the letters cannot sit where the
+right thumb lands. The original footprint keeps both steps, puts the gap
+between the hands at the card's centre, and carries the marks on flicks and
+the symbols layer.
 
 ## Physical acceptance
 

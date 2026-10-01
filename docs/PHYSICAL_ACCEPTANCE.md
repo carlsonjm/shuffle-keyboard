@@ -60,33 +60,30 @@ does is [`INPUT.md`](INPUT.md); these checks test it on the device.
   five characters, slide back two and lift. Exactly three are deleted. In a
   terminal the count shows on the key and three Backspaces arrive. Flick left
   from Delete: one word goes.
-- **Flicks:** Flick each key in the top row down for its digit, and every
-  punctuation key for its shift. Each types the grey character above it, and a
-  flick never types the key's own character as well.
+- **Flicks:** Flick each key in the top row down for its digit, and comma,
+  period, slash and every mark on the symbols layer for its shift. Each types
+  the grey character above it, and a flick never types the key's own character
+  as well. Then type a sentence fast with two thumbs: no flick fires by
+  accident.
 - **Accents:** Hold e, slide to `é` and lift. It types `é`; lifting off the
   accents types nothing.
 - **Layers:** Run quickly through Shift, Caps, `123`, the emoji panel and `ABC`
   several times. Each behaves as `INPUT.md` § Keys says, and nothing is left
   stuck on.
-- **Arrows:** Tap each arrow, then Shift and each arrow, in a KDE app and a
-  browser. Each moves or selects one step. On the symbols layer they are Home,
-  Page Up, Page Down and End, and Delete is Del.
-- **Row stagger:** Q begins at 1.50 units, A at 1.75, and Z at 2.25. Every
-  character key keeps the same pitch across all three rows.
+- **Row stagger:** Q begins at 1 unit, A at 1.25, and Z at 1.75, and the gap
+  between T and Y sits at the card's centre. Every character key keeps the
+  same pitch across all three rows.
 - **Rows:** The rows read as `KEYBOARD-CONTRACT.md` § Layout lists them,
-  without clipping or unexpectedly narrow targets. Tap Shift, either side,
-  followed by comma, period, slash and `[`; they enter `<`, `>`, `?` and `{`,
-  then return Shift to neutral after each character.
-- **Right controls:** Delete, Go, the right Shift and → end on one right edge.
-  Go fills the home-row gap and is muted Ghost White with dark text, and no
+  without clipping or unexpectedly narrow targets. Tap Shift followed by
+  comma, period and slash; they enter `<`, `>` and `?`, then return Shift to
+  neutral after each character.
+- **Right controls:** Delete, Go, the slash and Hide end on one right edge. Go
+  fills the home-row gap and is muted Ghost White with dark text, and no
   right-edge key moves a letter.
-- **Bottom row:** The order is Ctrl, Tette Dot, Alt, Emoji, large Space, `123`,
-  Hide, then ←, ↑ over ↓, →. The dot works as the modifier-only `Meta`
-  shortcut and opens Tettegouche.
-- **Half-height arrows:** Tap ↑ and ↓ twenty times each by thumb without
-  looking. Note any that lands on the other.
+- **Bottom row:** The order is Ctrl, Alt, large Space, Tette Dot, Hide. The dot
+  works as the modifier-only `Meta` shortcut and opens Tettegouche.
 - **Square geometry:** Ordinary letter keys are square, or narrowed together
-  only as far as the 16-unit block needs to fit the card.
+  only as far as the twelve-and-a-half-unit block needs to fit the card.
 - **Layer fit:** The symbols layer and the emoji panel keep the card's shape
   with no overlap, clipping, unexpectedly narrow targets, or dead gaps that
   interrupt typing.
