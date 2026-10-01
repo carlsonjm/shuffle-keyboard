@@ -90,7 +90,10 @@ Item {
         clip: true
         flow: GridView.FlowTopToBottom
         cellWidth: root.cellWidth
-        cellHeight: Math.floor(height / 3)
+        // Rows as near square as the panel allows, never fewer than three: a
+        // tall, narrow panel (a portrait screen) takes more rows rather than
+        // stretching each cell into a column.
+        cellHeight: Math.floor(height / Math.max(3, Math.floor(height / (root.cellWidth * 1.25))))
         boundsBehavior: Flickable.StopAtBounds
         model: root.entries
         onContentXChanged: {
@@ -114,7 +117,8 @@ Item {
             Text {
                 anchors.centerIn: parent
                 text: cell.modelData.text
-                font.pixelSize: Math.max(18, Math.min(cell.height * 0.5, 44))
+                // No wider than its cell, so neighbours never overlap.
+                font.pixelSize: Math.max(14, Math.min(cell.height * 0.5, cell.width * 0.75, 44))
             }
             MouseArea {
                 id: tap
