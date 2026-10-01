@@ -268,6 +268,34 @@ Item {
             compare(texts(), ["w"]);
         }
 
+        // A thumb rolling down as it lifts, the distance that typed "§" for
+        // "n" on the device when a flick fired at a fifth of a key.
+        function test_a_rolling_thumb_types_the_key() {
+            const n = find("char", "n");
+            const x = n.x + n.w / 2, y = n.y + n.h - 10;
+            touchEvent(field).press(0, field, x, y).commit();
+            touchEvent(field).move(0, field, x, y + field.rowHeight * 0.3).commit();
+            touchEvent(field).release(0, field, x, y + field.rowHeight * 0.3).commit();
+            compare(texts(), ["n"]);
+        }
+
+        function test_flick_short_of_full_types_the_key() {
+            const e = centre(find("char", "e"));
+            touchEvent(field).press(0, field, e.x, e.y).commit();
+            touchEvent(field).move(0, field, e.x, e.y + field.flickDistance * 0.9).commit();
+            touchEvent(field).release(0, field, e.x, e.y + field.flickDistance * 0.9).commit();
+            compare(texts(), ["e"]);
+        }
+
+        function test_a_slanted_slide_is_not_a_flick() {
+            const r = centre(find("char", "r"));
+            const d = field.flickDistance;
+            touchEvent(field).press(0, field, r.x, r.y).commit();
+            touchEvent(field).move(0, field, r.x + d, r.y + d).commit();
+            touchEvent(field).release(0, field, r.x + d, r.y + d).commit();
+            verify(texts().indexOf("4") < 0);
+        }
+
         function test_arrow_flicks_are_home_and_end() {
             for (const kind of ["left", "right"]) {
                 const c = centre(find(kind));

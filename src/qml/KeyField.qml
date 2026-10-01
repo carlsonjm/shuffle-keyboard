@@ -38,7 +38,9 @@ Item {
     implicitWidth: totalUnits * unitPitch - keyGap
 
     // Distances, from the key's own size so they hold at any scale.
-    readonly property real flickDistance: rowHeight * 0.36
+    // A flick down fires at nearly half a key's height, as its grey character
+    // finishes growing, so a thumb rolling as it lifts types the key itself.
+    readonly property real flickDistance: rowHeight * 0.45
     readonly property real slideSlop: unitWidth * 0.1
     readonly property real caretSlide: unitWidth * 0.22
     readonly property real caretStepX: unitWidth * 0.15
@@ -272,6 +274,12 @@ Item {
         return activeLayer === "letters" && ((key.kind === "char" && flicks[key.ch] !== undefined)
                                        || key.kind === "left" || key.kind === "right");
     }
+    // How far a flick has come, from 0 to 1. Only a move mostly downward
+    // counts, so a slide sideways never grows the grey character.
+    function flickProgress(state) {
+        if (state.dy <= 0 || state.dy < Math.abs(state.dx) * 1.5) return 0;
+        return Math.min(1, state.dy / flickDistance);
+    }
 
     function press(point) {
         // A finger landing types whatever character another is still on, so
@@ -308,7 +316,7 @@ Item {
         if (state.popup) {
             pickAccent(point.x);
         } else if (flickable(state.key) && !state.repeating) {
-            state.flick = Math.max(0, Math.min(1, state.dy / flickDistance));
+            state.flick = flickProgress(state);
         } else if (kind === "space") {
             if (!state.caret && Math.abs(state.dx) > caretSlide) beginCaret(state);
             if (state.caret) {
@@ -334,7 +342,11 @@ Item {
         finish(point.pointId);
         if (state.done) return;
         const key = state.key;
-        const within = inside(key, point.x, point.y, slideSlop);
+        // A flickable key keeps a lift short of a flick below it, so a thumb
+        // rolling down as it lifts types the key rather than nothing.
+        const within = inside(key, point.x, point.y, slideSlop)
+                    || (flickable(key) && point.y > key.y && point.y <= key.y + key.h + flickDistance
+                        && inside(key, point.x, key.y, slideSlop));
 
         if (state.popup) {
             // Lifted on the accents or the key: the accent picked. Lifted
@@ -346,7 +358,7 @@ Item {
             return;
         }
         if (state.repeating) return;
-        if (flickable(key) && state.dy >= flickDistance * 0.6) {
+        if (flickable(key) && flickProgress(state) >= 1) {
             if (key.kind === "char") typeCharacter(flicks[key.ch], true);
             else sendSpecial(key.kind === "left" ? Qt.Key_Home : Qt.Key_End, "");
             return;
