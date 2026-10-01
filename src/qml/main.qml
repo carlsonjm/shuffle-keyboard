@@ -262,8 +262,7 @@ InputPanelWindow {
     // text under Shift (Shift and an arrow selects), goes as a shortcut so
     // the compositor sees its modifiers; anything else is a key click.
     function deliver(key, text, modifiers) {
-        const chord = modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier);
-        if (chord || (text.length === 0 && (modifiers & Qt.ShiftModifier))) {
+        if (keyField.asShortcut(key, text, modifiers)) {
             thing.sendShortcut(key, modifiers);
         } else {
             inputEngine.InputContext.inputEngine.virtualKeyClick(key, text, modifiers);

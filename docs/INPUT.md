@@ -56,10 +56,11 @@ show as a pill in Control Center.
 | Hold Delete still | Keeps deleting until you lift your finger, by characters and then by words. |
 | Tap Go | Enter: a new line, or whatever Enter does in that application. |
 | Tap Esc, on the symbols layer | Esc. |
-| Tap Tab | Tab. |
+| Tap Tab | Tab, as a key press, so it moves between fields where Tab does. |
 | Tap the space bar | A space. Its right end is the trackpad mark (§ Precision surface). |
 | Tap Ctrl or Alt | It lights and applies to the next key, then lets go. Tapping it again first cancels it. |
 | Tap Ctrl, then C, X, V or Z | Copy, cut, paste or undo, as the application defines them. Any other key makes its own chord, and Shift and Alt combine the same way, so Ctrl, Shift, C copies in a terminal and Ctrl, Shift, Z redoes. |
+| Tap Shift, then Go, Tab or the space bar | Shift+Enter, Shift+Tab or Shift+Space, as the application defines them: in most chat boxes a new line without sending, and the previous field. |
 | Tap the Tette Dot | Whatever the bare Meta key opens in Plasma. |
 
 ### Flicks
@@ -76,10 +77,12 @@ height down. A move mostly sideways is not a flick.
 | Flick Z to M down | `)` `~` `` ` `` `€` `£` `§` `…`. |
 | Flick comma, period or slash down | Its ANSI shift: `<` `>` `?`. |
 | Flick a mark on the symbols layer down | Its ANSI shift: `_` `+` `{` `}` `\|` `:` `"` `~` `?`. |
+| Flick `123` down, or `ABC` on the symbols layer | Esc. A pending Ctrl, Alt or Shift goes with it, so Shift+Esc and Ctrl+Alt+Esc work as the application or desktop binds them. |
 | Move down less than a full flick, then lift | The key's own character, as a tap, even if the finger has left the key's bottom edge. |
 
 A flick types its character as it is, whatever Shift says, and a pending Shift
-stays pending.
+stays pending. Esc from `123` is a key, not a character, and takes the pending
+modifiers with it.
 
 ### Caret trackpad
 
@@ -89,6 +92,7 @@ stays pending.
 | Slide along the space bar | The same, at once, with no wait. |
 | Move sideways | Left or Right, one character per step. |
 | Move up or down | Up or Down, one line per larger step. |
+| Tap Shift, Ctrl or Alt first, then move | Each step carries it: Shift selects as the cursor moves, and Ctrl moves by words. It lets go at lift. |
 | Lift | The cursor stays where it is and the keys return. |
 | Touch the trackpad mark | Not the caret trackpad: the mark latches the precision surface. |
 

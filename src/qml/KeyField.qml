@@ -201,6 +201,14 @@ Item {
         keyRequested(key, text, modifierMask(shiftActive));
         clearOneShots();
     }
+    // A key leaves as a key press with its modifiers held whenever a modifier
+    // must reach the application: any Ctrl or Alt chord, and Shift with a key
+    // that types no letter (Go, Tab, Space, Esc, Delete, the caret's arrows).
+    // Shift with a letter or mark is the shifted character itself, typed.
+    function asShortcut(key, text, modifiers) {
+        if (modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier)) return true;
+        return (modifiers & Qt.ShiftModifier) !== 0 && (text === "" || text === "\n" || text === "\t" || text === " ");
+    }
     // Keys the gestures send step by step, which leave the modifiers alone.
     function sendStep(key, modifiers) {
         keyRequested(key, "", modifiers);
@@ -233,9 +241,12 @@ Item {
     function activate(key) {
         switch (key.kind) {
         case "char": typeCharacter(key.ch, false); break;
-        case "space": typeCharacter(" ", false); break;
+        case "space":
+            if (shiftActive) sendSpecial(Qt.Key_Space, " ");
+            else typeCharacter(" ", false);
+            break;
         case "esc": sendSpecial(Qt.Key_Escape, ""); break;
-        case "tab": sendSpecial(Qt.Key_Tab, "\t"); break;
+        case "tab": sendSpecial(Qt.Key_Tab, ""); break;
         case "enter": sendSpecial(Qt.Key_Return, "\n"); break;
         case "delete": deleteOne(); break;
         case "shift": tapShift(); break;
@@ -274,6 +285,8 @@ Item {
     }
 
     function flickable(key) {
+        // 123 sits where Esc does on a keyboard, and a flick down is Esc.
+        if (key.kind === "num") return activeLayer === "letters" || activeLayer === "symbols";
         if (activeLayer === "symbols") return key.kind === "char" && ansiShift[key.ch] !== undefined;
         return activeLayer === "letters" && ((key.kind === "char" && flicks[key.ch] !== undefined)
                                        || key.kind === "left" || key.kind === "right");
@@ -326,10 +339,10 @@ Item {
             if (state.caret) {
                 state.ax += mx;
                 state.ay += my;
-                while (state.ax >= caretStepX) { sendStep(Qt.Key_Right, Qt.NoModifier); state.ax -= caretStepX; }
-                while (state.ax <= -caretStepX) { sendStep(Qt.Key_Left, Qt.NoModifier); state.ax += caretStepX; }
-                while (state.ay >= caretStepY) { sendStep(Qt.Key_Down, Qt.NoModifier); state.ay -= caretStepY; }
-                while (state.ay <= -caretStepY) { sendStep(Qt.Key_Up, Qt.NoModifier); state.ay += caretStepY; }
+                while (state.ax >= caretStepX) { sendStep(Qt.Key_Right, state.mods); state.ax -= caretStepX; }
+                while (state.ax <= -caretStepX) { sendStep(Qt.Key_Left, state.mods); state.ax += caretStepX; }
+                while (state.ay >= caretStepY) { sendStep(Qt.Key_Down, state.mods); state.ay -= caretStepY; }
+                while (state.ay <= -caretStepY) { sendStep(Qt.Key_Up, state.mods); state.ay += caretStepY; }
             }
         } else if (kind === "delete" && !state.repeating) {
             if (state.dx < -deleteStart) state.scrub = true;
@@ -364,6 +377,7 @@ Item {
         if (state.repeating) return;
         if (flickable(key) && flickProgress(state) >= 1) {
             if (key.kind === "char") typeCharacter(activeLayer === "symbols" ? ansiShift[key.ch] : flicks[key.ch], true);
+            else if (key.kind === "num") sendSpecial(Qt.Key_Escape, "");
             else sendSpecial(key.kind === "left" ? Qt.Key_Home : Qt.Key_End, "");
             return;
         }
@@ -445,14 +459,18 @@ Item {
         }
     }
 
+    // A pending Shift, Ctrl or Alt rides on every step, so Shift selects and
+    // Ctrl moves by words, and lets go when the finger lifts.
     function beginCaret(state) {
         state.caret = true;
+        state.mods = modifierMask(shiftActive);
         caretCount += 1;
     }
     function endCaret(state) {
         if (!state.caret) return;
         state.caret = false;
         caretCount = Math.max(0, caretCount - 1);
+        if (state.mods !== Qt.NoModifier) clearOneShots();
     }
 
     // Marks are a selection grown with Shift+Left, so the application shows
@@ -522,6 +540,7 @@ Item {
         return "";
     }
     function secondaryFor(key) {
+        if (key.kind === "num") return activeLayer === "letters" || activeLayer === "symbols" ? "Esc" : "";
         if (activeLayer === "symbols") return key.kind === "char" ? (ansiShift[key.ch] || "") : "";
         if (activeLayer !== "letters") return "";
         if (key.kind === "char") return flicks[key.ch] || "";

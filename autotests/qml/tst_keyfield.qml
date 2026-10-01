@@ -180,6 +180,84 @@ Item {
             compare(keysSent().map(k => k[0]), [Qt.Key_Return, Qt.Key_Tab, Qt.Key_Escape]);
         }
 
+        function flickDown(key) {
+            const c = centre(key);
+            touchEvent(field).press(0, field, c.x, c.y).commit();
+            touchEvent(field).move(0, field, c.x, c.y + field.flickDistance).commit();
+            touchEvent(field).release(0, field, c.x, c.y + field.flickDistance).commit();
+        }
+
+        function test_flicking_123_is_esc_with_its_modifiers() {
+            compare(field.secondaryFor(find("num")), "Esc");
+            flickDown(find("num"));
+            compare(field.activeLayer, "letters");
+            tap(find("ctrl"));
+            tap(find("alt"));
+            flickDown(find("num"));
+            tap(find("shift"));
+            flickDown(find("num"));
+            compare(keysSent(), [[Qt.Key_Escape, 0],
+                                 [Qt.Key_Escape, Qt.ControlModifier | Qt.AltModifier],
+                                 [Qt.Key_Escape, Qt.ShiftModifier]]);
+            verify(!field.controlActive && !field.altActive && !field.shiftActive);
+            tap(find("num"));
+            flickDown(find("num"));
+            compare(field.activeLayer, "symbols");
+            compare(sent.signalArguments[3][0], Qt.Key_Escape);
+        }
+
+        // Shift reaches the application with Go, Tab and Space, as a key press
+        // with Shift held, so Shift+Enter, Shift+Tab and Shift+Space work.
+        function test_shift_rides_on_go_tab_and_space() {
+            for (const kind of ["enter", "tab", "space"]) {
+                tap(find("shift"));
+                field.lastShiftTap = 0;
+                tap(find(kind));
+            }
+            compare(keysSent(), [[Qt.Key_Return, Qt.ShiftModifier], [Qt.Key_Tab, Qt.ShiftModifier], [Qt.Key_Space, Qt.ShiftModifier]]);
+            for (let i = 0; i < sent.count; ++i) {
+                const a = sent.signalArguments[i];
+                verify(field.asShortcut(a[0], a[1], a[2]), "sent as a key press: " + a[0]);
+            }
+            verify(!field.shiftActive);
+        }
+
+        function test_tab_is_a_key_not_a_typed_tab() {
+            tap(find("tab"));
+            compare(sent.signalArguments[0][0], Qt.Key_Tab);
+            compare(sent.signalArguments[0][1], "");
+        }
+
+        function test_shifted_letters_are_typed_not_pressed() {
+            tap(find("shift"));
+            tapChar("a");
+            compare(texts(), ["A"]);
+            verify(!field.asShortcut(Qt.Key_A, "A", Qt.ShiftModifier));
+            verify(!field.asShortcut(Qt.Key_Space, " ", Qt.NoModifier));
+            verify(!field.asShortcut(Qt.Key_Return, "\n", Qt.NoModifier));
+            verify(field.asShortcut(Qt.Key_C, "c", Qt.ControlModifier));
+        }
+
+        function test_caret_carries_a_pending_modifier() {
+            tap(find("shift"));
+            const space = find("space");
+            const start = Qt.point(space.x + space.w * 0.4, space.y + space.h / 2);
+            touchEvent(field).press(0, field, start.x, start.y).commit();
+            for (let i = 1; i <= 10; ++i) touchEvent(field).move(0, field, start.x + i * 10, start.y).commit();
+            verify(field.shiftActive);
+            touchEvent(field).release(0, field, start.x + 100, start.y).commit();
+            verify(keysSent().length >= 4);
+            verify(keysSent().every(k => k[0] === Qt.Key_Right && k[1] === Qt.ShiftModifier));
+            verify(!field.shiftActive);
+            sent.clear();
+            tap(find("ctrl"));
+            touchEvent(field).press(0, field, start.x + 100, start.y).commit();
+            for (let i = 1; i <= 10; ++i) touchEvent(field).move(0, field, start.x + 100 - i * 10, start.y).commit();
+            touchEvent(field).release(0, field, start.x, start.y).commit();
+            verify(keysSent().every(k => k[0] === Qt.Key_Left && k[1] === Qt.ControlModifier));
+            verify(!field.controlActive);
+        }
+
         function test_hide_and_tette_dot() {
             tap(find("hide"));
             tap(find("dot"));

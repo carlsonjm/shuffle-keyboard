@@ -73,6 +73,8 @@ small and grey above their own, and a flick down types it
 ([`INPUT.md`](INPUT.md) § Flicks). The top row carries the digits, the home row
 `!` to `(`, and the bottom row `)` `~` `` ` `` `€` `£` `§` `…`, then the
 comma, period and slash their ANSI shifts `<` `>` `?`, which Shift also types.
+`123` carries Esc the same way, small and grey above it, since it sits where a
+keyboard puts Esc.
 
 The Tette Dot is a white dot: the protected resting brand mark, not a text
 label. It sits right of the space bar and stands for the bare Meta key as the
@@ -117,7 +119,10 @@ Editing is on the keys, not beside them:
 - **The delete scrub.** A drag left from Delete marks characters to delete; a
   flick left deletes a word.
 - **Modifier chords**: Ctrl, Z undoes and Ctrl, Shift, Z redoes, as the
-  application defines them.
+  application defines them. A pending Shift, Ctrl or Alt reaches the
+  application with every key that types no letter, Go, Tab, the space bar,
+  Esc, Delete and each caret step, so keybinds such as Shift+Enter work and
+  Shift with the caret trackpad selects.
 
 There is no history scrub. What each does is [`INPUT.md`](INPUT.md) § Caret
 trackpad and § Delete.
