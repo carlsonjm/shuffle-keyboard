@@ -95,7 +95,6 @@ int main(int argc, char **argv)
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeDelay"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_DELAY"));
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeShortcuts"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_SHORTCUTS") != 0);
     view.rootContext()->setContextProperty(QStringLiteral("shufflePreviewMode"), previewMode);
-    view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeHeight"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_HEIGHT"));
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbePrecision"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_PRECISION"));
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeDismiss"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_DISMISS") != 0);
     view.rootContext()->setContextProperty(QStringLiteral("shuffleProbeLayer"), qEnvironmentVariableIntValue("SHUFFLE_PROBE_LAYER"));

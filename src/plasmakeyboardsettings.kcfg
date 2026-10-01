@@ -39,12 +39,6 @@
             <max>720</max>
             <default>460</default>
         </entry>
-        <entry key="heightPercent" type="int">
-            <label>Shuffle Keyboard height as a share of the screen's height; 0 is the default. Replaces keyboardHeight, which measured a keyboard whose width followed its height.</label>
-            <min>0</min>
-            <max>100</max>
-            <default>0</default>
-        </entry>
         <entry key="keyboardWidthPercent" type="int">
             <label>Shuffle Keyboard width as a percentage of the usable panel.</label>
             <min>80</min>

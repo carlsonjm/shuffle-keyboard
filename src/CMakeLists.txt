@@ -92,10 +92,10 @@ ecm_add_qml_module(plasma-keyboard
 
 ecm_target_qml_sources(plasma-keyboard SOURCES
     qml/main.qml
-    qml/ShuffleButton.qml
-    qml/ScrubColumn.qml
-    qml/NotchClick.qml
-    qml/NotchSound.qml
+    qml/KeyField.qml
+    qml/KeyCap.qml
+    qml/KeyGlyph.qml
+    qml/EmojiPanel.qml
     qml/PrecisionSurface.qml
     qml/LanguagePopup.qml
     qml/LanguagePopupDelegate.qml

@@ -33,3 +33,14 @@ endif()
 
 qt_add_executable(shuffle-geometry-target geometrytarget.cpp)
 target_link_libraries(shuffle-geometry-target PRIVATE Qt::Widgets)
+
+# The key field's layout and gestures, driven by touch in an offscreen window.
+find_package(Qt6 ${QT_MIN_VERSION} QUIET COMPONENTS QuickTest)
+if(TARGET Qt6::QuickTest)
+    qt_add_executable(keyfieldtest keyfieldtest.cpp)
+    target_link_libraries(keyfieldtest PRIVATE Qt::QuickTest)
+    add_test(NAME keyfield COMMAND keyfieldtest -input ${CMAKE_CURRENT_SOURCE_DIR}/qml)
+    set_tests_properties(keyfield PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+else()
+    message(STATUS "Qt QuickTest is unavailable; skipping the key field test")
+endif()
