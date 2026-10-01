@@ -287,6 +287,9 @@ Item {
             wait(600);
             verify(field.accentPopup !== null);
             const p = field.accentPopup;
+            // Above the key held, even on the top row, so the finger on the
+            // key never covers them.
+            verify(p.y + p.cellHeight + p.pad * 2 <= e.y);
             const second = p.x + p.pad + p.cellWidth * 1.5;
             touchEvent(field).move(0, field, second, c.y).commit();
             touchEvent(field).release(0, field, second, c.y).commit();

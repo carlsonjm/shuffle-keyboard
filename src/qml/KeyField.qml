@@ -19,8 +19,6 @@ Item {
     // An application that does not share its text: the delete scrub counts on
     // the key instead of selecting, and a word goes with Ctrl+W.
     property bool terminal: false
-    // How far above the top row the accents may reach, inside the card.
-    property real popupHeadroom: 22
 
     property string activeLayer: "letters"
     property bool shiftActive: false
@@ -462,7 +460,10 @@ Item {
         const cellWidth = unitWidth * 0.78, cellHeight = rowHeight * 0.8, pad = 6;
         const width = chars.length * cellWidth + pad * 2;
         const x = Math.max(0, Math.min(field.width - width, state.key.x + state.key.w / 2 - width / 2));
-        const y = Math.max(-popupHeadroom, state.key.y - cellHeight - pad * 2 - 4);
+        // Wholly above the key held, so the finger on it never covers them.
+        // Over the top row they reach past the card, over the window above,
+        // for as long as the key is held.
+        const y = state.key.y - cellHeight - pad * 2 - 6;
         state.popup = true;
         accentPopup = { chars: chars, x: x, y: y, cellWidth: cellWidth, cellHeight: cellHeight, pad: pad, pick: -1 };
         pickAccent(state.lx);

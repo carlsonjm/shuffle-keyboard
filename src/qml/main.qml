@@ -466,7 +466,6 @@ InputPanelWindow {
                 width: implicitWidth
                 unitWidth: root.keyUnitWidth
                 keyGap: root.keyGap
-                popupHeadroom: root.topStrip - 4
                 terminal: thing.contentPurpose === 12
 
                 onKeyRequested: (key, text, modifiers) => root.deliver(key, text, modifiers)
