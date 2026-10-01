@@ -26,6 +26,10 @@ Item {
     property bool capsActive: false
     property bool controlActive: false
     property bool altActive: false
+    // Ctrl or Alt double-tapped stays on for every key until tapped again or
+    // the keys go away, as a double-tapped Shift is Caps Lock.
+    property bool controlLocked: false
+    property bool altLocked: false
     property int markCount: 0
     readonly property bool caretMoving: caretCount > 0
 
@@ -168,8 +172,8 @@ Item {
 
     function modifierMask(withShift) {
         return (withShift ? Qt.ShiftModifier : Qt.NoModifier)
-             | (controlActive ? Qt.ControlModifier : Qt.NoModifier)
-             | (altActive ? Qt.AltModifier : Qt.NoModifier);
+             | (controlActive || controlLocked ? Qt.ControlModifier : Qt.NoModifier)
+             | (altActive || altLocked ? Qt.AltModifier : Qt.NoModifier);
     }
     function keyCodeFor(text) {
         if (text === " ") return Qt.Key_Space;
@@ -238,6 +242,43 @@ Item {
     }
     property real lastShiftTap: 0
 
+    function tapControl() {
+        const now = Date.now();
+        if (controlLocked) {
+            controlLocked = false;
+            controlActive = false;
+        } else if (controlActive && now - lastControlTap < 350) {
+            controlActive = false;
+            controlLocked = true;
+        } else {
+            controlActive = !controlActive;
+        }
+        lastControlTap = now;
+    }
+    property real lastControlTap: 0
+
+    function tapAlt() {
+        const now = Date.now();
+        if (altLocked) {
+            altLocked = false;
+            altActive = false;
+        } else if (altActive && now - lastAltTap < 350) {
+            altActive = false;
+            altLocked = true;
+        } else {
+            altActive = !altActive;
+        }
+        lastAltTap = now;
+    }
+    property real lastAltTap: 0
+
+    // The keys going away let go of a held Ctrl or Alt, so nothing hidden
+    // turns the next typing into shortcuts.
+    function releaseHolds() {
+        controlLocked = false;
+        altLocked = false;
+    }
+
     function activate(key) {
         switch (key.kind) {
         case "char": typeCharacter(key.ch, false); break;
@@ -250,8 +291,8 @@ Item {
         case "enter": sendSpecial(Qt.Key_Return, "\n"); break;
         case "delete": deleteOne(); break;
         case "shift": tapShift(); break;
-        case "ctrl": controlActive = !controlActive; break;
-        case "alt": altActive = !altActive; break;
+        case "ctrl": tapControl(); break;
+        case "alt": tapAlt(); break;
         case "num":
             activeLayer = activeLayer === "letters" ? "symbols" : "letters";
             clearOneShots();
@@ -574,7 +615,9 @@ Item {
                     || (modelData.kind === "ctrl" && field.controlActive)
                     || (modelData.kind === "alt" && field.altActive)
                     || (modelData.kind === "num" && field.activeLayer !== "letters")
-            locked: modelData.kind === "shift" && field.capsActive
+            locked: (modelData.kind === "shift" && field.capsActive)
+                    || (modelData.kind === "ctrl" && field.controlLocked)
+                    || (modelData.kind === "alt" && field.altLocked)
             emphasised: modelData.kind === "enter"
             quiet: field.caretMoving
 

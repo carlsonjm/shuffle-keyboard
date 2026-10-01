@@ -38,6 +38,10 @@ Item {
             field.capsActive = false;
             field.controlActive = false;
             field.altActive = false;
+            field.controlLocked = false;
+            field.altLocked = false;
+            field.lastControlTap = 0;
+            field.lastAltTap = 0;
             field.terminal = false;
             field.markCount = 0;
             field.lastShiftTap = 0;
@@ -256,6 +260,43 @@ Item {
             touchEvent(field).release(0, field, start.x, start.y).commit();
             verify(keysSent().every(k => k[0] === Qt.Key_Left && k[1] === Qt.ControlModifier));
             verify(!field.controlActive);
+        }
+
+        function test_double_ctrl_holds_ctrl_until_tapped() {
+            tap(find("ctrl"));
+            tap(find("ctrl"));
+            verify(field.controlLocked);
+            tapChar("z");
+            tapChar("z");
+            tapChar("z");
+            compare(keysSent(), [[Qt.Key_Z, Qt.ControlModifier], [Qt.Key_Z, Qt.ControlModifier], [Qt.Key_Z, Qt.ControlModifier]]);
+            verify(field.controlLocked);
+            tap(find("ctrl"));
+            verify(!field.controlLocked && !field.controlActive);
+            sent.clear();
+            tapChar("z");
+            compare(keysSent(), [[Qt.Key_Z, 0]]);
+        }
+
+        function test_double_alt_holds_alt_and_shift_still_lets_go() {
+            tap(find("alt"));
+            tap(find("alt"));
+            verify(field.altLocked);
+            tap(find("shift"));
+            tap(find("tab"));
+            tap(find("tab"));
+            compare(keysSent(), [[Qt.Key_Tab, Qt.AltModifier | Qt.ShiftModifier], [Qt.Key_Tab, Qt.AltModifier]]);
+            verify(field.altLocked && !field.shiftActive);
+        }
+
+        function test_holds_let_go_when_the_keys_go() {
+            tap(find("ctrl"));
+            tap(find("ctrl"));
+            tap(find("alt"));
+            tap(find("alt"));
+            verify(field.controlLocked && field.altLocked);
+            field.releaseHolds();
+            verify(!field.controlLocked && !field.altLocked);
         }
 
         function test_hide_and_tette_dot() {

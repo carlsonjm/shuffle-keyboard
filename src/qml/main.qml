@@ -299,6 +299,7 @@ InputPanelWindow {
         }
         if (!visible) {
             keyField.clearOneShots();
+            keyField.releaseHolds();
             if (precisionActive) Qt.callLater(precisionController.keepKeyboardVisible);
         }
     }

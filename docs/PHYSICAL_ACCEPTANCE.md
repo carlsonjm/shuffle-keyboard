@@ -68,7 +68,8 @@ does is [`INPUT.md`](INPUT.md); these checks test it on the device.
 - **Modifiers:** In a chat box, tap Shift then Go: a new line, nothing sent.
   In a form, Shift then Tab moves to the previous field. Tap Shift, then slide
   along the space bar: the text selects. Open a menu and flick `123` down: it
-  closes.
+  closes. Double-tap Ctrl and tap Z three times: three steps undo, and Ctrl
+  stays lit until tapped again.
 - **Accents:** Hold e, slide to `é` and lift. It types `é`; lifting off the
   accents types nothing.
 - **Layers:** Run quickly through Shift, Caps, `123`, the emoji panel and `ABC`

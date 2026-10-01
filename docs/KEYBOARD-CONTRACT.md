@@ -122,7 +122,9 @@ Editing is on the keys, not beside them:
   application defines them. A pending Shift, Ctrl or Alt reaches the
   application with every key that types no letter, Go, Tab, the space bar,
   Esc, Delete and each caret step, so keybinds such as Shift+Enter work and
-  Shift with the caret trackpad selects.
+  Shift with the caret trackpad selects. Double-tapped, Ctrl or Alt stays on
+  until tapped again or the keys go away. Keys reach the application being
+  typed into; the desktop's own shortcuts, such as Alt+Tab, do not hear them.
 
 There is no history scrub. What each does is [`INPUT.md`](INPUT.md) § Caret
 trackpad and § Delete.

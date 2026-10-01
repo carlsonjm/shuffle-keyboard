@@ -59,7 +59,8 @@ show as a pill in Control Center.
 | Tap Tab | Tab, as a key press, so it moves between fields where Tab does. |
 | Tap the space bar | A space. Its right end is the trackpad mark (§ Precision surface). |
 | Tap Ctrl or Alt | It lights and applies to the next key, then lets go. Tapping it again first cancels it. |
-| Tap Ctrl, then C, X, V or Z | Copy, cut, paste or undo, as the application defines them. Any other key makes its own chord, and Shift and Alt combine the same way, so Ctrl, Shift, C copies in a terminal and Ctrl, Shift, Z redoes. |
+| Double-tap Ctrl or Alt | It stays on for every key, as Caps Lock does for Shift, until it is tapped again or the keys go away: Ctrl held, Z three times undoes three steps. |
+| Tap Ctrl, then C, X, V or Z | Copy, cut, paste or undo, as the application defines them. Keys reach the application being typed into, not the desktop's own shortcuts. Any other key makes its own chord, and Shift and Alt combine the same way, so Ctrl, Shift, C copies in a terminal and Ctrl, Shift, Z redoes. |
 | Tap Shift, then Go, Tab or the space bar | Shift+Enter, Shift+Tab or Shift+Space, as the application defines them: in most chat boxes a new line without sending, and the previous field. |
 | Tap the Tette Dot | Whatever the bare Meta key opens in Plasma. |
 
@@ -77,7 +78,7 @@ height down. A move mostly sideways is not a flick.
 | Flick Z to M down | `)` `~` `` ` `` `€` `£` `§` `…`. |
 | Flick comma, period or slash down | Its ANSI shift: `<` `>` `?`. |
 | Flick a mark on the symbols layer down | Its ANSI shift: `_` `+` `{` `}` `\|` `:` `"` `~` `?`. |
-| Flick `123` down, or `ABC` on the symbols layer | Esc. A pending Ctrl, Alt or Shift goes with it, so Shift+Esc and Ctrl+Alt+Esc work as the application or desktop binds them. |
+| Flick `123` down, or `ABC` on the symbols layer | Esc. A pending Ctrl, Alt or Shift goes with it, so Shift+Esc and Ctrl+Alt+Esc work as the application binds them. |
 | Move down less than a full flick, then lift | The key's own character, as a tap, even if the finger has left the key's bottom edge. |
 
 A flick types its character as it is, whatever Shift says, and a pending Shift
