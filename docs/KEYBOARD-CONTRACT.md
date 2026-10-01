@@ -128,7 +128,9 @@ trackpad and § Delete.
 The trackpad mark at the space bar's right end latches the whole keyboard as a
 trackpad; [`INPUT.md`](INPUT.md) § Precision surface is what each touch does.
 While latched, the keys dim and do not type, and they stay up whatever the
-pointer does. The mark stays live, and lit. The surface is the keyboard's
+pointer does. The mark stays live, and lit, and so does Hide, undimmed.
+Putting the keys away, with Hide or the tray entry, ends the latch, and they
+stay away until they are next asked for. The surface is the keyboard's
 full footprint below the top strip. Until the portal has granted pointer
 control, it says so in place of pointing.
 

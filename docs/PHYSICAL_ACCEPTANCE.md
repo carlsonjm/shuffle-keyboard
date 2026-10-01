@@ -94,7 +94,9 @@ does is [`INPUT.md`](INPUT.md); these checks test it on the device.
   nothing.
 - **Latch:** Tap the trackpad mark. The keys dim and stop typing, and they stay
   up while the pointer clicks into other applications. Tap the mark again:
-  typing resumes at once, into whatever the last click focused.
+  typing resumes at once, into whatever the last click focused. Latch again
+  and tap Hide: the keys go and stay away, and the next text field brings
+  them back for typing. Do the same with the tray entry.
 - **Pointer:** While latched, point, click, drag to select text, drag an item,
   scroll a long page and right-click, in a KDE app and in a browser. Each lands
   where the pointer is, and none needs a second try.

@@ -136,6 +136,12 @@ Item {
         return space ? Qt.rect(space.x + space.w - space.h, space.y, space.h, space.h) : Qt.rect(0, 0, 0, 0);
     }
 
+    // The Hide key, which stays live over the trackpad while it is latched.
+    readonly property rect hideRect: {
+        const hide = keyOfKind("hide");
+        return hide ? Qt.rect(hide.x, hide.y, hide.w, hide.h) : Qt.rect(0, 0, 0, 0);
+    }
+
     // A finger belongs to the key whose cell it lands in, gaps included.
     function keyAt(x, y) {
         const half = keyGap / 2;

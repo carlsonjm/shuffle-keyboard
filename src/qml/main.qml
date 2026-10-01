@@ -125,12 +125,24 @@ InputPanelWindow {
         root.carryTo(target, duration, easing);
     }
 
+    // Putting the keys away, with Hide or the tray entry, ends the latch
+    // first: a latched trackpad asks for the keys back the moment they go,
+    // so they would come straight back up.
     function putAway() {
+        root.precisionHeld = false;
         root.closing = true;
         root.travelTo(root.panelHeight,
                       root.settleDuration(root.panelHeight - root.carry, -root.pendingSpeed));
     }
     property bool closing: false
+
+    // The Hide key. The window above is told now, so it has its height back
+    // before the keys uncover it.
+    function hideKeys() {
+        BottomSurfaceCoordinator.announceHeading(0, 0);
+        root.pendingSpeed = 0;
+        root.putAway();
+    }
 
     // Typing ended, so the keys go: down the way Hide sends them, and
     // the window once they have. They start gently, so the window above has
@@ -459,13 +471,7 @@ InputPanelWindow {
 
                 onKeyRequested: (key, text, modifiers) => root.deliver(key, text, modifiers)
                 onMetaRequested: thing.triggerGlobalShortcut(Qt.Key_Meta)
-                // The window above is told now, so it has its height back
-                // before the keys uncover it.
-                onHideRequested: {
-                    BottomSurfaceCoordinator.announceHeading(0, 0);
-                    root.pendingSpeed = 0;
-                    root.putAway();
-                }
+                onHideRequested: root.hideKeys()
             }
         }
 
@@ -484,6 +490,34 @@ InputPanelWindow {
                 radius: 8
                 color: "#F8F8FF"
                 opacity: root.precisionHeld ? 0.22 : 0
+            }
+        }
+
+        // Hide stays live over the trackpad, as the mark does, and is drawn
+        // undimmed so it reads as live: it puts the keys away and ends the
+        // latch.
+        MouseArea {
+            z: 2
+            visible: root.precisionActive
+            x: keyboardBody.x + keyField.x + keyField.hideRect.x
+            y: keyboardBody.y + keyField.y + keyField.hideRect.y
+            width: keyField.hideRect.width
+            height: keyField.hideRect.height
+            onClicked: root.hideKeys()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: i18n("Put the keyboard away")
+            Accessible.onPressAction: root.hideKeys()
+
+            Rectangle {
+                anchors.fill: parent
+                radius: 8
+                color: "#141414"
+            }
+            KeyCap {
+                anchors.fill: parent
+                glyph: "hide"
+                down: parent.pressed
             }
         }
 
