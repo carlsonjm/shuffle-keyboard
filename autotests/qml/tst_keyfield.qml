@@ -74,9 +74,9 @@ Item {
 
         function test_rows_begin_on_the_stagger() {
             const pitch = field.unitPitch;
-            compare(find("char", "q").x / pitch, 1.5);
-            compare(find("char", "a").x / pitch, 1.75);
-            compare(find("char", "z").x / pitch, 2.25);
+            compare(find("char", "q").x / pitch, 1);
+            compare(find("char", "a").x / pitch, 1.25);
+            compare(find("char", "z").x / pitch, 1.75);
             compare(field.implicitWidth, 16 * pitch - field.keyGap);
         }
 
@@ -100,7 +100,7 @@ Item {
             compare(row(0), "esc q w e r t y u i o p [ ] \\ delete");
             compare(row(1), "tab a s d f g h j k l ; ' - enter");
             compare(row(2), "shift z x c v b n m , . / = shift");
-            compare(row(3), "ctrl dot alt emoji space num hide left up down right");
+            compare(row(3), "ctrl dot alt space num hide left up down right");
         }
 
         function test_up_and_down_share_one_unit() {
@@ -231,12 +231,21 @@ Item {
             compare(field.activeLayer, "letters");
         }
 
+        function test_emoji_is_on_the_symbols_layer() {
+            compare(field.keys.filter(k => k.kind === "emoji").length, 0);
+            tap(find("num"));
+            const emoji = find("emoji");
+            compare(emoji.row, 2);
+            compare(emoji.x, 0);
+        }
+
         function test_emoji_panel_replaces_the_upper_rows() {
+            tap(find("num"));
             tap(find("emoji"));
             compare(field.activeLayer, "emoji");
             compare(field.keys.filter(k => k.row < 3).length, 0);
-            compare(field.labelFor(find("emoji")), "ABC");
-            tap(find("emoji"));
+            compare(field.labelFor(find("num")), "ABC");
+            tap(find("num"));
             compare(field.activeLayer, "letters");
         }
 

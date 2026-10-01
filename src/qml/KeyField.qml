@@ -70,20 +70,20 @@ Item {
 
     // Rows as [kind, span] for the named keys and a string for a run of
     // one-unit character keys.
-    readonly property var bottomRow: [["ctrl", 1.25], ["dot", 1.25], ["alt", 1.25], ["emoji", 1.25],
-                                      ["space", 5.5], ["num", 1.25], ["hide", 1.25],
+    readonly property var bottomRow: [["ctrl", 1.25], ["dot", 1.25], ["alt", 1.25],
+                                      ["space", 6.75], ["num", 1.25], ["hide", 1.25],
                                       ["left", 1], ["updown", 1], ["right", 1]]
     readonly property var rowsByLayer: ({
         letters: [
-            [["esc", 1.5], "qwertyuiop[]\\", ["delete", 1.5]],
-            [["tab", 1.75], "asdfghjkl;'-", ["enter", 2.25]],
-            [["shift", 2.25], "zxcvbnm,./=", ["shift", 2.75]],
+            [["esc", 1], "qwertyuiop[]\\", ["delete", 2]],
+            [["tab", 1.25], "asdfghjkl;'-", ["enter", 2.75]],
+            [["shift", 1.75], "zxcvbnm,./=", ["shift", 3.25]],
             bottomRow
         ],
         symbols: [
-            [["esc", 1.5], "1234567890[]\\", ["delete", 1.5]],
-            [["tab", 1.75], "!@#$%^&*()_+", ["enter", 2.25]],
-            [["shift", 2.25], "~`{}|<>€£¥°", ["shift", 2.75]],
+            [["esc", 1], "1234567890[]\\", ["delete", 2]],
+            [["tab", 1.25], "!@#$%^&*()_+", ["enter", 2.75]],
+            [["emoji", 1.75], "~`{}|<>€£¥°", ["shift", 3.25]],
             bottomRow
         ],
         emoji: [[], [], [], bottomRow]
@@ -239,10 +239,10 @@ Item {
         case "ctrl": controlActive = !controlActive; break;
         case "alt": altActive = !altActive; break;
         case "num":
-            activeLayer = activeLayer === "symbols" ? "letters" : "symbols";
+            activeLayer = activeLayer === "letters" ? "symbols" : "letters";
             clearOneShots();
             break;
-        case "emoji": activeLayer = activeLayer === "emoji" ? "letters" : "emoji"; break;
+        case "emoji": activeLayer = "emoji"; break;
         case "hide": hideRequested(); break;
         case "dot": metaRequested(); break;
         case "left": case "right": case "up": case "down": arrow(key.kind); break;
@@ -506,8 +506,7 @@ Item {
         case "ctrl": return "Ctrl";
         case "alt": return "Alt";
         case "space": return "Space";
-        case "num": return activeLayer === "symbols" ? "ABC" : "123";
-        case "emoji": return activeLayer === "emoji" ? "ABC" : "";
+        case "num": return activeLayer === "letters" ? "123" : "ABC";
         case "delete": return activeLayer === "symbols" ? "Del" : (terminal && markCount > 0 ? String(markCount) : "");
         case "left": return activeLayer === "symbols" ? "Home" : "";
         case "right": return activeLayer === "symbols" ? "End" : "";
@@ -519,7 +518,7 @@ Item {
     function glyphFor(key) {
         if (activeLayer === "symbols" && ["delete", "left", "right", "up", "down"].indexOf(key.kind) >= 0) return "";
         if (key.kind === "delete") return terminal && markCount > 0 ? "" : "delete";
-        if (key.kind === "emoji") return activeLayer === "emoji" ? "" : "emoji";
+        if (key.kind === "emoji") return "emoji";
         if (["left", "right", "up", "down", "hide"].indexOf(key.kind) >= 0) return key.kind;
         return "";
     }
@@ -555,7 +554,7 @@ Item {
             active: (modelData.kind === "shift" && field.shiftActive && !field.capsActive)
                     || (modelData.kind === "ctrl" && field.controlActive)
                     || (modelData.kind === "alt" && field.altActive)
-                    || (modelData.kind === "num" && field.activeLayer === "symbols")
+                    || (modelData.kind === "num" && field.activeLayer !== "letters")
             locked: modelData.kind === "shift" && field.capsActive
             emphasised: modelData.kind === "enter"
             quiet: field.caretMoving
