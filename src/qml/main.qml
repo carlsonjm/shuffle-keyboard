@@ -151,13 +151,25 @@ InputPanelWindow {
     property bool leaving: false
     function slideAway() {
         if (root.precisionActive || !root.visible || root.carry >= root.panelHeight) {
+            handover.stop();
             root.finishLeaving();
             return;
         }
-        root.leaving = true;
-        root.closing = false;
-        root.arriving = false;
-        root.travelTo(root.panelHeight, 280, Easing.InOutCubic);
+        if (!root.leaving) handover.start();
+    }
+    // A field letting go is often a field handing over: a browser moving
+    // between two of its boxes lets go of one and asks for the keys again a
+    // few milliseconds later. The keys wait this long before they go, so a
+    // handover moves nothing and tells the window above nothing.
+    Timer {
+        id: handover
+        interval: 150
+        onTriggered: {
+            root.leaving = true;
+            root.closing = false;
+            root.arriving = false;
+            root.travelTo(root.panelHeight, 280, Easing.InOutCubic);
+        }
     }
     // Out of sight: the window goes, and so does the input method's own
     // visibility, which is what brings the window back when the keys are
@@ -167,8 +179,10 @@ InputPanelWindow {
         if (Qt.inputMethod.visible) Qt.inputMethod.hide();
         else root.visible = false;
     }
-    // Asked for again on the way out: they come back up from where they are.
+    // Asked for again on the way out: they come back up from where they are,
+    // or, before they have set off, simply stay.
     function returnFromLeaving() {
+        handover.stop();
         if (!root.leaving) return;
         root.leaving = false;
         root.travelTo(0, 240);
@@ -293,6 +307,7 @@ InputPanelWindow {
             // above would make room for keys that are not there. An arrival
             // sets the carry afresh.
             carryMotion.stop();
+            handover.stop();
             arriving = false;
             closing = false;
             leaving = false;

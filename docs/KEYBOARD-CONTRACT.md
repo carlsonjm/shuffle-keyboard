@@ -163,8 +163,10 @@ They rise from the screen's bottom edge on their own and go back into it,
 whether the Hide key, the tray entry, the end of typing or the application put
 them away. Keys going because
 typing ended, or because an application asked the compositor to put them away,
-leave before the window goes. Asked for again on the
-way out, they come back from where they are.
+leave before the window goes. They wait 150 ms before setting off, because a
+field letting go is often handing over to the next, as a browser's boxes do,
+and then nothing moves. Asked for again on the way out, they come back from
+where they are.
 
 They rise only once the dock has left and given up its room, so they never rise
 into it.
