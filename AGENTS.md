@@ -47,6 +47,9 @@ that checkout is present, and say the suite plan was unavailable when it is not.
 - Automated checks cannot establish typing accuracy, latency, dropped
   characters, focus behavior or finger comfort. `docs/PHYSICAL_ACCEPTANCE.md` is
   the pass for those, on a touch device, by hand.
-- Installing into the user's session, running `kbuildsycoca6`, restarting Plasma
-  and logging out are the user's to perform. Prepare the candidate and hand the
-  installation over as the exact commands in `docs/PHYSICAL_ACCEPTANCE.md`.
+- An agent running on the tablet with J's permission installs the candidate and
+  runs `kbuildsycoca6` itself. Restarting Plasma and logging out close J's work
+  and wait for J's go in chat. Otherwise hand the installation over as the exact
+  commands in `docs/PHYSICAL_ACCEPTANCE.md`.
+- A change whose behavior saved tests fully prove merges once `./verify.sh`
+  passes; the physical pass covers only what automated checks cannot establish.
