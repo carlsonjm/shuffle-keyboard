@@ -28,10 +28,13 @@
 #include <QWindow>
 #include <qpa/qwindowsysteminterface.h>
 
+#include <chrono>
+#include <cstdlib>
+#include <thread>
+
 #ifdef Q_OS_UNIX
 #include <KSignalHandler>
 #include <signal.h>
-#include <unistd.h>
 #endif
 
 int main(int argc, char **argv)
@@ -165,8 +168,12 @@ int main(int argc, char **argv)
             qCDebug(PlasmaKeyboard) << "Received signal" << signal << ", exiting now.";
             // KWin holds the whole session still while it waits for this
             // process. If anything on the way out waits on the compositor,
-            // the default SIGALRM ends the process instead.
-            alarm(3);
+            // the process ends anyway. A thread, not alarm(): the Keyboard
+            // inherits its signal dispositions from KWin.
+            std::thread([] {
+                std::this_thread::sleep_for(std::chrono::seconds(3));
+                std::_Exit(0);
+            }).detach();
             QCoreApplication::quit();
         }
     });

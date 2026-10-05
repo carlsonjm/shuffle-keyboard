@@ -10,6 +10,7 @@
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
 #include <QDBusInterface>
+#include <QDBusMessage>
 #include <QDBusReply>
 #include <QGuiApplication>
 #include <QJsonDocument>
@@ -146,15 +147,19 @@ bool BottomSurfaceCoordinator::askSurface(bool yield)
         return false;
     }
 
-    QDBusInterface surface(QString::fromLatin1(kSurfaceService),
-                           QString::fromLatin1(kSurfacePath),
-                           QString::fromLatin1(kSurfaceInterface),
-                           QDBusConnection::sessionBus());
-    if (m_leaving) {
-        surface.setTimeout(kLeavingTimeoutMs);
+    const QDBusMessage message = QDBusMessage::createMethodCall(QString::fromLatin1(kSurfaceService),
+                                                                QString::fromLatin1(kSurfacePath),
+                                                                QString::fromLatin1(kSurfaceInterface),
+                                                                yield ? QStringLiteral("yieldRegion") : QStringLiteral("releaseRegion"));
+    if (!yield && !m_leaving) {
+        // Nothing waits on the hand-back, and it must not wait itself: a
+        // compositor that is shutting down hides the keys and then waits on
+        // the Keyboard, and a surface behind that compositor cannot reply.
+        QDBusConnection::sessionBus().send(message);
+        return true;
     }
-    const QDBusReply<bool> reply = surface.call(yield ? QStringLiteral("yieldRegion") : QStringLiteral("releaseRegion"));
-    return reply.isValid() && reply.value();
+    const QDBusMessage reply = QDBusConnection::sessionBus().call(message, QDBus::Block, m_leaving ? kLeavingTimeoutMs : -1);
+    return reply.type() == QDBusMessage::ReplyMessage && !reply.arguments().isEmpty() && reply.arguments().constFirst().toBool();
 }
 
 void BottomSurfaceCoordinator::syncKeyboardVisibility()
@@ -269,9 +274,6 @@ QString BottomSurfaceCoordinator::evaluate(const QString &script)
         setError(QStringLiteral("Plasma Shell is not available"));
         return {};
     }
-    if (m_leaving) {
-        shell.setTimeout(kLeavingTimeoutMs);
-    }
 
     const QDBusReply<QString> reply = shell.call(QStringLiteral("evaluateScript"), script);
     if (!reply.isValid()) {
@@ -348,7 +350,17 @@ void BottomSurfaceCoordinator::restoreBottomPanels()
         });
     )JS")
                                .arg(serialized);
-    evaluate(script);
+    // As with the surface: the shell may be waiting on the compositor.
+    QDBusMessage message = QDBusMessage::createMethodCall(QStringLiteral("org.kde.plasmashell"),
+                                                          QStringLiteral("/PlasmaShell"),
+                                                          QStringLiteral("org.kde.PlasmaShell"),
+                                                          QStringLiteral("evaluateScript"));
+    message.setArguments({script});
+    if (m_leaving) {
+        QDBusConnection::sessionBus().call(message, QDBus::Block, kLeavingTimeoutMs);
+    } else {
+        QDBusConnection::sessionBus().send(message);
+    }
     m_savedPanels.clear();
 }
 
