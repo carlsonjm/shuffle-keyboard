@@ -10,6 +10,7 @@ It is a stand-in for the producer, never for the Keyboard's own half.
 """
 
 import json
+import os
 import sys
 
 import gi
@@ -58,6 +59,7 @@ INTROSPECTION = """
 
 class StandIn:
     def __init__(self):
+        self.held = []
         self.presenting = False
         self.band = 0
         self.left = 0
@@ -106,6 +108,12 @@ class StandIn:
                 invocation.return_value(GLib.Variant("(b)", (granted,)))
                 return
             if method == "releaseRegion":
+                if os.environ.get("STAND_IN_HOLD_RELEASE"):
+                    # A surface that cannot answer while the compositor is
+                    # waiting on the Keyboard: the ask arrives, no reply does.
+                    self.say("release asked")
+                    self.held.append(invocation)
+                    return
                 released = self.holder == sender
                 if released:
                     self.holder = None
