@@ -42,6 +42,8 @@ timeout 120s env \
     PROBE_ROOT="${probe_root}" \
     QT_QPA_PLATFORM=wayland \
     QT_FORCE_STDERR_LOGGING=1 \
+    QT_LOGGING_RULES="org.kde.plasma.keyboard.debug=true" \
+    QT_MESSAGE_PATTERN="%{time process} %{category}: %{message}" \
     SHUFFLE_PROBE_KADUNCE_SERVICE=studio.warbler.test.Kadunce \
     SHUFFLE_PROBE_TEXT=exit \
     dbus-run-session -- kwin_wayland \
