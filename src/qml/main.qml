@@ -15,8 +15,13 @@ import org.kde.plasma.keyboard
 InputPanelWindow {
     id: root
 
+    // As tall as the card and one row more, for the accents that rise above
+    // the top row, and no taller: a window the size of the screen, even a
+    // transparent one, is composited whole on every frame the keys are up.
+    // The card slides inside it, and the compositor places the panel by its
+    // input region either way.
     width: Screen.width
-    height: Screen.height
+    height: root.panelHeight + Math.ceil(root.rowHeight)
     color: "transparent"
 
     property bool precisionHeld: false
@@ -37,7 +42,7 @@ InputPanelWindow {
     readonly property int heightPercent: 44
     readonly property real keyGap: Math.max(5, Math.min(10, root.width * 0.0062))
     readonly property real outerGap: Math.max(6, Math.min(12, root.width * 0.007))
-    readonly property real panelHeight: Math.round(root.height * heightPercent / 100)
+    readonly property real panelHeight: Math.round(Screen.height * heightPercent / 100)
     readonly property real rowHeight: (panelHeight - root.topStrip - root.keyGap * 3 - root.outerGap) / 4
     readonly property real keyUnitWidth: Math.max(1, Math.min(rowHeight,
         (root.width - root.sideGutter * 2 - root.outerGap * 2 + root.keyGap) / keyField.totalUnits - root.keyGap))
