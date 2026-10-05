@@ -255,14 +255,20 @@ gdbus call --session --dest "$(tray_entry)" --object-path /StatusNotifierItem \
 wait_keyboard true
 check "the tray entry brought the keys up" "$(keyboard visible)" "(<true>,)"
 sleep 1
-starts_before=$(grep -c '^portal Start' "${portal_log}" 2>/dev/null)
 tap_at "${latch_x}" "${latch_y}"
+sleep 1
+# The pointer was allowed the first time, so the latch asks the portal for
+# nothing new; a tap on the trackpad it opens moves the pointer's button.
+notes_before=$(grep -c '^portal NotifyPointer' "${portal_log}" 2>/dev/null)
+tap_at "$((frame_x + frame_w / 2))" "$((frame_y + frame_h / 2))"
 waited=0
-until (($(grep -c '^portal Start' "${portal_log}" 2>/dev/null) > starts_before)) || ((waited >= 30)); do
+until (($(grep -c '^portal NotifyPointer' "${portal_log}" 2>/dev/null) > notes_before)) || ((waited >= 30)); do
     sleep 0.1
     waited=$((waited + 1))
 done
-check "the latch took again" "$(($(grep -c '^portal Start' "${portal_log}" 2>/dev/null) > starts_before))" "1"
+check "the latch took again: a tap on the trackpad reached the pointer" \
+    "$(($(grep -c '^portal NotifyPointer' "${portal_log}" 2>/dev/null) > notes_before))" "1"
+check "the keys are up" "$(keyboard visible)" "(<true>,)"
 sleep 1
 before=$(raise_requests)
 gdbus call --session --dest "$(tray_entry)" --object-path /StatusNotifierItem \
