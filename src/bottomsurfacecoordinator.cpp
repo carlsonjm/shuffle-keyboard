@@ -24,6 +24,12 @@ namespace
 constexpr auto kSurfaceService = "studio.warbler.BottomSurface";
 constexpr auto kSurfacePath = "/BottomSurface";
 constexpr auto kSurfaceInterface = "studio.warbler.BottomSurface";
+// KWin stops the keyboard with SIGTERM and then waits for it to exit, up to
+// 30 seconds, without serving anything else. A surface or shell that needs
+// the compositor to answer cannot answer until the keyboard is gone, so on the
+// way out the region is handed back without waiting long for a reply. The
+// request still arrives and is acted on once the compositor moves again.
+constexpr int kLeavingTimeoutMs = 1000;
 constexpr int kSupportedMajor = 1;
 }
 
@@ -144,6 +150,9 @@ bool BottomSurfaceCoordinator::askSurface(bool yield)
                            QString::fromLatin1(kSurfacePath),
                            QString::fromLatin1(kSurfaceInterface),
                            QDBusConnection::sessionBus());
+    if (m_leaving) {
+        surface.setTimeout(kLeavingTimeoutMs);
+    }
     const QDBusReply<bool> reply = surface.call(yield ? QStringLiteral("yieldRegion") : QStringLiteral("releaseRegion"));
     return reply.isValid() && reply.value();
 }
@@ -163,6 +172,7 @@ void BottomSurfaceCoordinator::syncKeyboardVisibility()
 
 BottomSurfaceCoordinator::~BottomSurfaceCoordinator()
 {
+    m_leaving = true;
     restoreBottomPanels();
 }
 
@@ -258,6 +268,9 @@ QString BottomSurfaceCoordinator::evaluate(const QString &script)
     if (!shell.isValid()) {
         setError(QStringLiteral("Plasma Shell is not available"));
         return {};
+    }
+    if (m_leaving) {
+        shell.setTimeout(kLeavingTimeoutMs);
     }
 
     const QDBusReply<QString> reply = shell.call(QStringLiteral("evaluateScript"), script);
