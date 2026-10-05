@@ -115,6 +115,7 @@ private:
     /// True while the surface is the one that yielded, so the release goes
     /// back the same way it was taken.
     bool m_surfaceYielded = false;
+    bool m_leaving = false;
     bool m_surfacePresent = false;
     int m_bandHeight = 0;
     int m_dockLeft = 0;

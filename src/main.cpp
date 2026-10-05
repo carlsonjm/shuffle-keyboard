@@ -31,6 +31,7 @@
 #ifdef Q_OS_UNIX
 #include <KSignalHandler>
 #include <signal.h>
+#include <unistd.h>
 #endif
 
 int main(int argc, char **argv)
@@ -162,6 +163,10 @@ int main(int argc, char **argv)
     QObject::connect(KSignalHandler::self(), &KSignalHandler::signalReceived, &application, [](int signal) {
         if (signal == SIGINT || signal == SIGTERM) {
             qCDebug(PlasmaKeyboard) << "Received signal" << signal << ", exiting now.";
+            // KWin holds the whole session still while it waits for this
+            // process. If anything on the way out waits on the compositor,
+            // the default SIGALRM ends the process instead.
+            alarm(3);
             QCoreApplication::quit();
         }
     });
