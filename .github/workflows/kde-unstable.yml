@@ -33,25 +33,29 @@ jobs:
           # the stable ones, as Arch documents for this repository.
           sed -i '0,/^\[core\]/s//[kde-unstable]\nInclude = \/etc\/pacman.d\/mirrorlist\n\n[core-testing]\nInclude = \/etc\/pacman.d\/mirrorlist\n\n[extra-testing]\nInclude = \/etc\/pacman.d\/mirrorlist\n\n[core]/' /etc/pacman.conf
           grep -n '^\[' /etc/pacman.conf
-          pacman -Syu --noconfirm --needed git base-devel cmake ninja clang python \
+          pacman -Syu --noconfirm --needed git base-devel cmake ninja python \
             extra-cmake-modules qt6-base qt6-declarative qt6-virtualkeyboard \
             qt6-wayland qt6-tools kcoreaddons ki18n kcmutils kconfig kcrash \
             libplasma libxkbcommon wayland wayland-protocols \
-            plasma-wayland-protocols layer-shell-qt kwin
+            plasma-wayland-protocols layer-shell-qt
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Record what was tested against
         run: |
           {
             echo "### Tested against"
             echo '```'
-            pacman -Q kwin libplasma layer-shell-qt kcoreaddons qt6-base qt6-virtualkeyboard qt6-wayland
+            pacman -Q libplasma layer-shell-qt kcoreaddons qt6-base qt6-virtualkeyboard qt6-wayland
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
-      - name: Verify
+      - name: Build and test
+        # Only what the next Plasma can change: the build and the tests.
+        # Formatting and licence headers depend on the tools, not on Plasma,
+        # and ./verify.sh checks them on every change.
         run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           mkdir -p -m 0700 "$XDG_RUNTIME_DIR"
-          ./verify.sh
+          cmake -S . -B build -G Ninja -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cmake --build build
+          ctest --test-dir build --output-on-failure
