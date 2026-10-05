@@ -8,6 +8,11 @@ project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 build_dir="$(mktemp -d "${TMPDIR:-/tmp}/shuffle-keyboard-verify.XXXXXX")"
 trap 'rm -rf -- "${build_dir}"' EXIT
 
+# Configuring writes .clang-format from KDE's ECM, and Git ignores that file, so
+# a fresh checkout has no style to check against until this has run.
+cmake -S "${project_root}" -B "${build_dir}" -G Ninja \
+    -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo >/dev/null
+
 # The commit hook refuses unformatted C++, and a refusal at commit time is a
 # refusal after the work is done. Fail here instead, where it is one command to
 # fix with `git clang-format`.
@@ -27,8 +32,6 @@ if ((${#missing[@]})); then
 fi
 echo "Shuffle Keyboard licence headers are present."
 
-cmake -S "${project_root}" -B "${build_dir}" -G Ninja \
-    -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo >/dev/null
 cmake --build "${build_dir}" >/dev/null
 ctest --test-dir "${build_dir}" --output-on-failure
 
