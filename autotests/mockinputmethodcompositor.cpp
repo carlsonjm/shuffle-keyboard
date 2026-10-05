@@ -513,6 +513,9 @@ private Q_SLOTS:
         });
         auto env = QProcessEnvironment::systemEnvironment();
         env.insert(u"WAYLAND_DISPLAY"_s, m_socketPath);
+        // The Keyboard talks to this compositor only over Wayland, whatever
+        // platform the test itself was started on.
+        env.insert(u"QT_QPA_PLATFORM"_s, u"wayland"_s);
         env.insert(u"QT_QUICK_BACKEND"_s, u"software"_s); // Without this plasma-keyboard explodes on alpine for some reason
         m_child->setProcessEnvironment(env);
 
