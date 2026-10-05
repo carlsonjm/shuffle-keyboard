@@ -28,6 +28,11 @@
 #include <QWindow>
 #include <qpa/qwindowsysteminterface.h>
 
+#ifdef Q_OS_UNIX
+#include <KSignalHandler>
+#include <signal.h>
+#endif
+
 int main(int argc, char **argv)
 {
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
@@ -148,6 +153,19 @@ int main(int argc, char **argv)
     // Loaded after the keyboard, so a failure here cannot cost the keyboard
     // itself.
     view.load(holdUrl);
+
+#ifdef Q_OS_UNIX
+    // KWin stops the keyboard with SIGTERM. Quitting through the event loop
+    // lets the bottom-surface coordinator restore Plasma's bottom panel.
+    KSignalHandler::self()->watchSignal(SIGINT);
+    KSignalHandler::self()->watchSignal(SIGTERM);
+    QObject::connect(KSignalHandler::self(), &KSignalHandler::signalReceived, &application, [](int signal) {
+        if (signal == SIGINT || signal == SIGTERM) {
+            qCDebug(PlasmaKeyboard) << "Received signal" << signal << ", exiting now.";
+            QCoreApplication::quit();
+        }
+    });
+#endif
 
     qCDebug(PlasmaKeyboard) << "Starting Shuffle Keyboard";
 

@@ -5,6 +5,8 @@
 */
 
 #include "inputmethod_p.h"
+#include "logging.h"
+
 #include <QDateTime>
 #include <QDebug>
 #include <QGuiApplication>
@@ -19,6 +21,19 @@
 InputMethod::InputMethod()
     : QWaylandClientExtensionTemplate<InputMethod>(1)
 {
+    // A kwin_wayland restart drops the connection; without this the keyboard
+    // lingers and leaves a dead keys entry in the tray beside the new one.
+    connect(
+        this,
+        &InputMethod::activeChanged,
+        this,
+        [this]() {
+            if (!isActive()) {
+                qCDebug(PlasmaKeyboard) << "Connection to the Wayland compositor has been lost; exiting Shuffle Keyboard.";
+                QCoreApplication::quit();
+            }
+        },
+        Qt::QueuedConnection);
 }
 
 InputMethod::~InputMethod() = default;

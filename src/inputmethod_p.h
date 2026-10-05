@@ -35,7 +35,7 @@ public:
         return m_current;
     }
 
-    bool isActive() const
+    bool hasContext() const
     {
         return bool(m_current);
     }
