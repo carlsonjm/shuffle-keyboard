@@ -15,6 +15,7 @@
 #include <QWindow>
 #include <QtTest/QTest>
 
+#include <algorithm>
 #include <memory>
 
 #include <QtWaylandCompositor/QWaylandCompositor>
@@ -196,6 +197,7 @@ Q_SIGNALS:
     void keyboardGrabbed();
     void commitStringChanged(const QString &commitString);
     void keysymReceived(uint32_t sym, uint32_t state);
+    void keyReceived(uint32_t key, uint32_t state);
 
 protected:
     void zwp_input_method_context_v1_destroy(Resource *resource) override
@@ -227,6 +229,13 @@ protected:
         Q_UNUSED(resource);
         qInfo() << "keysym" << serial << time << sym << state << modifiers;
         Q_EMIT keysymReceived(sym, state);
+    }
+
+    void zwp_input_method_context_v1_key(Resource *resource, uint32_t serial, uint32_t time, uint32_t key, uint32_t state) override
+    {
+        Q_UNUSED(resource);
+        qInfo() << "key" << serial << time << key << state;
+        Q_EMIT keyReceived(key, state);
     }
 
     void zwp_input_method_context_v1_grab_keyboard(Resource *resource, uint32_t keyboard) override
@@ -584,18 +593,26 @@ private Q_SLOTS:
         QTest::qWait(200);
     }
 
-    void testLongPressShowsOverlayPanel()
+    /**
+     * Test that holding a physical key opens no accent overlay: Shuffle shows
+     * none, so the key after a hold must reach the application as itself and
+     * not as an accent chosen from a list nobody can see.
+     */
+    void testLongPressTypesNormally()
     {
         QSignalSpy overlaySpy(m_inputPanel.get(), &InputPanelV1::overlayPanelRequested);
+        QSignalSpy commitStringSpy(m_inputMethod->context(), &InputMethodContext::commitStringChanged);
+        QSignalSpy keySpy(m_inputMethod->context(), &InputMethodContext::keyReceived);
 
         sendKey(KEY_A, 1200);
-        QVERIFY(overlaySpy.count() || overlaySpy.wait());
-
-        QSignalSpy commitStringSpy(m_inputMethod->context(), &InputMethodContext::commitStringChanged);
         sendKey(KEY_1, 10);
-        QVERIFY(commitStringSpy.count() || commitStringSpy.wait());
-        QCOMPARE(commitStringSpy.count(), 1);
-        QCOMPARE(commitStringSpy.first().first().toString(), QStringLiteral("à"));
+
+        // A key the Keyboard leaves alone goes back to the compositor as itself.
+        QTRY_VERIFY(std::any_of(keySpy.cbegin(), keySpy.cend(), [](const QList<QVariant> &args) {
+            return args.at(0).toUInt() == KEY_1 && args.at(1).toUInt() == WL_KEYBOARD_KEY_STATE_PRESSED;
+        }));
+        QVERIFY(overlaySpy.isEmpty());
+        QVERIFY(commitStringSpy.isEmpty());
     }
 
     /**

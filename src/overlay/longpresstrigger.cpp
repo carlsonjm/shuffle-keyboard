@@ -111,7 +111,10 @@ void LongPressTrigger::reset()
 
 bool LongPressTrigger::isEnabled() const
 {
-    return PlasmaKeyboardSettings::self()->diacriticsPopupEnabled();
+    // Shuffle shows no accent popup for a held physical key, and a choice
+    // made with nothing on screen would take the next digit, arrow or Enter.
+    // A held vowel on the keys themselves shows its accents in the QML.
+    return false;
 }
 
 QStringList LongPressTrigger::candidates(const QString &baseText) const
