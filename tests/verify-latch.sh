@@ -2,10 +2,10 @@
 # SPDX-FileCopyrightText: 2026 Shuffle Project
 # SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
 #
-# Puts the keys away by their handle with the trackpad latched, in a
-# compositor of its own with the Keyboard as that compositor's input method,
-# once by a mouse click on the handle and once by a finger dragging it down,
-# and asks the compositor whether the keys stay away.
+# Puts the keys away with Hide and with the tray entry while the trackpad is
+# latched, in a compositor of its own with the Keyboard as that compositor's
+# input method, once clicking Hide with a mouse and once tapping it with a
+# finger, and asks the compositor whether the keys stay away.
 # Nothing here reaches the running session: its own compositor, its own bus,
 # its own runtime and config directories, all thrown away afterwards.
 set -euo pipefail
@@ -44,7 +44,7 @@ keyboard_bin="${build_dir}/bin/shuffle-keyboard"
 protocol="$(pkg-config --variable=pkgdatadir plasma-wayland-protocols 2>/dev/null || true)/fake-input.xml"
 [[ -f "${protocol}" ]] || protocol=/usr/share/plasma-wayland-protocols/fake-input.xml
 if [[ ! -f "${protocol}" ]] || ! command -v wayland-scanner > /dev/null; then
-    echo "Skipped: no fake-input protocol or wayland-scanner, so the handle cannot be touched." >&2
+    echo "Skipped: no fake-input protocol or wayland-scanner, so Hide cannot be touched." >&2
     exit 77
 fi
 wayland-scanner client-header "${protocol}" "${scratch}/fake-input-client-protocol.h"
@@ -79,7 +79,7 @@ run_path() {
     chmod 700 "${probe_root}/runtime"
 
     echo
-    echo "=== handle ${path} ==="
+    echo "=== Hide by ${path} ==="
     # The tablet's own logical size, as the other sealed sessions use.
     timeout 120s env \
         XDG_RUNTIME_DIR="${probe_root}/runtime" \
@@ -87,6 +87,7 @@ run_path() {
         XDG_DATA_HOME="${probe_root}/data" \
         PROBE_ROOT="${probe_root}" \
         LATCH_PATH="${path}" \
+        SCREEN_HEIGHT=915 \
         FAKE_INPUT_BIN="${scratch}/fake-input" \
         KWIN_WAYLAND_NO_PERMISSION_CHECKS=1 \
         QT_QPA_PLATFORM=wayland \
@@ -101,7 +102,7 @@ run_path() {
 
     cat "${probe_root}/report.log" 2>/dev/null || true
     if [[ "$(cat "${probe_root}/result" 2>/dev/null)" != "PASS" ]]; then
-        echo "The latch probe with the handle ${path} did not pass." >&2
+        echo "The latch probe with Hide by ${path} did not pass." >&2
         if ! grep -qE 'passed, .* failed$' "${probe_root}/report.log" 2>/dev/null; then
             echo "--- compositor and session ---" >&2
             tail -60 "${probe_root}/compositor.log" >&2
@@ -111,12 +112,12 @@ run_path() {
 }
 
 failed=0
-run_path tap
-run_path drag
+run_path click
+run_path touch
 echo
 if ((failed)); then
     exit 1
 fi
-echo "The handle puts the keys away with the trackpad latched, by click or by"
-echo "drag, and they stay away. How the drag feels under a finger is physical,"
-echo "and is not this."
+echo "Hide and the tray entry put the keys away with the trackpad latched, by"
+echo "click or by touch, and they stay away. How Hide feels under a finger is"
+echo "physical, and is not this."

@@ -5,12 +5,12 @@
 # Runs inside the compositor verify-latch.sh starts, with the Keyboard as its
 # input method. Nothing here reaches the running session.
 #
-# The handle puts the keys away, and they stay away until a text field or the
-# tray entry asks for them again. The trackpad latch keeps the keys up while
-# the pointer clicks into other applications; it is no reason to bring them
-# back once the handle has put them away. An application holds a focused
-# field, stand-ins answer for Kadunce and for the pointer portal, and the
-# handle is tapped with the mouse or dragged down by a finger.
+# Hide puts the keys away, and they stay away until a text field or the tray
+# entry asks for them again. The trackpad latch keeps the keys up while the
+# pointer clicks into other applications; it is no reason to bring them back
+# once Hide or the tray entry has put them away. An application holds a
+# focused field, stand-ins answer for Kadunce and for the pointer portal, and
+# Hide is clicked with the mouse or tapped by a finger.
 
 set -uo pipefail
 
@@ -105,26 +105,10 @@ send() { printf '%s\n' "$@" >&3; }
 
 tap_at() {
     local x="$1" y="$2"
-    if [[ "${LATCH_PATH}" == drag ]]; then
+    if [[ "${LATCH_PATH}" == touch ]]; then
         send "tdown 1 ${x} ${y}" "wait 60" "tup 1"
     else
         send "abs ${x} ${y}" "wait 60" "down" "wait 60" "up"
-    fi
-}
-
-# The handle takes the keys away: a click on it with the mouse, or a finger
-# carrying them down half their height and letting go.
-handle_away() {
-    local x="$1" y="$2"
-    if [[ "${LATCH_PATH}" == drag ]]; then
-        send "tdown 1 ${x} ${y}" "wait 40"
-        local step
-        for step in 1 2 3 4 5 6 7 8 9 10; do
-            send "tmove 1 ${x} $((y + step * 20))" "wait 16"
-        done
-        send "tup 1"
-    else
-        tap_at "${x}" "${y}"
     fi
 }
 
@@ -150,7 +134,7 @@ for log in "${stand_in_log}" "${kadunce_log}" "${portal_log}"; do
         exit 1
     fi
 done
-# A dock is published, so the handle takes the dock row's place and width.
+# A dock is published, as on the tablet.
 control report true 60 544 920
 
 QML_XHR_ALLOW_FILE_READ=1 qml6 "${tests_dir}/app-stand-in.qml" -- "${PROBE_ROOT}/app-type" \
@@ -167,7 +151,7 @@ if ! wait_for "${PROBE_ROOT}/input.log" '^ready' 50; then
     echo FAIL > "${PROBE_ROOT}/result"
     exit 1
 fi
-if [[ "${LATCH_PATH}" == drag ]]; then
+if [[ "${LATCH_PATH}" == touch ]]; then
     # The touchscreen only appears with its first touch, which reaches no
     # window; that one lands in an empty corner.
     send "tdown 9 1450 10" "wait 60" "tup 9"
@@ -187,26 +171,41 @@ frame_x="${origin%,*}"
 frame_y="${origin#*,}"
 frame_w="${size%x*}"
 frame_h="${size#*x}"
-# The handle is the dock row the keys cover, 544 to 920, in the keys' top
-# strip.
-handle_x=732
-handle_y=$((frame_y + 13))
-# The latch is the square at the space bar's right end, one key row tall. At
-# this output's size and the default height its centre is 379 px right of the
-# keys' centre and 50 px above their bottom edge.
-latch_x=$((frame_x + frame_w / 2 + 379))
-latch_y=$((frame_y + frame_h - 50))
+# Where Hide and the trackpad mark sit, by the Keyboard's own sizes
+# (src/qml/main.qml, src/qml/KeyField.qml): the card fills the frame's width
+# less a gutter at either side, the twelve-and-a-half-unit block is centred
+# on it, and the bottom row is Ctrl, Alt, the space bar, the Tette Dot and
+# Hide, at 1.5, 1.5, 6.5, 1.5 and 1.5 units. The mark is the square at the
+# space bar's right end.
+read -r hide_x mark_x row_y <<< "$(python3 - "${frame_x}" "${frame_y}" "${frame_w}" "${frame_h}" "${SCREEN_HEIGHT}" <<'PY'
+import sys
+x, y, w, h, screen_h = map(float, sys.argv[1:])
+gap = max(5, min(10, w * 0.0062))
+outer = max(6, min(12, w * 0.007))
+panel = round(screen_h * 44 / 100)
+row = (panel - 26 - gap * 3 - outer) / 4
+unit = max(1, min(row, (w - 20 - outer * 2 + gap) / 12.5 - gap))
+pitch = unit + gap
+left = x + w / 2 - (12.5 * pitch - gap) / 2
+hide = left + 11 * pitch + (1.5 * pitch - gap) / 2
+mark = left + 3 * pitch + (6.5 * pitch - gap) - row / 2
+row_y = y + h - outer - row / 2
+print(round(hide), round(mark), round(row_y))
+PY
+)"
+latch_x="${mark_x}"
+latch_y="${row_y}"
 
-if [[ "${LATCH_PATH}" == drag ]]; then
-    gesture="dragged down by a finger"
+if [[ "${LATCH_PATH}" == touch ]]; then
+    gesture="tapped by a finger"
 else
     gesture="clicked"
 fi
 
 echo
-echo "Unlatched, the handle ${gesture} puts the keys away"
+echo "Unlatched, Hide ${gesture} puts the keys away"
 before=$(raise_requests)
-handle_away "${handle_x}" "${handle_y}"
+tap_at "${hide_x}" "${row_y}"
 sleep 1
 check "the keys are down" "$(keyboard visible)" "(<false>,)"
 sleep 1.5
@@ -233,11 +232,11 @@ sleep 1
 check "the keys are up" "$(keyboard visible)" "(<true>,)"
 
 echo
-echo "Latched, the handle ${gesture} puts the keys away and they stay away"
+echo "Latched, Hide ${gesture} puts the keys away and they stay away"
 before=$(raise_requests)
 signals_before=$(wc -l < "${signal_log}")
 put_away_at=$(now_ms)
-handle_away "${handle_x}" "${handle_y}"
+tap_at "${hide_x}" "${row_y}"
 sleep 1
 check "the keys are down" "$(keyboard visible)" "(<false>,)"
 sleep 1.5
@@ -248,6 +247,31 @@ while read -r at; do
     changes+=" +$((at - put_away_at))ms"
 done < <(tail -n +"$((signals_before + 1))" "${signal_log}")
 printf '  the compositor announced a change of visibility at:%s\n' "${changes:- nothing}"
+
+echo
+echo "Latched again, the tray entry puts the keys away and they stay away"
+gdbus call --session --dest "$(tray_entry)" --object-path /StatusNotifierItem \
+    --method org.kde.StatusNotifierItem.Activate 0 0 > /dev/null 2>&1
+wait_keyboard true
+check "the tray entry brought the keys up" "$(keyboard visible)" "(<true>,)"
+sleep 1
+starts_before=$(grep -c '^portal Start' "${portal_log}" 2>/dev/null)
+tap_at "${latch_x}" "${latch_y}"
+waited=0
+until (($(grep -c '^portal Start' "${portal_log}" 2>/dev/null) > starts_before)) || ((waited >= 30)); do
+    sleep 0.1
+    waited=$((waited + 1))
+done
+check "the latch took again" "$(($(grep -c '^portal Start' "${portal_log}" 2>/dev/null) > starts_before))" "1"
+sleep 1
+before=$(raise_requests)
+gdbus call --session --dest "$(tray_entry)" --object-path /StatusNotifierItem \
+    --method org.kde.StatusNotifierItem.Activate 0 0 > /dev/null 2>&1
+sleep 1
+check "the keys are down" "$(keyboard visible)" "(<false>,)"
+sleep 1.5
+check "they are still down" "$(keyboard visible)" "(<false>,)"
+check "nothing asked for them again" "$(($(raise_requests) - before))" "0"
 
 exec 3>&-
 kill "${app_pid}" 2>/dev/null
