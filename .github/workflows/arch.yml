@@ -30,3 +30,41 @@ jobs:
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           ./verify.sh
+
+  # The sealed sessions: each starts a compositor of its own with the Keyboard
+  # as its input method, touches it the way a person would, and asks the
+  # compositor what happened. They build nothing of their own.
+  sessions:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install build and session dependencies
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel clang cmake extra-cmake-modules git ninja pkgconf \
+            qt6-base qt6-declarative qt6-virtualkeyboard qt6-wayland \
+            kcoreaddons ki18n kcmutils kconfig kcrash libplasma layer-shell-qt \
+            libxkbcommon wayland wayland-protocols \
+            kwin plasma-wayland-protocols python-gobject dbus mesa
+      - uses: actions/checkout@v5
+      - name: Build the Keyboard
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cmake --build build
+      - name: Run every sealed session
+        env:
+          SHUFFLE_KEYBOARD_BUILD: ${{ github.workspace }}/build
+        run: |
+          failed=()
+          for session in tests/verify-*.sh; do
+            echo "::group::${session}"
+            status=0
+            "${session}" || status=$?
+            echo "::endgroup::"
+            case "${status}" in
+              0) echo "passed: ${session}" ;;
+              77) echo "skipped: ${session}" ;;
+              *) echo "FAILED: ${session}"; failed+=("${session}") ;;
+            esac
+          done
+          ((${#failed[@]} == 0)) || { printf 'Failed: %s\n' "${failed[@]}"; exit 1; }
