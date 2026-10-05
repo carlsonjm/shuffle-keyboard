@@ -36,7 +36,11 @@ jobs:
   # compositor what happened. They build nothing of their own.
   sessions:
     runs-on: ubuntu-latest
-    container: archlinux:latest
+    container:
+      image: archlinux:latest
+      # kwin_wayland carries the capability to raise its own priority, and a
+      # container without it may not run the binary at all.
+      options: --cap-add=SYS_NICE
     steps:
       - name: Install build and session dependencies
         run: |
