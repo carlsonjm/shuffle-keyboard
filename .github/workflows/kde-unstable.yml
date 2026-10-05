@@ -3,7 +3,9 @@
 #
 # Builds and tests the Keyboard against the next Plasma before it ships, from
 # Arch Linux's kde-unstable repository. A red run here is an early warning
-# about the coming Plasma release, not a failure of the released one.
+# about the coming Plasma release, not a failure of the released one. A push
+# that changes the source or the tests runs it too, so a port to the next
+# Plasma is checked before it merges.
 name: Next Plasma (kde-unstable)
 
 on:
@@ -13,6 +15,9 @@ on:
   push:
     paths:
       - ".github/workflows/kde-unstable.yml"
+      - "CMakeLists.txt"
+      - "src/**"
+      - "autotests/**"
 
 concurrency:
   group: kde-unstable-${{ github.ref }}
