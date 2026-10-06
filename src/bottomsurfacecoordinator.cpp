@@ -13,8 +13,8 @@
 #include <QDBusMessage>
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>
-#include <QDBusVariant>
 #include <QDBusReply>
+#include <QDBusVariant>
 #include <QGuiApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
