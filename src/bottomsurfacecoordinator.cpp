@@ -11,6 +11,9 @@
 #include <QDBusConnectionInterface>
 #include <QDBusInterface>
 #include <QDBusMessage>
+#include <QDBusPendingCallWatcher>
+#include <QDBusPendingReply>
+#include <QDBusVariant>
 #include <QDBusReply>
 #include <QGuiApplication>
 #include <QJsonDocument>
@@ -164,15 +167,24 @@ bool BottomSurfaceCoordinator::askSurface(bool yield)
 
 void BottomSurfaceCoordinator::syncKeyboardVisibility()
 {
-    QDBusInterface keyboard(QStringLiteral("org.kde.KWin"),
-                            QStringLiteral("/VirtualKeyboard"),
-                            QStringLiteral("org.kde.kwin.VirtualKeyboard"),
-                            QDBusConnection::sessionBus());
-    const bool visible = keyboard.isValid() && keyboard.property("visible").toBool();
-    setKeyboardVisible(visible);
-    // A compositor offering no keyboard interface cannot say, so the keys
-    // take themselves as shown.
-    Q_EMIT compositorVisibilityChecked(visible || !keyboard.isValid());
+    // Asked without waiting: KWin hides the keys as it begins to stop the
+    // Keyboard, and then answers nothing until the Keyboard has gone.
+    QDBusMessage message = QDBusMessage::createMethodCall(QStringLiteral("org.kde.KWin"),
+                                                          QStringLiteral("/VirtualKeyboard"),
+                                                          QStringLiteral("org.freedesktop.DBus.Properties"),
+                                                          QStringLiteral("Get"));
+    message.setArguments({QStringLiteral("org.kde.kwin.VirtualKeyboard"), QStringLiteral("visible")});
+    auto watcher = new QDBusPendingCallWatcher(QDBusConnection::sessionBus().asyncCall(message), this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher *call) {
+        call->deleteLater();
+        const QDBusPendingReply<QDBusVariant> reply = *call;
+        const bool offered = !reply.isError();
+        const bool visible = offered && reply.value().variant().toBool();
+        setKeyboardVisible(visible);
+        // A compositor offering no keyboard interface cannot say, so the keys
+        // take themselves as shown.
+        Q_EMIT compositorVisibilityChecked(visible || !offered);
+    });
 }
 
 BottomSurfaceCoordinator::~BottomSurfaceCoordinator()
