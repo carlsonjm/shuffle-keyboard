@@ -9,8 +9,8 @@ through the application's own text-input path.
 For every task, read this file, `docs/KEYBOARD-CONTRACT.md` for what the
 Keyboard is, `docs/INPUT.md` for every input it handles, and
 `docs/FEASIBILITY.md` for why the base was chosen. Suite block order lives in
-`../shuffle/docs/suite/ROADMAP-CC.md`, where this repository is Block 9; read it when
-that checkout is present, and say the suite plan was unavailable when it is not.
+`../shuffle/docs/suite/ROADMAP-CC.md`, where this repository is Block 9; read only its
+§ Current target and Block 9, when that checkout is present, and say the suite plan was unavailable when it is not.
 
 ## Working in a fork
 
