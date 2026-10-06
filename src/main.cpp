@@ -28,13 +28,25 @@
 #include <QWindow>
 #include <qpa/qwindowsysteminterface.h>
 
-#include <chrono>
-#include <cstdlib>
-#include <thread>
-
 #ifdef Q_OS_UNIX
 #include <KSignalHandler>
 #include <signal.h>
+#include <unistd.h>
+
+namespace
+{
+struct sigaction s_eventLoopQuit = {};
+
+void leaveSoon(int signal, siginfo_t *info, void *context)
+{
+    alarm(3);
+    if (s_eventLoopQuit.sa_flags & SA_SIGINFO) {
+        s_eventLoopQuit.sa_sigaction(signal, info, context);
+    } else if (s_eventLoopQuit.sa_handler != SIG_DFL && s_eventLoopQuit.sa_handler != SIG_IGN) {
+        s_eventLoopQuit.sa_handler(signal);
+    }
+}
+}
 #endif
 
 int main(int argc, char **argv)
@@ -166,17 +178,20 @@ int main(int argc, char **argv)
     QObject::connect(KSignalHandler::self(), &KSignalHandler::signalReceived, &application, [](int signal) {
         if (signal == SIGINT || signal == SIGTERM) {
             qCDebug(PlasmaKeyboard) << "Received signal" << signal << ", exiting now.";
-            // KWin holds the whole session still while it waits for this
-            // process. If anything on the way out waits on the compositor,
-            // the process ends anyway. A thread, not alarm(): the Keyboard
-            // inherits its signal dispositions from KWin.
-            std::thread([] {
-                std::this_thread::sleep_for(std::chrono::seconds(3));
-                std::_Exit(0);
-            }).detach();
             QCoreApplication::quit();
         }
     });
+    // KWin holds the whole session still while it waits for this process to
+    // leave, so leaving cannot wait on the event loop, which may itself be
+    // waiting on KWin. The alarm is armed in the signal handler and ends the
+    // process if the orderly way out has not within three seconds.
+    signal(SIGALRM, SIG_DFL);
+    struct sigaction leaving = {};
+    sigaction(SIGTERM, nullptr, &s_eventLoopQuit);
+    leaving = s_eventLoopQuit;
+    leaving.sa_flags |= SA_SIGINFO;
+    leaving.sa_sigaction = leaveSoon;
+    sigaction(SIGTERM, &leaving, nullptr);
 #endif
 
     qCDebug(PlasmaKeyboard) << "Starting Shuffle Keyboard";
