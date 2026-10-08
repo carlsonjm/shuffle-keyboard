@@ -87,7 +87,7 @@ send() { printf '%s\n' "$@" >&3; }
 # One finger down on the space bar, held or not, carried sideways by a
 # distance in small even steps, and lifted.
 drag() {
-    local hold="$1" distance="$2" x="${space_x}" i
+    local hold="$1" distance="$2" x="${3:-${space_x}}" i
     local steps=$(((${distance#-} + 2) / 3)) step=$((distance < 0 ? -3 : 3))
     send "tdown 1 ${x} ${row_y}" "wait ${hold}"
     for ((i = 0; i < steps; i++)); do
@@ -172,7 +172,7 @@ fi
 # The space bar's centre and one caret step, by the Keyboard's own sizes
 # (src/qml/main.qml, src/qml/KeyField.qml), as latch-session.sh reads them.
 # The drag is two keys wide and stays on the space bar either way.
-read -r space_x row_y distance expected <<< "$(python3 - "${frame_x}" "${frame_y}" "${frame_w}" "${frame_h}" "${SCREEN_HEIGHT}" <<'PY'
+read -r space_x row_y distance expected mark_x <<< "$(python3 - "${frame_x}" "${frame_y}" "${frame_w}" "${frame_h}" "${SCREEN_HEIGHT}" <<'PY'
 import math
 import sys
 x, y, w, h, screen_h = map(float, sys.argv[1:])
@@ -186,7 +186,8 @@ left = x + w / 2 - (12.5 * pitch - gap) / 2
 space = left + 3 * pitch + (6.5 * pitch - gap - row) / 2
 row_y = y + h - outer - row / 2
 distance = round(2 * pitch / 3) * 3
-print(round(space), round(row_y), distance, math.floor(distance / (unit * 0.15)))
+mark = left + 3 * pitch + (6.5 * pitch - gap) - row
+print(round(space), round(row_y), distance, math.floor(distance / (unit * 0.15)), round(mark))
 PY
 )"
 printf '  each drag is %s px, about %s caret steps\n' "${distance}" "${expected}"
@@ -220,6 +221,17 @@ for start in hold slide; do
     near=$((went_left >= expected - 1 && went_left <= expected + 1))
     check "the cursor moved one character per step" "${near}" "1"
 done
+
+echo
+echo "For the record: a drag that ends over the trackpad mark"
+start=$((mark_x - distance + 30))
+before="$(app_cursor)"
+drag 500 "${distance}" "$((mark_x - distance + 30))"
+on=$(($(app_cursor) - before))
+before="$(app_cursor)"
+drag 500 "-${distance}" "$((mark_x + 30))"
+back=$((before - $(app_cursor)))
+printf '  right onto the mark: cursor %s on; left off it: cursor %s back\n' "${on}" "${back}"
 
 exec 3>&-
 kill "${app_pid}" 2>/dev/null
