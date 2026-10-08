@@ -9,6 +9,8 @@
 
 #include <Plasma/Theme>
 
+#include <QPalette>
+
 KeysTheme::KeysTheme(QObject *parent)
     : QObject(parent)
     , m_theme(std::make_unique<Plasma::Theme>())
@@ -28,7 +30,7 @@ void KeysTheme::read()
 {
     m_ground = m_theme->color(Plasma::Theme::BackgroundColor);
     m_ink = m_theme->color(Plasma::Theme::TextColor);
-    m_raised = KeysThemeRule::raised(m_theme->color(Plasma::Theme::BackgroundColor, Plasma::Theme::ViewColorGroup), m_ground, m_ink);
+    m_raised = KeysThemeRule::raised(Plasma::Theme::globalPalette().color(QPalette::Base), m_ground, m_ink);
     m_light = KeysThemeRule::wantsLight(m_ground, m_ink, m_greeter);
 }
 
