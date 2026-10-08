@@ -32,6 +32,14 @@ hairlines, with no accent colour. Keys have hairline outlines, open spacing
 and floating Ghost White labels. A key that is on (Shift, Caps, Ctrl, Alt)
 fills. There are no skeuomorphic keys, dense outlines or permanent toolbars.
 
+The card follows the Plasma style, as the desktop's panels do, not the colours
+programs use. It is dark, in exactly the colours above, unless the style is
+light and its text reads on it (WCAG AA, 4.5:1); then the surface is the
+style's window colour, the labels its text colour, and every hairline, fill and
+the trackpad are mixed from those two, so a label and what it sits on always
+come from the same look. A style that keeps its panels dark under light
+programs keeps the keys dark. At the sign-in screen the keys are always dark.
+
 Its top strip, 10 px above a 6 px band and 10 px below it, is kept clear for
 word predictions, which come after 1.0 (§ 1.0 boundaries). Nothing is drawn
 there and a touch there does nothing. There is no handle: the Hide key puts the

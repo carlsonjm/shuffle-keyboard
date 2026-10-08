@@ -24,22 +24,23 @@ Rectangle {
     // How far a flick down has come, from 0 to 1: the grey character grows
     // into the key's centre as the label fades.
     property real flick: 0
+    required property KeysPalette colours
 
-    readonly property color paper: "#F8F8FF"
-    readonly property color outline: "#383838"
+    readonly property color paper: colours.ink
+    readonly property color outline: colours.outline
 
     // Keys are paper: round keys would read as dots.
     radius: 8
     scale: down ? 0.99 : 1
     color: locked ? paper
-         : emphasised ? (down ? "#D9F8F8FF" : "#B3F8F8FF")
-         : active ? "#38F8F8FF"
+         : emphasised ? colours.wash(down ? 0xD9 / 255 : 0xB3 / 255)
+         : active ? colours.wash(0x38 / 255)
          : down ? outline : "transparent"
     border.width: 1
-    border.color: emphasised ? "#B3F8F8FF" : (active ? "#80F8F8FF" : outline)
+    border.color: emphasised ? colours.wash(0xB3 / 255) : (active ? colours.wash(0x80 / 255) : outline)
     opacity: quiet ? 0.12 : 1
 
-    readonly property color ink: (locked || emphasised) ? "#141414" : paper
+    readonly property color ink: (locked || emphasised) ? colours.ground : paper
     readonly property bool hasSecondary: secondaryLabel.length > 0
 
     Behavior on color { ColorAnimation { duration: 70 } }

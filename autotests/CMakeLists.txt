@@ -31,6 +31,10 @@ else()
     message(STATUS "Qt WaylandCompositor is unavailable; skipping the mock compositor test")
 endif()
 
+# When the keys are drawn light, without a theme to read.
+ecm_add_test(keysthemetest.cpp LINK_LIBRARIES Qt::Gui Qt::Test)
+target_include_directories(keysthemetest PRIVATE ${CMAKE_SOURCE_DIR}/src)
+
 qt_add_executable(shuffle-geometry-target geometrytarget.cpp)
 target_link_libraries(shuffle-geometry-target PRIVATE Qt::Widgets)
 

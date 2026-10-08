@@ -15,6 +15,7 @@ Item {
     id: root
 
     property real cellWidth: 80
+    required property KeysPalette colours
     signal picked(string text)
 
     readonly property var categories: [
@@ -58,13 +59,13 @@ Item {
                 radius: 8
                 color: "transparent"
                 border.width: 1
-                border.color: root.currentCategory === index ? "#383838" : "transparent"
+                border.color: root.currentCategory === index ? root.colours.outline : "transparent"
 
                 Text {
                     id: label
                     anchors.centerIn: parent
                     text: tab.modelData[0]
-                    color: "#F8F8FF"
+                    color: root.colours.ink
                     opacity: root.currentCategory === tab.index ? 0.9 : 0.55
                     font.pixelSize: Math.max(12, Math.min(tabs.height * 0.42, 18))
                 }
@@ -111,7 +112,7 @@ Item {
                 anchors.fill: parent
                 anchors.margins: 2
                 radius: 8
-                color: "#383838"
+                color: root.colours.outline
                 opacity: tap.pressed ? 1 : 0
             }
             Text {
