@@ -29,6 +29,9 @@ target_sources(plasma-keyboard PRIVATE
     bottomsurfacecoordinator.cpp
     bottomsurfacecoordinator.h
     keysrequest.h
+    keystheme.cpp
+    keystheme.h
+    keysthemerule.h
     keystrayentry.cpp
     keystrayentry.h
     textinputhold.cpp
@@ -95,6 +98,7 @@ ecm_target_qml_sources(plasma-keyboard SOURCES
     qml/KeyField.qml
     qml/KeyCap.qml
     qml/KeyGlyph.qml
+    qml/KeysPalette.qml
     qml/EmojiPanel.qml
     qml/PrecisionSurface.qml
     qml/LanguagePopup.qml
@@ -126,6 +130,7 @@ target_link_libraries(plasma-keyboard
     KF6::ConfigGui
     KF6::Crash
     PkgConfig::XKBCommon
+    Plasma::Plasma
     Plasma::PlasmaQuick
     Qt::DBus
     Qt::Gui

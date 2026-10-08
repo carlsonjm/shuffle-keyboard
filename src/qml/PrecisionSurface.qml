@@ -11,11 +11,12 @@ Rectangle {
 
     required property var controller
     property bool keyboardUnderlayVisible: false
+    required property KeysPalette colours
 
-    color: keyboardUnderlayVisible ? "transparent" : "#12151A"
+    color: keyboardUnderlayVisible ? "transparent" : colours.recessed
     radius: keyboardUnderlayVisible ? 0 : 8
     border.width: keyboardUnderlayVisible ? 0 : 1
-    border.color: "#30353C"
+    border.color: colours.recessedEdge
 
     property int maximumTouches: 0
     property point previous: Qt.point(0, 0)
@@ -107,7 +108,7 @@ Rectangle {
     Controls.Label {
         anchors.centerIn: parent
         text: root.controller.ready ? "" : root.controller.message
-        color: "#F8F8F4"
+        color: root.colours.recessedInk
         opacity: 0.62
         font.pixelSize: 14
     }

@@ -25,6 +25,15 @@ InputPanelWindow {
     color: "transparent"
 
     property bool precisionHeld: false
+
+    // The keys' colours, from the Plasma style: dark unless it is light and
+    // its text reads on it, and always dark at the sign-in screen.
+    readonly property KeysPalette colours: KeysPalette {
+        light: KeysTheme.light
+        themeGround: KeysTheme.ground
+        themeInk: KeysTheme.ink
+        themeRaised: KeysTheme.raised
+    }
     // The keyboard is a card: Kadunce's gutter at either side and nowhere
     // else, rounded as a card is where it stands free, flush with the screen's
     // bottom edge and lying over the window above it. Its top strip is kept
@@ -474,9 +483,9 @@ InputPanelWindow {
             anchors.top: parent.top
             height: parent.height + root.cardRadius
             radius: root.cardRadius
-            color: "#141414"
+            color: root.colours.ground
             border.width: 1
-            border.color: "#333333"
+            border.color: root.colours.edge
         }
 
         Item {
@@ -500,6 +509,7 @@ InputPanelWindow {
                 unitWidth: root.keyUnitWidth
                 keyGap: root.keyGap
                 terminal: thing.contentPurpose === 12
+                colours: root.colours
 
                 onKeyRequested: (key, text, modifiers) => root.deliver(key, text, modifiers)
                 onMetaRequested: thing.triggerGlobalShortcut(Qt.Key_Meta)
@@ -520,7 +530,7 @@ InputPanelWindow {
             Rectangle {
                 anchors.fill: parent
                 radius: 8
-                color: "#F8F8FF"
+                color: root.colours.ink
                 opacity: root.precisionHeld ? 0.22 : 0
             }
         }
@@ -544,10 +554,11 @@ InputPanelWindow {
             Rectangle {
                 anchors.fill: parent
                 radius: 8
-                color: "#141414"
+                color: root.colours.ground
             }
             KeyCap {
                 anchors.fill: parent
+                colours: root.colours
                 glyph: "hide"
                 down: parent.pressed
             }
@@ -562,6 +573,7 @@ InputPanelWindow {
             anchors.bottomMargin: root.outerGap
             visible: root.precisionActive
             controller: precisionController
+            colours: root.colours
             keyboardUnderlayVisible: root.precisionHeld
         }
 

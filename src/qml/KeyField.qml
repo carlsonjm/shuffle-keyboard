@@ -20,6 +20,9 @@ Item {
     // An application that does not share its text: the delete scrub counts on
     // the key instead of selecting, and a word goes with Ctrl+W.
     property bool terminal: false
+    // The colours every key, pop-up and panel in the field is drawn with. The
+    // window gives the theme's; a field on its own is drawn dark.
+    property KeysPalette colours: KeysPalette {}
 
     property string activeLayer: "letters"
     property bool shiftActive: false
@@ -597,6 +600,7 @@ Item {
             id: cap
             required property var modelData
             readonly property var touch: field.stateOn(modelData.id)
+            colours: field.colours
             x: modelData.x
             y: modelData.y
             width: modelData.w
@@ -636,7 +640,7 @@ Item {
                 radius: 3
                 color: "transparent"
                 border.width: 1.5
-                border.color: "#F8F8FF"
+                border.color: field.colours.ink
                 opacity: 0.55
             }
         }
@@ -661,6 +665,7 @@ Item {
         width: field.width
         height: field.rowHeight * 3 + field.keyGap * 2
         cellWidth: field.unitWidth * 0.8
+        colours: field.colours
         onPicked: text => field.commitEmoji(text)
     }
 
@@ -673,9 +678,9 @@ Item {
         width: field.accentPopup ? field.accentPopup.chars.length * field.accentPopup.cellWidth + field.accentPopup.pad * 2 : 0
         height: field.accentPopup ? field.accentPopup.cellHeight + field.accentPopup.pad * 2 : 0
         radius: 10
-        color: "#26272B"
+        color: field.colours.raised
         border.width: 1
-        border.color: "#44464C"
+        border.color: field.colours.raisedEdge
 
         Row {
             x: field.accentPopup ? field.accentPopup.pad : 0
@@ -690,11 +695,11 @@ Item {
                     width: field.accentPopup ? field.accentPopup.cellWidth : 0
                     height: field.accentPopup ? field.accentPopup.cellHeight : 0
                     radius: 7
-                    color: picked ? "#F8F8FF" : "transparent"
+                    color: picked ? field.colours.ink : "transparent"
                     Text {
                         anchors.centerIn: parent
                         text: accentCell.modelData
-                        color: accentCell.picked ? "#141414" : "#F8F8FF"
+                        color: accentCell.picked ? field.colours.ground : field.colours.ink
                         font.pixelSize: Math.max(14, Math.min(parent.height * 0.4, 30))
                     }
                 }
