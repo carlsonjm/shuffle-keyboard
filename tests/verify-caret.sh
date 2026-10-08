@@ -68,39 +68,51 @@ cat > "${scratch}/bus.conf" <<'EOF'
 </busconfig>
 EOF
 
-probe_root="$(mktemp -d "${TMPDIR:-/tmp}/shuffle-caret-run.XXXXXX")"
-probe_roots+=("${probe_root}")
-mkdir -p "${probe_root}/runtime" "${probe_root}/config"
-chmod 700 "${probe_root}/runtime"
+# One run, in a compositor whose output has the given size and scale.
+run_scale() {
+    local name="$1" size="$2"
+    echo
+    echo "=== ${name} ==="
+    probe_root="$(mktemp -d "${TMPDIR:-/tmp}/shuffle-caret-run.XXXXXX")"
+    probe_roots+=("${probe_root}")
+    mkdir -p "${probe_root}/runtime" "${probe_root}/config"
+    chmod 700 "${probe_root}/runtime"
 
-# The tablet's own logical size, as the other sealed sessions use.
-timeout 120s env \
-    XDG_RUNTIME_DIR="${probe_root}/runtime" \
-    XDG_CONFIG_HOME="${probe_root}/config" \
-    XDG_DATA_HOME="${probe_root}/data" \
-    PROBE_ROOT="${probe_root}" \
-    SCREEN_HEIGHT=915 \
-    FAKE_INPUT_BIN="${scratch}/fake-input" \
-    KWIN_WAYLAND_NO_PERMISSION_CHECKS=1 \
-    QT_QPA_PLATFORM=wayland \
-    QT_FORCE_STDERR_LOGGING=1 \
-    SHUFFLE_PROBE_KADUNCE_SERVICE=studio.warbler.test.Kadunce \
-    dbus-run-session --config-file="${scratch}/bus.conf" -- kwin_wayland \
-        --virtual --width 1463 --height 915 \
-        --no-lockscreen --no-global-shortcuts --no-kactivities \
-        --inputmethod "${keyboard_bin}" \
-        --exit-with-session "${tests_dir}/caret-session.sh" \
-    > "${probe_root}/compositor.log" 2>&1 || true
+    # The tablet's logical height, as the other sealed sessions use.
+    timeout 120s env \
+        XDG_RUNTIME_DIR="${probe_root}/runtime" \
+        XDG_CONFIG_HOME="${probe_root}/config" \
+        XDG_DATA_HOME="${probe_root}/data" \
+        PROBE_ROOT="${probe_root}" \
+        SCREEN_HEIGHT=915 \
+        FAKE_INPUT_BIN="${scratch}/fake-input" \
+        KWIN_WAYLAND_NO_PERMISSION_CHECKS=1 \
+        QT_QPA_PLATFORM=wayland \
+        QT_FORCE_STDERR_LOGGING=1 \
+        SHUFFLE_PROBE_KADUNCE_SERVICE=studio.warbler.test.Kadunce \
+        dbus-run-session --config-file="${scratch}/bus.conf" -- kwin_wayland \
+            --virtual ${size} \
+            --no-lockscreen --no-global-shortcuts --no-kactivities \
+            --inputmethod "${keyboard_bin}" \
+            --exit-with-session "${tests_dir}/caret-session.sh" \
+        > "${probe_root}/compositor.log" 2>&1 || true
 
-cat "${probe_root}/report.log" 2>/dev/null || true
-if [[ "$(cat "${probe_root}/result" 2>/dev/null)" != "PASS" ]]; then
-    echo "The caret probe did not pass." >&2
-    if ! grep -qE 'passed, .* failed$' "${probe_root}/report.log" 2>/dev/null; then
-        echo "--- compositor and session ---" >&2
-        tail -60 "${probe_root}/compositor.log" >&2
+    cat "${probe_root}/report.log" 2>/dev/null || true
+    if [[ "$(cat "${probe_root}/result" 2>/dev/null)" != "PASS" ]]; then
+        echo "The caret probe at ${name} did not pass." >&2
+        if ! grep -qE 'passed, .* failed$' "${probe_root}/report.log" 2>/dev/null; then
+            echo "--- compositor and session ---" >&2
+            tail -60 "${probe_root}/compositor.log" >&2
+        fi
+        failed=1
     fi
-    exit 1
-fi
+}
+
+failed=0
+run_scale "scale 1" "--width 1463 --height 915"
+# The tablet's own output: 2560 by 1600 pixels at 175%.
+run_scale "scale 1.75" "--width 2560 --height 1600 --scale 1.75"
+((failed == 0)) || exit 1
 echo
 echo "The caret trackpad moved the cursor as far left as right for the same"
 echo "travel. How the drag feels under a finger is physical, and is not this."

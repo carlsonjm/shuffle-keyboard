@@ -95,7 +95,21 @@ drag() {
         send "tmove 1 ${x} ${row_y}" "wait 8"
     done
     send "wait 150" "tup 1"
-    sleep 0.8
+    settle
+}
+
+# The application takes its arrows a while after the finger lifts; wait until
+# it has been quiet for a second.
+settle() {
+    local lines=-1 waited=0
+    while ((waited < 100)); do
+        sleep 1
+        local now
+        now=$(wc -l < "${app_log}")
+        ((now == lines)) && return 0
+        lines=${now}
+        waited=$((waited + 1))
+    done
 }
 
 # A compositor with no touch device leaves its virtual keyboard to tablet
@@ -194,8 +208,7 @@ for start in hold slide; do
     sent_right=$(($(app_keys right) - rights))
     printf '  left: %s arrows, cursor %s back; right: %s arrows, cursor %s on\n' \
         "${sent_left}" "${went_left}" "${sent_right}" "${went_right}"
-    echo "  --- what the application saw ---"
-    sed -n "${mark},\$p" "${app_log}" | grep -oE 'app (key|text)=.*' | sed 's/^/  /' | tail -40
+    sed -n "${mark},\$p" "${app_log}" | grep -oE 'app text=.*' | sed 's/^/  /' | tail -5
     check "the cursor came back to where it started" "${went_right}" "${went_left}"
     check "the application was sent as many Rights as Lefts" "${sent_right}" "${sent_left}"
     near=$((went_left >= expected - 1 && went_left <= expected + 1))
