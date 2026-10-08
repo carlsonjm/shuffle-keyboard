@@ -39,10 +39,8 @@ inline void requestKeys(QObject *context)
                                                                                QStringLiteral("org.kde.kwin.VirtualKeyboard"),
                                                                                QStringLiteral("forceActivate")));
     };
-    const QDBusPendingCall call = QDBusConnection::sessionBus().asyncCall(QDBusMessage::createMethodCall(kadunceService(),
-                                                                                                         QStringLiteral("/Kadunce"),
-                                                                                                         QStringLiteral("co.goodinput.Kadunce"),
-                                                                                                         QStringLiteral("raiseKeyboard")));
+    const QDBusPendingCall call = QDBusConnection::sessionBus().asyncCall(
+        QDBusMessage::createMethodCall(kadunceService(), QStringLiteral("/Kadunce"), QStringLiteral("co.goodinput.Kadunce"), QStringLiteral("raiseKeyboard")));
     auto *watcher = new QDBusPendingCallWatcher(call, context);
     QObject::connect(watcher, &QDBusPendingCallWatcher::finished, context, [direct](QDBusPendingCallWatcher *finished) {
         if (finished->isError()) {
@@ -63,10 +61,8 @@ inline void requestKeys(QObject *context)
  */
 inline void announceKeys(double height, int durationMs)
 {
-    QDBusMessage message = QDBusMessage::createMethodCall(kadunceService(),
-                                                          QStringLiteral("/Kadunce"),
-                                                          QStringLiteral("co.goodinput.Kadunce"),
-                                                          QStringLiteral("keyboardHeading"));
+    QDBusMessage message =
+        QDBusMessage::createMethodCall(kadunceService(), QStringLiteral("/Kadunce"), QStringLiteral("co.goodinput.Kadunce"), QStringLiteral("keyboardHeading"));
     message << height << durationMs;
     message.setAutoStartService(false);
     QDBusConnection::sessionBus().send(message);
