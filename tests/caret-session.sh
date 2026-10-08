@@ -163,6 +163,12 @@ frame_x="${origin%,*}"
 frame_y="${origin#*,}"
 frame_w="${size%x*}"
 frame_h="${size#*x}"
+# A scaled output may report the keys in its pixels rather than in the
+# logical size the touches use.
+if ((frame_w > 1463)); then
+    read -r frame_x frame_y frame_w frame_h <<< "$(python3 -c "import sys; print(*(round(float(v) / 1.75) for v in sys.argv[1:]))" "${frame_x}" "${frame_y}" "${frame_w}" "${frame_h}")"
+    printf '  in logical size, %s,%s %sx%s\n' "${frame_x}" "${frame_y}" "${frame_w}" "${frame_h}"
+fi
 # The space bar's centre and one caret step, by the Keyboard's own sizes
 # (src/qml/main.qml, src/qml/KeyField.qml), as latch-session.sh reads them.
 # The drag is two keys wide and stays on the space bar either way.
