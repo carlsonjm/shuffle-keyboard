@@ -81,18 +81,21 @@ panels_now() {
     grep -oE 'record panels .*' "${stand_in_log}" | tail -1 | sed 's/^record panels //'
 }
 
-# The touchscreen, fed a line at a time.
+# The touchscreen, fed a line at a time, in the output's own pixels.
 send() { printf '%s\n' "$@" >&3; }
+px() { python3 -c "import sys; print(round(float(sys.argv[1]) * float(sys.argv[2])))" "$1" "${touch_scale}"; }
 
 # One finger down on the space bar, held or not, carried sideways by a
 # distance in small even steps, and lifted.
 drag() {
     local hold="$1" distance="$2" x="${3:-${space_x}}" i
     local steps=$(((${distance#-} + 2) / 3)) step=$((distance < 0 ? -3 : 3))
-    send "tdown 1 ${x} ${row_y}" "wait ${hold}"
+    local y
+    y=$(px "${row_y}")
+    send "tdown 1 $(px "${x}") ${y}" "wait ${hold}"
     for ((i = 0; i < steps; i++)); do
         x=$((x + step))
-        send "tmove 1 ${x} ${row_y}" "wait 8"
+        send "tmove 1 $(px "${x}") ${y}" "wait 8"
     done
     send "wait 150" "tup 1"
     settle
@@ -165,7 +168,9 @@ frame_w="${size%x*}"
 frame_h="${size#*x}"
 # A scaled output may report the keys in its pixels rather than in the
 # logical size the touches use.
+touch_scale=1
 if ((frame_w > 1463)); then
+    touch_scale=1.75
     read -r frame_x frame_y frame_w frame_h <<< "$(python3 -c "import sys; print(*(round(float(v) / 1.75) for v in sys.argv[1:]))" "${frame_x}" "${frame_y}" "${frame_w}" "${frame_h}")"
     printf '  in logical size, %s,%s %sx%s\n' "${frame_x}" "${frame_y}" "${frame_w}" "${frame_h}"
 fi

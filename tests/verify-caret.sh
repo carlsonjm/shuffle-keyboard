@@ -110,6 +110,8 @@ run_scale() {
 
 failed=0
 run_scale "scale 1" "--width 1463 --height 915"
+# The tablet's own output: 2560 by 1600 pixels at 175%, the same logical size.
+run_scale "scale 1.75" "--width 1463 --height 915 --scale 1.75"
 ((failed == 0)) || exit 1
 echo
 echo "The caret trackpad moved the cursor as far left as right for the same"
