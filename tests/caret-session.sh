@@ -181,6 +181,7 @@ for start in hold slide; do
         echo
         echo "Slid at once, the same travel moves the cursor as far either way"
     fi
+    mark=$(($(wc -l < "${app_log}") + 1))
     before="$(app_cursor)"
     lefts=$(app_keys left)
     drag "${hold}" "-${distance}"
@@ -193,6 +194,8 @@ for start in hold slide; do
     sent_right=$(($(app_keys right) - rights))
     printf '  left: %s arrows, cursor %s back; right: %s arrows, cursor %s on\n' \
         "${sent_left}" "${went_left}" "${sent_right}" "${went_right}"
+    echo "  --- what the application saw ---"
+    sed -n "${mark},\$p" "${app_log}" | grep -oE 'app (key|text)=.*' | sed 's/^/  /' | tail -40
     check "the cursor came back to where it started" "${went_right}" "${went_left}"
     check "the application was sent as many Rights as Lefts" "${sent_right}" "${sent_left}"
     near=$((went_left >= expected - 1 && went_left <= expected + 1))

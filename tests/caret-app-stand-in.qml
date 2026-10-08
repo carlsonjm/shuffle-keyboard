@@ -28,9 +28,11 @@ Window {
         color: "white"
         text: "abcdefghij".repeat(8)
         onCursorPositionChanged: console.warn("app cursor=" + field.cursorPosition)
+        onTextChanged: console.warn("app text=" + field.text)
         Keys.onPressed: event => {
             if (event.key === Qt.Key_Left) console.warn("app key=left");
             else if (event.key === Qt.Key_Right) console.warn("app key=right");
+            else console.warn("app key=" + event.key + " " + JSON.stringify(event.text));
             event.accepted = false;
         }
     }
