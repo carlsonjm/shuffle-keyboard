@@ -76,11 +76,24 @@ InputPanelWindow {
         || !BottomSurfaceCoordinator.surfacePresent
         || !BottomSurfaceCoordinator.regionReserving
 
+    // Plasma's animation speed, as a multiple of its default. Timed travel
+    // is written at the default and scaled by this, so the keys keep pace
+    // with the dock and the cards; at the fastest setting nothing travels.
+    readonly property real motionScale: Kirigami.Units.longDuration / 200
+    function timed(duration) {
+        return Math.round(duration * root.motionScale);
+    }
+
     // The keys go on at the speed they were sent with and slow to rest: an
-    // ease-out curve starts at three times its average speed.
+    // ease-out curve starts at three times its average speed. Motion that
+    // carries on from the hand keeps the hand's pace at every speed but the
+    // fastest, where it lands at once.
     function settleDuration(distance, speed) {
         if (speed <= 0) {
-            return 240;
+            return root.timed(240);
+        }
+        if (root.motionScale === 0) {
+            return 0;
         }
         return Math.max(140, Math.min(320, 3000 * distance / speed));
     }
@@ -109,7 +122,7 @@ InputPanelWindow {
         if (!root.compositorShown) {
             return;
         }
-        root.travelTo(0, 240);
+        root.travelTo(0, root.timed(240));
     }
     // The speed the keys were sent away at, which they carry on at as they go.
     property real pendingSpeed: 0
@@ -173,7 +186,7 @@ InputPanelWindow {
             root.leaving = true;
             root.closing = false;
             root.arriving = false;
-            root.travelTo(root.panelHeight, 280, Easing.InOutCubic);
+            root.travelTo(root.panelHeight, root.timed(280), Easing.InOutCubic);
         }
     }
     // Out of sight: the window goes, and so does the input method's own
@@ -190,7 +203,7 @@ InputPanelWindow {
         handover.stop();
         if (!root.leaving) return;
         root.leaving = false;
-        root.travelTo(0, 240);
+        root.travelTo(0, root.timed(240));
     }
     Connections {
         target: Qt.inputMethod
