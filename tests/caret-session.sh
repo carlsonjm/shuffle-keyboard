@@ -131,8 +131,8 @@ for log in "${stand_in_log}" "${kadunce_log}"; do
     fi
 done
 # A dock is published, as on the tablet.
-gdbus call --session --dest studio.warbler.BottomSurface --object-path /BottomSurface \
-    --method studio.warbler.test.Control.report true 60 544 920 > /dev/null 2>&1
+gdbus call --session --dest co.goodinput.BottomSurface --object-path /BottomSurface \
+    --method co.goodinput.test.Control.report true 60 544 920 > /dev/null 2>&1
 
 QML_XHR_ALLOW_FILE_READ=1 qml6 "${tests_dir}/caret-app-stand-in.qml" -- "${PROBE_ROOT}/app-type" \
     > "${app_log}" 2>&1 &

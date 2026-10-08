@@ -20,19 +20,19 @@ gi.require_version("GLib", "2.0")
 gi.require_version("Gio", "2.0")
 from gi.repository import GLib, Gio  # noqa: E402
 
-SERVICE = "studio.warbler.test.Kadunce"
+SERVICE = "co.goodinput.test.Kadunce"
 PATH = "/Kadunce"
 
 INTROSPECTION = """
 <node>
-  <interface name='studio.warbler.Kadunce'>
+  <interface name='co.goodinput.Kadunce'>
     <method name='raiseKeyboard'/>
     <method name='keyboardHeading'>
       <arg type='d' direction='in'/>
       <arg type='i' direction='in'/>
     </method>
   </interface>
-  <interface name='studio.warbler.test.Control'>
+  <interface name='co.goodinput.test.Control'>
     <method name='setAsking'>
       <arg type='b' direction='in'/>
     </method>
@@ -48,18 +48,18 @@ def main():
     asking = {"value": True}
 
     def on_call(_connection, _sender, _path, interface, method, parameters, invocation):
-        if interface == "studio.warbler.test.Control" and method == "setAsking":
+        if interface == "co.goodinput.test.Control" and method == "setAsking":
             asking["value"] = parameters.unpack()[0]
             invocation.return_value(None)
             return
-        if interface == "studio.warbler.Kadunce" and method == "raiseKeyboard":
+        if interface == "co.goodinput.Kadunce" and method == "raiseKeyboard":
             print("raiseKeyboard asking=%s" % asking["value"], flush=True)
             if asking["value"]:
                 connection.call_sync("org.kde.KWin", "/VirtualKeyboard", "org.kde.kwin.VirtualKeyboard",
                                      "forceActivate", None, None, Gio.DBusCallFlags.NONE, -1, None)
             invocation.return_value(None)
             return
-        if interface == "studio.warbler.Kadunce" and method == "keyboardHeading":
+        if interface == "co.goodinput.Kadunce" and method == "keyboardHeading":
             invocation.return_value(None)
             return
         invocation.return_error_literal(

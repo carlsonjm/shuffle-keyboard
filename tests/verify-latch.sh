@@ -92,7 +92,7 @@ run_path() {
         KWIN_WAYLAND_NO_PERMISSION_CHECKS=1 \
         QT_QPA_PLATFORM=wayland \
         QT_FORCE_STDERR_LOGGING=1 \
-        SHUFFLE_PROBE_KADUNCE_SERVICE=studio.warbler.test.Kadunce \
+        SHUFFLE_PROBE_KADUNCE_SERVICE=co.goodinput.test.Kadunce \
         dbus-run-session --config-file="${scratch}/bus.conf" -- kwin_wayland \
             --virtual --width 1463 --height 915 \
             --no-lockscreen --no-global-shortcuts --no-kactivities \

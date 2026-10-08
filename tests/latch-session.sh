@@ -55,9 +55,9 @@ now_ms() {
 }
 
 control() {
-    gdbus call --session --dest studio.warbler.BottomSurface \
+    gdbus call --session --dest co.goodinput.BottomSurface \
         --object-path /BottomSurface \
-        --method "studio.warbler.test.Control.$1" "${@:2}" > /dev/null 2>&1
+        --method "co.goodinput.test.Control.$1" "${@:2}" > /dev/null 2>&1
 }
 
 keyboard() {

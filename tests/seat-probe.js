@@ -7,9 +7,9 @@
 // The work area first, so a reading can say whether the reservation had
 // actually gone when the Keyboard was measured.
 var area = workspace.clientArea(KWin.MaximizeArea, workspace.activeScreen, workspace.currentDesktop);
-callDBus("studio.warbler.BottomSurface",
+callDBus("co.goodinput.BottomSurface",
          "/BottomSurface",
-         "studio.warbler.test.Control",
+         "co.goodinput.test.Control",
          "record",
          "area bottom=" + (area.y + area.height));
 
@@ -18,9 +18,9 @@ workspace.stackingOrder.forEach(function (window) {
         return;
     }
     var frame = window.frameGeometry;
-    callDBus("studio.warbler.BottomSurface",
+    callDBus("co.goodinput.BottomSurface",
              "/BottomSurface",
-             "studio.warbler.test.Control",
+             "co.goodinput.test.Control",
              "record",
              "keyboard " + frame.x + "," + frame.y
                  + " " + frame.width + "x" + frame.height

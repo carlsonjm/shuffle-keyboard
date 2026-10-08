@@ -47,9 +47,9 @@ wait_for() {
 }
 
 control() {
-    gdbus call --session --dest studio.warbler.BottomSurface \
+    gdbus call --session --dest co.goodinput.BottomSurface \
         --object-path /BottomSurface \
-        --method "studio.warbler.test.Control.$1" "${@:2}" > /dev/null 2>&1
+        --method "co.goodinput.test.Control.$1" "${@:2}" > /dev/null 2>&1
 }
 
 focus_now() {
@@ -75,8 +75,8 @@ tray_entry() {
 # A tap on the entry. On a cold start Kadunce's ask of the compositor shows
 # nothing, and the Keyboard's own hold is left to raise the keys.
 tray_tap() {
-    gdbus call --session --dest studio.warbler.test.Kadunce --object-path /Kadunce \
-        --method studio.warbler.test.Control.setAsking "$([[ "$1" == ask ]] && echo true || echo false)" > /dev/null 2>&1
+    gdbus call --session --dest co.goodinput.test.Kadunce --object-path /Kadunce \
+        --method co.goodinput.test.Control.setAsking "$([[ "$1" == ask ]] && echo true || echo false)" > /dev/null 2>&1
     gdbus call --session --dest "$(tray_entry)" --object-path /StatusNotifierItem \
         --method org.kde.StatusNotifierItem.Activate 0 0 > /dev/null 2>&1
 }

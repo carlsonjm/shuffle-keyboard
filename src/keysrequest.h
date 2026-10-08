@@ -41,7 +41,7 @@ inline void requestKeys(QObject *context)
     };
     const QDBusPendingCall call = QDBusConnection::sessionBus().asyncCall(QDBusMessage::createMethodCall(kadunceService(),
                                                                                                          QStringLiteral("/Kadunce"),
-                                                                                                         QStringLiteral("studio.warbler.Kadunce"),
+                                                                                                         QStringLiteral("co.goodinput.Kadunce"),
                                                                                                          QStringLiteral("raiseKeyboard")));
     auto *watcher = new QDBusPendingCallWatcher(call, context);
     QObject::connect(watcher, &QDBusPendingCallWatcher::finished, context, [direct](QDBusPendingCallWatcher *finished) {
@@ -65,7 +65,7 @@ inline void announceKeys(double height, int durationMs)
 {
     QDBusMessage message = QDBusMessage::createMethodCall(kadunceService(),
                                                           QStringLiteral("/Kadunce"),
-                                                          QStringLiteral("studio.warbler.Kadunce"),
+                                                          QStringLiteral("co.goodinput.Kadunce"),
                                                           QStringLiteral("keyboardHeading"));
     message << height << durationMs;
     message.setAutoStartService(false);
