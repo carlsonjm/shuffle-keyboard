@@ -14,7 +14,11 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    container: archlinux:latest
+    container:
+      image: archlinux:latest
+      credentials:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
       - name: Install build dependencies
         run: |
@@ -38,6 +42,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: archlinux:latest
+      credentials:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
       # kwin_wayland carries the capability to raise its own priority, and a
       # container without it may not run the binary at all.
       options: --cap-add=SYS_NICE
