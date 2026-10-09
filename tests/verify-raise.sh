@@ -66,7 +66,7 @@ run_path() {
         RAISE_PATH="${path}" \
         QT_QPA_PLATFORM=wayland \
         QT_FORCE_STDERR_LOGGING=1 \
-        SHUFFLE_PROBE_KADUNCE_SERVICE=studio.warbler.test.Kadunce \
+        SHUFFLE_PROBE_KADUNCE_SERVICE=co.goodinput.test.Kadunce \
         SHUFFLE_PROBE_HOLD=1 \
         SHUFFLE_PROBE_TEXT=hold \
         SHUFFLE_PROBE_DELAY=4000 \

@@ -19,12 +19,12 @@ gi.require_version("GLib", "2.0")
 gi.require_version("Gio", "2.0")
 from gi.repository import GLib, Gio  # noqa: E402
 
-SERVICE = "studio.warbler.BottomSurface"
+SERVICE = "co.goodinput.BottomSurface"
 PATH = "/BottomSurface"
 
 INTROSPECTION = """
 <node>
-  <interface name='studio.warbler.BottomSurface'>
+  <interface name='co.goodinput.BottomSurface'>
     <method name='dockExtent'>
       <arg type='s' name='outputName' direction='in'/>
       <arg type='s' name='payload' direction='out'/>
@@ -39,7 +39,7 @@ INTROSPECTION = """
       <arg type='s' name='outputName'/>
     </signal>
   </interface>
-  <interface name='studio.warbler.test.Control'>
+  <interface name='co.goodinput.test.Control'>
     <method name='report'>
       <arg type='b' name='presenting' direction='in'/>
       <arg type='i' name='band' direction='in'/>
@@ -73,7 +73,7 @@ class StandIn:
     def payload(self, output_name):
         return json.dumps(
             {
-                "schema": "studio.warbler.shuffle.dock-extent",
+                "schema": "co.goodinput.shuffle.dock-extent",
                 "version": 1,
                 "output": output_name or self.output,
                 "presenting": self.presenting,
@@ -96,7 +96,7 @@ class StandIn:
         print(line, flush=True)
 
     def on_call(self, _connection, sender, _path, interface, method, parameters, invocation):
-        if interface == "studio.warbler.BottomSurface":
+        if interface == "co.goodinput.BottomSurface":
             if method == "dockExtent":
                 invocation.return_value(GLib.Variant("(s)", (self.payload(parameters[0]),)))
                 return
@@ -121,11 +121,11 @@ class StandIn:
                 invocation.return_value(GLib.Variant("(b)", (released,)))
                 return
 
-        if interface == "studio.warbler.test.Control":
+        if interface == "co.goodinput.test.Control":
             if method == "report":
                 self.presenting, self.band, self.left, self.right = parameters
                 self.connection.emit_signal(
-                    None, PATH, "studio.warbler.BottomSurface",
+                    None, PATH, "co.goodinput.BottomSurface",
                     "dockExtentChanged", GLib.Variant("(s)", ("Virtual-1",)),
                 )
                 invocation.return_value(None)
@@ -133,7 +133,7 @@ class StandIn:
             if method == "setReserving":
                 self.reserving = parameters[0]
                 self.connection.emit_signal(
-                    None, PATH, "studio.warbler.BottomSurface",
+                    None, PATH, "co.goodinput.BottomSurface",
                     "dockExtentChanged", GLib.Variant("(s)", ("Virtual-1",)),
                 )
                 invocation.return_value(None)

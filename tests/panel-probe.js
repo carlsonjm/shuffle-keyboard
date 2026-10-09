@@ -12,8 +12,8 @@ workspace.stackingOrder.forEach(function (window) {
     var frame = window.frameGeometry;
     shown.push(frame.x + "," + frame.y + " " + frame.width + "x" + frame.height);
 });
-callDBus("studio.warbler.BottomSurface",
+callDBus("co.goodinput.BottomSurface",
          "/BottomSurface",
-         "studio.warbler.test.Control",
+         "co.goodinput.test.Control",
          "record",
          "panels " + shown.length + (shown.length ? " " + shown.join(" ") : ""));

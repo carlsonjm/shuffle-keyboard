@@ -42,10 +42,10 @@ QML_XHR_ALLOW_FILE_READ=1 qml6 "${tests_dir}/app-stand-in.qml" -- "${PROBE_ROOT}
     > "${PROBE_ROOT}/app.log" 2>&1 &
 sleep 2
 
-gdbus call --session --dest studio.warbler.BottomSurface --object-path /BottomSurface \
-    --method studio.warbler.test.Control.report true 60 544 920 > /dev/null 2>&1
-gdbus call --session --dest studio.warbler.test.Kadunce --object-path /Kadunce \
-    --method studio.warbler.test.Control.setAsking true > /dev/null 2>&1
+gdbus call --session --dest co.goodinput.BottomSurface --object-path /BottomSurface \
+    --method co.goodinput.test.Control.report true 60 544 920 > /dev/null 2>&1
+gdbus call --session --dest co.goodinput.test.Kadunce --object-path /Kadunce \
+    --method co.goodinput.test.Control.setAsking true > /dev/null 2>&1
 gdbus call --session --dest "$(tray_entry)" --object-path /StatusNotifierItem \
     --method org.kde.StatusNotifierItem.Activate 0 0 > /dev/null 2>&1
 

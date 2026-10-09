@@ -3,9 +3,9 @@
 
 // Which window holds the focus, as the compositor sees it.
 var active = workspace.activeWindow;
-callDBus("studio.warbler.BottomSurface",
+callDBus("co.goodinput.BottomSurface",
          "/BottomSurface",
-         "studio.warbler.test.Control",
+         "co.goodinput.test.Control",
          "record",
          "focus " + (active ? (active.caption === "app-stand-in" ? "app"
                                 : (active.resourceClass + ":" + active.caption)) : "none"));

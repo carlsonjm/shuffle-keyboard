@@ -25,9 +25,9 @@ namespace
 // The Bottom Surface, when one is installed. Discovered at run time and never
 // required: with the name unowned this component behaves exactly as it did
 // before the surface existed.
-constexpr auto kSurfaceService = "studio.warbler.BottomSurface";
+constexpr auto kSurfaceService = "co.goodinput.BottomSurface";
 constexpr auto kSurfacePath = "/BottomSurface";
-constexpr auto kSurfaceInterface = "studio.warbler.BottomSurface";
+constexpr auto kSurfaceInterface = "co.goodinput.BottomSurface";
 // KWin stops the keyboard with SIGTERM and then waits for it to exit, up to
 // 30 seconds, without serving anything else. A surface or shell that needs
 // the compositor to answer cannot answer until the keyboard is gone, so on the
