@@ -38,10 +38,10 @@ does is [`INPUT.md`](INPUT.md); these checks test it on the device.
   a text field brings them back every time.
 - **Panel handoff:** The normal bottom panel yields without overlap or visible
   bouncing and returns after dismissal.
-- **Looks:** With Shuffle Settings on Dark, then on Light windows, the keys
-  look exactly as they always have. On a light Plasma style the card turns
-  light with dark labels, and every label, the accents' pop-up, the emoji
-  panel and the trackpad read. At the sign-in screen the keys are dark.
+- **Looks:** With Shuffle Settings on Dark, the keys are dark. On Light, as
+  on any light Plasma style, the card turns light with dark labels, and every
+  label, the accents' pop-up, the emoji panel and the trackpad read. At the
+  sign-in screen the keys are dark.
 - **Dock handoff:** With the Bottom Surface installed instead, raising the
   keyboard slides the dock down and out rather than blinking it away, and
   dismissing brings it back with a small settle. Nothing is ever left holding

@@ -18,5 +18,4 @@ Checking it:
 | `../tests/verify-raise.sh` | Raises the Keyboard from its tray entry, in a compositor of its own, with a stand-in for Kadunce answering and an application holding the focus. Asks the compositor where the focus is at each step, with a text box ready and on a cold start, and puts the keys away with a second tap. |
 | `../tests/verify-seat.sh` | Seats the Keyboard in a compositor of its own over a band that reserves the bottom of the output and then gives it up, and asks where the compositor put it. |
 
-Suite block order lives in `../../shuffle/docs/suite/ROADMAP-CC.md`. This repository
-is Block 9.
+The suite's plan is kept privately, outside this repository.

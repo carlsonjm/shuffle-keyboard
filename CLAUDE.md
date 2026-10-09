@@ -21,11 +21,10 @@ difference before committing any of it.
 
 ## Suite position
 
-One of five repositories. `kadunce`, `tettegouche` and `temperance` are the
-public components; `shuffle` downstream assembles the product. This repository
-is Block 9 in `../shuffle/docs/suite/ROADMAP-CC.md`, and it is private because it has
-not been published yet, not because it can be closed: it carries KDE's licence,
-and whoever receives a build is entitled to its source.
+`kadunce`, `tettegouche`, `temperance`, `gooseberry` and this repository are
+the public components; `shuffle` downstream assembles the product. This
+repository is public, as it must be: it carries KDE's licence, and whoever
+receives a build is entitled to its source.
 
 `bottomsurfacecoordinator` is where this repository meets `shuffle`: it asks
 the Bottom Surface for the bottom of the screen where one is installed, and
