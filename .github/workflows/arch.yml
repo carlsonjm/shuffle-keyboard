@@ -15,10 +15,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     container:
-      image: archlinux:latest
-      credentials:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      image: public.ecr.aws/docker/library/archlinux:latest
     steps:
       - name: Install build dependencies
         run: |
@@ -41,10 +38,7 @@ jobs:
   sessions:
     runs-on: ubuntu-latest
     container:
-      image: archlinux:latest
-      credentials:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      image: public.ecr.aws/docker/library/archlinux:latest
       # kwin_wayland carries the capability to raise its own priority, and a
       # container without it may not run the binary at all.
       options: --cap-add=SYS_NICE
