@@ -52,6 +52,12 @@ void leaveSoon(int signal, siginfo_t *info, void *context)
 int main(int argc, char **argv)
 {
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
+    // Plasma asks every Qt application to reconnect when KWin crashes and
+    // comes back. The Keyboard belongs to the compositor that started it: the
+    // one that comes back starts its own, and a Keyboard that reconnected
+    // would stay running beside it as an ordinary window, holding the tray
+    // entry and the bottom region. It leaves with its compositor instead.
+    qunsetenv("QT_WAYLAND_RECONNECT");
 
     initLayoutsPath();
 
