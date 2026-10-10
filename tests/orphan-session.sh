@@ -45,9 +45,16 @@ done
 ln -sfn wayland-next "${runtime}/wayland-orphan"
 kill -9 "${first}"
 
+# Its parent is gone, and a container's first process may never reap it,
+# so a Keyboard that has exited can linger as a zombie: that counts as gone.
+running() {
+    local state
+    state="$(sed 's/.*) //' "/proc/$1/stat" 2>/dev/null | cut -d' ' -f1)"
+    [[ -n "${state}" && "${state}" != Z ]]
+}
 gone=alive
 for _ in $(seq 80); do
-    if ! kill -0 "${keyboard}" 2>/dev/null; then
+    if ! running "${keyboard}"; then
         gone=gone
         break
     fi
