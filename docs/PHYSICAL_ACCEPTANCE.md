@@ -13,9 +13,12 @@ where a check asks for one.
    ```
 
    It builds, replaces the copy in your own prefix, and checks that what
-   landed is what was built. No password, and nothing outside your home
-   directory. The Keyboard you are typing on is still the previous copy until
-   you have signed out and back in, which the script says as well.
+   landed is what was built, with no password and nothing outside your home
+   directory. Where the sign-in screen has its own copy under `/usr/local`, it
+   then runs Shuffle's `install-signin-keyboard.sh` to bring that copy level,
+   which asks for your password unless the install key is set up. The Keyboard
+   you are typing on is still the previous copy until you have signed out and
+   back in, which the script says as well.
 
 2. Open **System Settings → Keyboard → Virtual Keyboard**.
 3. Select **Shuffle Keyboard** and choose **Apply**.
