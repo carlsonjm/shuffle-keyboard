@@ -29,7 +29,9 @@ It carries KDE's licence.
 
 ## Build
 
-On an Arch-family Plasma 6 development system:
+On an Arch-family Plasma 6 development system, with Qt 6.10, KDE Frameworks
+6.26 and Plasma 6.7 or later, Qt Virtual Keyboard, Qt Wayland and LayerShellQt
+(`.github/workflows/arch.yml` lists the Arch packages):
 
 ```sh
 cmake -S . -B build -G Ninja -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo
@@ -49,7 +51,8 @@ cmake --install build --prefix "$PWD/stage"
 ```
 
 For the device, `./install-keyboard.sh` builds and replaces the copy in your own
-prefix; the Keyboard in use changes at the next sign-in. Enabling it is
+prefix, and brings the sign-in screen's copy under `/usr/local` level too where
+there is one; the Keyboard in use changes at the next sign-in. Enabling it is
 [`docs/PHYSICAL_ACCEPTANCE.md`](docs/PHYSICAL_ACCEPTANCE.md) § Install and
 enable. KWin must start the binary as its virtual keyboard: run as a normal
 application it exits, unless `SHUFFLE_PREVIEW_MODE=1` is set for an isolated

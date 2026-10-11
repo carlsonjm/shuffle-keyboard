@@ -93,7 +93,7 @@ does is [`INPUT.md`](INPUT.md); these checks test it on the device.
   fills the home-row gap and is muted Ghost White with dark text, and no
   right-edge key moves a letter.
 - **Bottom row:** The order is Ctrl, Alt, large Space, Tette Dot, Hide. The dot
-  works as the modifier-only `Meta` shortcut and opens Tettegouche.
+  works as the modifier-only `Meta` shortcut: in Shuffle it opens Search.
 - **Square geometry:** Ordinary letter keys are square, or narrowed together
   only as far as the twelve-and-a-half-unit block needs to fit the card.
 - **Layer fit:** The symbols layer and the emoji panel keep the card's shape
