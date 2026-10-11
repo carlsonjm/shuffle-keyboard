@@ -107,8 +107,14 @@ terminals included.
 | Drag left from Delete | The characters before the cursor are marked, one more for each step the finger moves. |
 | Slide back toward Delete | Marks come off one step at a time. Back at the key, nothing is marked. |
 | Lift after a drag | The marked characters are deleted. |
-| Flick left from Delete | Deletes the word before the cursor, as Ctrl, Backspace does in that application. |
+| Flick left from Delete | Deletes the word before the cursor, as Ctrl, Backspace does in that application, or Ctrl, W in a terminal. |
 | Drag in an application that does not share its text, such as a terminal | The count shows on the key in place of a mark, and lifting sends that many Backspaces. |
+
+### A physical keyboard
+
+| Input | What happens |
+| --- | --- |
+| Hold a key on an attached keyboard | It types its own character, repeating as any held key does. No accent chooser opens, with the keys up or down; the accents are on the keys on screen (§ Keys). |
 
 ## Precision surface
 

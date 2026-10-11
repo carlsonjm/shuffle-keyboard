@@ -34,11 +34,13 @@ fills. There are no skeuomorphic keys, dense outlines or permanent toolbars.
 
 The card follows the Plasma style, as the desktop's panels do, not the colours
 programs use. It is dark, in exactly the colours above, unless the style is
-light and its text reads on it (WCAG AA, 4.5:1); then the surface is the
-style's window colour, the labels its text colour, and every hairline, fill and
-the trackpad are mixed from those two, so a label and what it sits on always
-come from the same look. A style that keeps its panels dark under light
-programs keeps the keys dark. At the sign-in screen the keys are always dark.
+light and its text reads on it (WCAG AA, 4.5:1); then the surface is the style's
+window colour, the labels its text colour, and every hairline, fill and the
+trackpad are mixed from those two, so a label and what it sits on always come
+from the same look. The accents' pop-up stands on the style's view colour where
+the labels read on it, and on the card's own colour where they do not. A style
+that keeps its panels dark under light programs keeps the keys dark. At the
+sign-in screen the keys are always dark.
 
 Its top strip, 10 px above a 6 px band and 10 px below it, is kept clear for
 word predictions, which come after 1.0 (§ 1.0 boundaries). Nothing is drawn
@@ -106,11 +108,10 @@ to return to the letters.
 
 ## Height
 
-The card is 44% of the screen's height, always, set by J on 1 October 2026 for
-room to test. The person does not change it: Shuffle's window roll gives the
-Active card its room (§ Showing and hiding), so there is no screen to win back
-with shorter keys. At 45% the room left above the keys was shorter than a
-browser makes itself (J, 26 September).
+The card is 44% of the screen's height, always. The person does not change it:
+Shuffle's window roll gives the Active card its room (§ Showing and hiding), so
+there is no screen to win back with shorter keys. At 45% the room left above
+the keys was shorter than a browser makes itself.
 
 At 44% the four rows set the key height, and a character key is as wide as it
 is tall. Where twelve and a half square units would not fit inside the card's
@@ -169,23 +170,34 @@ keys go, and the focus returns to where it was.
 
 They rise from the screen's bottom edge on their own and go back into it,
 whether the Hide key, the tray entry, the end of typing or the application put
-them away. Keys going because
-typing ended, or because an application asked the compositor to put them away,
-leave before the window goes. They wait 150 ms before setting off, because a
-field letting go is often handing over to the next, as a browser's boxes do,
-and then nothing moves. Asked for again on the way out, they come back from
-where they are.
+them away. Keys going because typing ended, or because an application asked the
+compositor to put them away, leave before the window goes. They wait 150 ms
+before setting off, because a field letting go is often handing over to the
+next, as a browser's boxes do, and then nothing moves. Asked for again on the
+way out, they come back from where they are.
 
 They rise only once the dock has left and given up its room, so they never rise
 into it.
 
+Their travel follows Plasma's animation speed, so they keep pace with the dock
+and the cards. At the fastest setting they arrive and leave at once.
+
 Before each motion with a destination, and on a press of the Hide key, the keys
-tell Kadunce where they will rest and when (`keyboardHeading`). The Active card
-follows them, and its application is resized once, at rest, not every frame.
+tell Kadunce where they will rest and when (`keyboardHeading` on
+`co.goodinput.Kadunce`). The Active card follows them, and its application is
+resized once, at rest, not every frame.
 With no Kadunce nothing answers and nothing changes. A request for the keys made
 on the person's behalf, from the tray entry or the precision surface, goes
 through Kadunce when it is running, so Kadunce knows it was asked; otherwise it
 goes to the compositor directly.
+
+KWin starts the Keyboard and stops it, and the Keyboard never outlives the
+compositor that started it. When the session ends it hands the bottom of the
+screen back, waiting no more than a second for an answer, and is gone within
+three seconds, so it never holds a sign-out still. If KWin crashes, the Keyboard
+leaves with it rather than reconnecting: the KWin that comes back starts a
+Keyboard of its own, and there is only ever one, holding the tray entry and the
+bottom of the screen.
 
 ### The bottom of the screen
 
@@ -194,9 +206,12 @@ the Keyboard asks the Bottom Surface for the region, and the surface decides
 what giving it up means. The region goes back once the keys have gone. Where no
 Bottom Surface answers, Plasma's bottom panels autohide while the keys are up
 and return to their previous hiding mode afterwards. `bottomsurfacecoordinator`
-is this whole boundary; the surface's side of it is the Bottom Surface contract
-in the `shuffle` repository. The Keyboard puts nothing of its own on the
-surface's band, so windows stop at the band.
+is this whole boundary. It finds the surface on the session bus as
+`co.goodinput.BottomSurface`, asks for the region with `yieldRegion`, gives it
+back with `releaseRegion`, and follows `dockExtentChanged` so the keys rise only
+once the band has given up its room. The surface's side is the Bottom Surface
+contract in the `shuffle` repository. The Keyboard puts nothing of its own on
+the surface's band, so windows stop at the band.
 
 ## Engineering constraints
 

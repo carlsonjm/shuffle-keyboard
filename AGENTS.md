@@ -34,8 +34,9 @@ longer maintained and stays only as a record.
 
 ## Holds
 
-- J approves product behavior and visual direction before implementation begins.
-  He sets intent, scope and sequencing and does not review code.
+- The product owner approves product behavior and visual direction before
+  implementation begins, sets intent, scope and sequencing, and does not review
+  code.
 - One implementation owner: this workflow. Changes arrive as commits against
   this repository, never as a folder copied from somewhere else. A second worker
   is read-only review or a disjoint file set.
@@ -47,9 +48,10 @@ longer maintained and stays only as a record.
 - Automated checks cannot establish typing accuracy, latency, dropped
   characters, focus behavior or finger comfort. `docs/PHYSICAL_ACCEPTANCE.md` is
   the pass for those, on a touch device, by hand.
-- An agent running on the tablet with J's permission installs the candidate and
-  runs `kbuildsycoca6` itself. Restarting Plasma and logging out close J's work
-  and wait for J's go in chat. Otherwise hand the installation over as the exact
-  commands in `docs/PHYSICAL_ACCEPTANCE.md`.
+- An agent running on the tablet with the product owner's permission installs
+  the candidate and runs `kbuildsycoca6` itself. Restarting Plasma and logging
+  out close the product owner's work and wait for the product owner's go.
+  Otherwise hand the installation over as the exact commands in
+  `docs/PHYSICAL_ACCEPTANCE.md`.
 - A change whose behavior saved tests fully prove merges once `./verify.sh`
   passes; the physical pass covers only what automated checks cannot establish.

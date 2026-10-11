@@ -12,7 +12,7 @@ arrived from it by hand.
 
 **Bring changed files, never the folder.** Copying the old folder over this one
 brings its hidden `.git` with it, which replaces this repository's history,
-remote and every commit in one move. It happened on 21 September: the checkout
+remote and every commit in one move. It has happened once: the checkout
 reverted to a shallow clone with one commit and no link to GitHub, and only the
 pushed copy made it recoverable. If it happens again, do not re-commit the tree
 on top. Re-add the `origin` remote, `git fetch --unshallow origin`,

@@ -17,5 +17,14 @@ Checking it:
 | `../install-keyboard.sh` | Builds and replaces the installed Keyboard in your own prefix, and refuses if what landed is not what was built. Brings the sign-in screen's copy under `/usr/local` level too, where there is one. Restarts nothing: the compositor holds the copy it started for the life of the session. |
 | `../tests/verify-raise.sh` | Raises the Keyboard from its tray entry, in a compositor of its own, with a stand-in for Kadunce answering and an application holding the focus. Asks the compositor where the focus is at each step, with a text box ready and on a cold start, and puts the keys away with a second tap. |
 | `../tests/verify-seat.sh` | Seats the Keyboard in a compositor of its own over a band that reserves the bottom of the output and then gives it up, and asks where the compositor put it. |
+| `../tests/verify-caret.sh` | Drags the caret trackpad left and right by the same distance, and asks the application how far its cursor went each way. |
+| `../tests/verify-latch.sh` | Puts the keys away with Hide and with the tray entry while the trackpad is latched, by mouse and by finger, and asks the compositor whether they stay away. |
+| `../tests/verify-hold.sh` | Holds a physical key with the keys down and with them up, and checks that it types only itself and opens nothing. |
+| `../tests/verify-exit.sh` | Ends a compositor with the keys up, and checks that the Keyboard hands the bottom of the screen back and the compositor is gone within five seconds. |
+| `../tests/verify-orphan.sh` | Crashes a compositor with a second behind its socket, and checks that the Keyboard leaves with the first rather than reconnecting. |
+
+Each `tests/verify-*.sh` runs in a compositor of its own and touches nothing in
+the running session. CI runs every one; one that cannot run where it is, for
+want of a tool, says so and is a skip, not a pass.
 
 The suite's plan is kept privately, outside this repository.
