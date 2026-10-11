@@ -356,7 +356,7 @@ Item {
         }
         const key = keyAt(point.x, point.y);
         const state = { key: key, x0: point.x, y0: point.y, lx: point.x, ly: point.y, dx: 0, dy: 0,
-                        t0: Date.now(), ax: 0, ay: 0, flick: 0, caret: false, scrub: false,
+                        t0: Date.now(), cx: 0, cy: 0, nx: 0, ny: 0, flick: 0, caret: false, scrub: false,
                         repeating: false, nextRepeat: 0, repeats: 0, popup: false, done: !key };
         if (key && key.kind === "space" && point.x >= markRect.x) state.done = true;
         touches[point.pointId] = state;
@@ -367,7 +367,6 @@ Item {
     function move(point) {
         const state = touches[point.pointId];
         if (!state || state.done) return;
-        const mx = point.x - state.lx, my = point.y - state.ly;
         state.lx = point.x;
         state.ly = point.y;
         state.dx = point.x - state.x0;
@@ -381,12 +380,14 @@ Item {
         } else if (kind === "space") {
             if (!state.caret && Math.abs(state.dx) > caretSlide) beginCaret(state);
             if (state.caret) {
-                state.ax += mx;
-                state.ay += my;
-                while (state.ax >= caretStepX) { sendStep(Qt.Key_Right, state.mods); state.ax -= caretStepX; }
-                while (state.ax <= -caretStepX) { sendStep(Qt.Key_Left, state.mods); state.ax += caretStepX; }
-                while (state.ay >= caretStepY) { sendStep(Qt.Key_Down, state.mods); state.ay -= caretStepY; }
-                while (state.ay <= -caretStepY) { sendStep(Qt.Key_Up, state.mods); state.ay += caretStepY; }
+                // Steps are counted from the stroke's anchor, not from each
+                // event, so the same stroke moves the cursor the same distance
+                // however the touchscreen divides it.
+                const ax = state.dx - state.cx, ay = state.dy - state.cy;
+                while (ax - state.nx * caretStepX >= caretStepX) { sendStep(Qt.Key_Right, state.mods); state.nx += 1; }
+                while (ax - state.nx * caretStepX <= -caretStepX) { sendStep(Qt.Key_Left, state.mods); state.nx -= 1; }
+                while (ay - state.ny * caretStepY >= caretStepY) { sendStep(Qt.Key_Down, state.mods); state.ny += 1; }
+                while (ay - state.ny * caretStepY <= -caretStepY) { sendStep(Qt.Key_Up, state.mods); state.ny -= 1; }
             }
         } else if (kind === "delete" && !state.repeating) {
             if (state.dx < -deleteStart) state.scrub = true;
@@ -472,6 +473,9 @@ Item {
             const still = Math.hypot(state.dx, state.dy) < caretSlide;
             const kind = state.key.kind;
             if (kind === "space" && !state.caret && held >= caretHold && still) {
+                // Held: the finger's place now is where the steps count from.
+                state.cx = state.dx;
+                state.cy = state.dy;
                 beginCaret(state);
             } else if (kind === "char" && activeLayer === "letters" && accents[state.key.ch] && !state.popup
                        && held >= accentHold && still && state.dy < flickDistance * 0.4) {
@@ -504,7 +508,9 @@ Item {
     }
 
     // A pending Shift, Ctrl or Alt rides on every step, so Shift selects and
-    // Ctrl moves by words, and lets go when the finger lifts.
+    // Ctrl moves by words, and lets go when the finger lifts. A slide counts
+    // its steps from where the finger landed, including the travel that
+    // started the slide.
     function beginCaret(state) {
         state.caret = true;
         state.mods = modifierMask(shiftActive);
