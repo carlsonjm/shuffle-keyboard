@@ -90,7 +90,7 @@ modifiers with it.
 | Input | What happens |
 | --- | --- |
 | Hold the space bar still for a third of a second | The keys go quiet, their labels nearly gone, and the whole key block moves the text cursor. Nothing is typed. |
-| Slide along the space bar | The same, at once, with no wait. |
+| Slide along the space bar | The same, at once, with no wait. The steps count from where the finger landed, so the same slide moves the cursor as far however quickly it is made. |
 | Move sideways | Left or Right, one character per step. |
 | Move up or down | Up or Down, one line per larger step. |
 | Tap Shift, Ctrl or Alt first, then move | Each step carries it: Shift selects as the cursor moves, and Ctrl moves by words. It lets go at lift. |

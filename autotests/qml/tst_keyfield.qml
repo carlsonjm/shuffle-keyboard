@@ -454,6 +454,36 @@ Item {
             verify(texts().indexOf(" ") < 0);
         }
 
+        // The same stroke, however the touchscreen divides it into events,
+        // moves the cursor the same number of steps: the travel that starts
+        // the slide counts, and no event's remainder is lost.
+        function test_the_same_slide_always_moves_the_same_distance_data() {
+            return [
+                { tag: "one event", events: 1 },
+                { tag: "four events", events: 4 },
+                { tag: "ten events", events: 10 },
+                { tag: "thirty-three events", events: 33 },
+                { tag: "a hundred events", events: 100 },
+            ];
+        }
+        function test_the_same_slide_always_moves_the_same_distance(data) {
+            const space = find("space");
+            const travel = field.unitWidth;
+            const steps = Math.floor(travel / field.caretStepX);
+            for (const direction of [1, -1]) {
+                sent.clear();
+                const start = Qt.point(space.x + space.w * 0.4, space.y + space.h / 2);
+                touchEvent(field).press(0, field, start.x, start.y).commit();
+                for (let i = 1; i <= data.events; ++i) {
+                    touchEvent(field).move(0, field, start.x + direction * travel * i / data.events, start.y).commit();
+                }
+                touchEvent(field).release(0, field, start.x + direction * travel, start.y).commit();
+                const arrow = direction > 0 ? Qt.Key_Right : Qt.Key_Left;
+                compare(keysSent().length, steps);
+                verify(keysSent().every(k => k[0] === arrow && k[1] === 0));
+            }
+        }
+
         function test_holding_space_moves_the_cursor_up_and_down() {
             const space = find("space");
             const start = Qt.point(space.x + space.w * 0.4, space.y + space.h / 2);
