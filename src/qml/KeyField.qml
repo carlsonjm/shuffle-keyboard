@@ -675,10 +675,17 @@ Item {
         onPicked: text => field.commitEmoji(text)
     }
 
+    LoggingCategory {
+        id: feedbackLog
+        name: "org.kde.plasma.keyboard.feedback"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     // The accents, above the key held.
     Rectangle {
         z: 3
         visible: field.accentPopup !== null
+        onVisibleChanged: console.debug(feedbackLog, "accents shown", visible)
         x: field.accentPopup ? field.accentPopup.x : 0
         y: field.accentPopup ? field.accentPopup.y : 0
         width: field.accentPopup ? field.accentPopup.chars.length * field.accentPopup.cellWidth + field.accentPopup.pad * 2 : 0

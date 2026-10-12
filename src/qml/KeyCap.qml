@@ -26,6 +26,16 @@ Rectangle {
     property real flick: 0
     required property KeysPalette colours
 
+    // What the key draws as a finger works it, for the sealed sessions; off
+    // unless org.kde.plasma.keyboard.feedback is enabled.
+    LoggingCategory {
+        id: feedbackLog
+        name: "org.kde.plasma.keyboard.feedback"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+    onDownChanged: console.debug(feedbackLog, "key", label, "down", down)
+    onFlickChanged: if (flick > 0) console.debug(feedbackLog, "key", label, "flick", flick.toFixed(2))
+
     readonly property color paper: colours.ink
     readonly property color outline: colours.outline
 
