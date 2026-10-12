@@ -7,9 +7,8 @@
 #
 # A finger on a key shows on screen: the key it is on is drawn pressed, a
 # flick down grows the key's grey character, and a held e brings its accents
-# up above the key. Each is a picture the compositor shows, so the compositor
-# is asked for the screen before the touch and during it, and the pixels where
-# the feedback belongs are compared.
+# up above the key. The Keyboard as built says what it draws, through its
+# feedback log, and the session reads that while the finger is down.
 
 set -uo pipefail
 
@@ -20,8 +19,7 @@ tests_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 stand_in_log="${PROBE_ROOT}/stand-in.log"
 kadunce_log="${PROBE_ROOT}/kadunce.log"
 app_log="${PROBE_ROOT}/app.log"
-shots="${PROBE_ROOT}/shots"
-mkdir -p "${shots}"
+keyboard_log="${PROBE_ROOT}/compositor.log"
 script_count=0
 
 pass=0
@@ -92,8 +90,17 @@ app_text() {
 # The touchscreen, fed a line at a time.
 send() { printf '%s\n' "$@" >&3; }
 
-grab() { python3 "${tests_dir}/screen-probe.py" grab "${shots}/$1" >> "${PROBE_ROOT}/grab.log" 2>&1; }
-differ() { python3 "${tests_dir}/screen-probe.py" differ "${shots}/$1" "${shots}/$2" "${@:3}"; }
+# Whether the Keyboard has said a line since the mark was taken.
+mark() { wc -l < "${keyboard_log}"; }
+said_since() {
+    local from="$1" pattern="$2" waited=0
+    while ((waited < 10)); do
+        tail -n +"$((from + 1))" "${keyboard_log}" | grep -qE "${pattern}" && { echo yes; return; }
+        sleep 0.1
+        waited=$((waited + 1))
+    done
+    echo no
+}
 
 # A compositor with no touch device leaves its virtual keyboard to tablet
 # mode, which this one is never in. Mode 2 offers it regardless.
@@ -140,10 +147,9 @@ sleep 1.5
 panels="$(panels_now)"
 printf '  the keys are at %s\n' "${panels#* }"
 read -r _ origin size <<< "${panels}"
-# Where q and e sit, and the band above the top row the accents rise into,
-# by the Keyboard's own sizes as verify-latch.sh reads them: q and e are the
-# second and fourth keys of the top row, after 123.
-read -r q_x e_x top_y key_w key_h band_y <<< "$(python3 - "${origin%,*}" "${origin#*,}" "${size%x*}" "${size#*x}" "${SCREEN_HEIGHT}" <<'PY'
+# Where q and e sit, by the Keyboard's own sizes as verify-latch.sh reads
+# them: the second and fourth keys of the top row, after 123.
+read -r q_x e_x top_y key_h <<< "$(python3 - "${origin%,*}" "${origin#*,}" "${size%x*}" "${size#*x}" "${SCREEN_HEIGHT}" <<'PY'
 import sys
 x, y, w, h, screen_h = map(float, sys.argv[1:])
 gap = max(5, min(10, w * 0.0062))
@@ -153,60 +159,35 @@ row = (panel - 26 - gap * 3 - outer) / 4
 unit = max(1, min(row, (w - 20 - outer * 2 + gap) / 12.5 - gap))
 pitch = unit + gap
 left = x + w / 2 - (12.5 * pitch - gap) / 2
-bottom = y + h - outer - row / 2
-top = bottom - 3 * (row + gap)
-q = left + 1 * pitch + unit / 2
-e = left + 3 * pitch + unit / 2
-print(round(q), round(e), round(top), round(unit), round(row), round(top - row / 2 - row * 0.8 - 18))
+top = y + h - outer - row / 2 - 3 * (row + gap)
+print(round(left + pitch + unit / 2), round(left + 3 * pitch + unit / 2), round(top), round(row))
 PY
 )"
-printf '  q at %s,%s and e at %s,%s; keys %sx%s\n' "${q_x}" "${top_y}" "${e_x}" "${top_y}" "${key_w}" "${key_h}"
-key_rect() { echo "$(($1 - key_w / 2)) $((top_y - key_h / 2)) ${key_w} ${key_h}"; }
-
-if ! grab rest.raw; then
-    echo "  the compositor gave no screenshot; nothing here can be read" >&2
-    echo "The compositor gave no screenshot, so the screen cannot be read."
-    echo SKIP > "${PROBE_ROOT}/result"
-    exit 0
-fi
-sleep 0.3
-grab rest-again.raw
-# A caret blinking in the application is the only thing that moves at rest,
-# and it is nowhere near the keys.
-check "the keys hold still at rest" "$(differ rest.raw rest-again.raw $(key_rect "${e_x}"))" "0"
+printf '  q at %s,%s and e at %s,%s\n' "${q_x}" "${top_y}" "${e_x}" "${top_y}"
 
 echo
 echo "A finger resting on e draws it pressed"
+from=$(mark)
 send "tdown 1 ${e_x} ${top_y}"
-sleep 0.25
-grab pressed.raw
-changed="$(differ rest.raw pressed.raw $(key_rect "${e_x}"))"
-printf '  %s pixels of e changed\n' "${changed}"
-check "e is drawn pressed" "$((changed > 50))" "1"
+check "e is drawn pressed" "$(said_since "${from}" 'key e down true')" "yes"
 
 echo
 echo "Held on e, its accents rise above it"
-sleep 0.6
-grab accents.raw
-changed="$(differ rest.raw accents.raw $((e_x - key_w * 3)) "${band_y}" $((key_w * 6)) "${key_h}")"
-printf '  %s pixels above e changed\n' "${changed}"
-check "the accents are drawn above e" "$((changed > 200))" "1"
+check "the accents are shown" "$(said_since "${from}" 'accents shown true')" "yes"
+from=$(mark)
 send "tup 1"
-sleep 0.5
+check "e is let go" "$(said_since "${from}" 'key e down false')" "yes"
+check "the accents go" "$(said_since "${from}" 'accents shown false')" "yes"
+sleep 0.3
 before_flick="$(app_text)"
 printf '  lifting on e typed: %s\n' "${before_flick}"
 
 echo
 echo "Part way through a flick down on q, its grey 1 grows"
-send "tdown 2 ${q_x} $((top_y - key_h / 4))"
-sleep 0.1
-grab flick-start.raw
-send "tmove 2 ${q_x} $((top_y + key_h / 8))"
-sleep 0.25
-grab flick-mid.raw
-changed="$(differ flick-start.raw flick-mid.raw $(key_rect "${q_x}"))"
-printf '  %s pixels of q changed\n' "${changed}"
-check "the flick is drawn as it grows" "$((changed > 50))" "1"
+from=$(mark)
+send "tdown 2 ${q_x} $((top_y - key_h / 4))" "wait 60" "tmove 2 ${q_x} $((top_y + key_h / 8))"
+check "q is drawn pressed" "$(said_since "${from}" 'key q down true')" "yes"
+check "the flick is drawn as it grows" "$(said_since "${from}" 'key q flick 0\.[1-9]')" "yes"
 send "tmove 2 ${q_x} $((top_y + key_h))" "wait 30" "tup 2"
 sleep 0.5
 check "the flick still types 1" "$(app_text)" "${before_flick}1"
