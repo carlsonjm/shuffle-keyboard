@@ -5,9 +5,11 @@
 
 The precision surface asks the portal for the pointer once, and on a device
 where the person has allowed it the portal says yes without asking again. This
-says yes the same way: each request answers a moment after it is made, since
-the Keyboard listens for the answer only once the request has returned. The
-pointer events the surface sends afterwards are logged and dropped.
+says yes the same way, and as soon as it can: each request answers on the
+object the portal names after the request's handle_token, before the call that
+made it has returned, so a Keyboard that listened only once the call returned
+would never hear it. The pointer events the surface sends afterwards are
+logged and dropped.
 """
 
 import sys
@@ -68,36 +70,31 @@ def main():
     connection = Gio.bus_get_sync(Gio.BusType.SESSION, None)
     counter = {"requests": 0}
 
-    def answer_later(path, results):
-        def answer():
-            connection.emit_signal(None, path, "org.freedesktop.portal.Request", "Response",
-                                   GLib.Variant("(ua{sv})", (0, results)))
-            return False
-
-        GLib.timeout_add(150, answer)
-
-    def request_path():
+    def answer_first(sender, options, results):
+        # The path every portal since 0.9 uses, from the caller's unique
+        # name and the token it chose.
+        token = options.get("handle_token") or "r%d" % counter["requests"]
         counter["requests"] += 1
-        return "/org/freedesktop/portal/desktop/request/test/r%d" % counter["requests"]
+        path = "/org/freedesktop/portal/desktop/request/%s/%s" % (
+            sender.lstrip(":").replace(".", "_"), token)
+        connection.emit_signal(None, path, "org.freedesktop.portal.Request", "Response",
+                               GLib.Variant("(ua{sv})", (0, results)))
+        return GLib.Variant("(o)", (path,))
 
-    def on_call(_connection, _sender, _path, _interface, method, parameters, invocation):
+    def on_call(_connection, sender, _path, _interface, method, parameters, invocation):
         print("portal %s" % method, flush=True)
         if method == "CreateSession":
-            path = request_path()
-            invocation.return_value(GLib.Variant("(o)", (path,)))
-            answer_later(path, {"session_handle": GLib.Variant(
-                "o", "/org/freedesktop/portal/desktop/session/test/s1")})
+            invocation.return_value(answer_first(sender, parameters[0], {
+                "session_handle": GLib.Variant(
+                    "o", "/org/freedesktop/portal/desktop/session/test/s1")}))
             return
         if method == "SelectDevices":
-            path = request_path()
-            invocation.return_value(GLib.Variant("(o)", (path,)))
-            answer_later(path, {})
+            invocation.return_value(answer_first(sender, parameters[1], {}))
             return
         if method == "Start":
-            path = request_path()
-            invocation.return_value(GLib.Variant("(o)", (path,)))
-            answer_later(path, {"devices": GLib.Variant("u", POINTER),
-                                "restore_token": GLib.Variant("s", "test-restore")})
+            invocation.return_value(answer_first(sender, parameters[2], {
+                "devices": GLib.Variant("u", POINTER),
+                "restore_token": GLib.Variant("s", "test-restore")}))
             return
         invocation.return_value(None)
 

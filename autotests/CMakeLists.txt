@@ -48,8 +48,17 @@ if(DBUS_RUN_SESSION)
     target_link_libraries(bottomsurfacecoordinatortest PRIVATE KF6::I18n Qt::DBus Qt::Gui Qt::Qml Qt::Test)
     add_test(NAME bottomsurfacecoordinator COMMAND ${DBUS_RUN_SESSION} -- $<TARGET_FILE:bottomsurfacecoordinatortest>)
     set_tests_properties(bottomsurfacecoordinator PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+    # The precision surface against a stand-in for the RemoteDesktop portal.
+    qt_add_executable(precisioncontrollertest
+        precisioncontrollertest.cpp
+        ${CMAKE_SOURCE_DIR}/src/precisioncontroller.cpp
+    )
+    target_include_directories(precisioncontrollertest PRIVATE ${CMAKE_SOURCE_DIR}/src)
+    target_link_libraries(precisioncontrollertest PRIVATE KF6::ConfigCore Qt::DBus Qt::Qml Qt::Test)
+    add_test(NAME precisioncontroller COMMAND ${DBUS_RUN_SESSION} -- $<TARGET_FILE:precisioncontrollertest>)
 else()
-    message(STATUS "dbus-run-session is unavailable; skipping the bottom surface coordinator test")
+    message(STATUS "dbus-run-session is unavailable; skipping the bottom surface coordinator and precision controller tests")
 endif()
 
 qt_add_executable(shuffle-geometry-target geometrytarget.cpp)

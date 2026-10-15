@@ -46,8 +46,6 @@ public:
     /// Another of this process's surfaces taking the compositor's focus moves
     /// Qt's focus with it, and this puts it back.
     Q_INVOKABLE void reclaimFocus();
-    Q_INVOKABLE void persistKeyboardHeight(int height);
-    Q_INVOKABLE void persistKeyboardWidthPercent(int widthPercent);
 
 Q_SIGNALS:
     void interactiveRegionChanged();

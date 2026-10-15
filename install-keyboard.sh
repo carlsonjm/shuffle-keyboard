@@ -8,6 +8,10 @@
 # Where the sign-in screen has its own copy under /usr/local, put there by
 # Shuffle's install-signin-keyboard.sh, that copy is brought level too.
 #
+# Every file it puts in your prefix is listed in the prefix, so that the next
+# run removes what this build no longer installs, and uninstall-keyboard.sh
+# removes exactly what is there and nothing else.
+#
 # It does not restart anything. The compositor started the Keyboard it is
 # running and keeps that copy until the session does, so a file on disk is not
 # a Keyboard in use until you have signed out and back in.
@@ -16,6 +20,24 @@ set -euo pipefail
 project_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 prefix="${SHUFFLE_KEYBOARD_PREFIX:-${HOME}/.local}"
 installed="${prefix}/bin/shuffle-keyboard"
+manifest="${prefix}/share/shuffle-keyboard/installed-files.txt"
+
+# This fork installs under the same QML, settings-page and data names as
+# Plasma's own plasma-keyboard, so with both installed either program can load
+# the other's pieces. The Shuffle package declares the conflict and replaces
+# it; a copy in your own prefix cannot, so it says so.
+distro_owner=""
+if [[ -e /usr/bin/plasma-keyboard && "$(readlink /usr/bin/plasma-keyboard 2>/dev/null)" != shuffle-keyboard ]]; then
+    distro_owner="$(pacman -Qqo /usr/bin/plasma-keyboard 2>/dev/null || echo "another package")"
+fi
+if [[ -n "${distro_owner}" && "${distro_owner}" != shuffle-keyboard ]]; then
+    cat >&2 <<WARN
+Plasma's own keyboard (${distro_owner}) is installed in /usr. It uses the same
+names as this one, so the Shuffle Keyboard and its settings page can pick up
+pieces of Plasma's. Remove it (sudo pacman -R ${distro_owner}) or install the
+Shuffle package, which replaces it.
+WARN
+fi
 
 before="missing"
 if [[ -f "${installed}" ]]; then
@@ -55,8 +77,27 @@ echo "[3/6] Replacing it..."
 # Each destination is unlinked before it is written. The Keyboard you are
 # using has its own binary open, and writing over a running executable is
 # refused outright.
+( cd "${staged_root}" && find . \( -type f -o -type l \) | sed 's|^\./||' | LC_ALL=C sort ) > "${work}/files.txt"
 mkdir -p "${prefix}"
 cp -a --remove-destination "${staged_root}/." "${prefix}/"
+
+# What an earlier build installed and this one does not is removed, so a name
+# this build has moved away from is not left behind for anything to load.
+if [[ -f "${manifest}" ]]; then
+    stale=0
+    while IFS= read -r file; do
+        case "${file}" in "" | /* | *..*) continue ;; esac
+        rm -f -- "${prefix}/${file}"
+        dir="$(dirname -- "${prefix}/${file}")"
+        while [[ "${dir}" != "${prefix}" ]] && rmdir -- "${dir}" 2> /dev/null; do
+            dir="$(dirname -- "${dir}")"
+        done
+        stale=$((stale + 1))
+    done < <(LC_ALL=C sort "${manifest}" | LC_ALL=C comm -23 - "${work}/files.txt")
+    ((stale == 0)) || echo "      removed ${stale} file(s) the previous build installed and this one does not."
+fi
+mkdir -p "$(dirname -- "${manifest}")"
+cp "${work}/files.txt" "${manifest}"
 
 echo "[4/6] Checking what is actually on disk..."
 [[ -f "${installed}" ]] || {
@@ -107,5 +148,5 @@ cat <<'DONE'
 The Shuffle Keyboard on disk is now this build. The one you are typing on is
 still the previous copy, because the compositor started it and holds it for
 the life of the session. Signing out and back in is what makes it the one in
-use.
+use. uninstall-keyboard.sh takes it out again.
 DONE

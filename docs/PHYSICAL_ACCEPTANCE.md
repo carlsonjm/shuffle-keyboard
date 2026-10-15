@@ -26,7 +26,9 @@ where a check asks for one.
 5. Tap a text field. The keys come up and the bottom panel or dock steps aside.
 
 To stop the test at any time, return to **Virtual Keyboard**, select **None**,
-and apply.
+and apply. To take the Keyboard off the device afterwards, run
+`./uninstall-keyboard.sh`, which removes exactly what `./install-keyboard.sh`
+put in your prefix, once **None** is applied.
 
 ## Pass / Fail / Note
 

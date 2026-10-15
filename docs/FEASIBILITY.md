@@ -80,6 +80,30 @@ right thumb lands. The original footprint keeps both steps, puts the gap
 between the hands at the card's centre, and carries the marks on flicks and
 the symbols layer.
 
+## What KWin does that it does not promise
+
+Three things the Keyboard does rest on how KWin and Qt behave today rather
+than on anything either promises, and a minor release of either can change
+them without notice. Each has a sealed session that proves it against a real
+KWin, run on every change against the released Plasma and every night against
+the next one (Arch's kde-unstable). The next KWin no longer composites without
+a GPU, which a hosted runner lacks, so until that lane has one it reports its
+sessions as skipped rather than passed, and the tablet is where a change in the
+next KWin is first seen. The focus and the cold start also say so
+in the log when they stop working, with a line that starts `KWin dependency:`;
+where KWin placed the keys cannot be seen from inside the Keyboard, so only its
+session catches that one.
+
+| Dependency | What breaks if it changes | Proved by |
+| --- | --- | --- |
+| KWin places an input panel again only when its committed input region changes, so the Keyboard shortens its region by a pixel for one frame to be placed again once the dock has given up its room (`InputPanelWindow::refreshInteractiveRegion`). | The keys sit a band's height above the screen's bottom edge. | `tests/verify-seat.sh` |
+| Qt's private `QWaylandDisplay` takes the keys' window out of its focus and puts it back, so a raise from the tray entry still types (`InputPanelWindow::reclaimFocus`). | Keys raised from the tray entry type nothing. | `tests/verify-raise.sh` |
+| Straight after signing in a raise shows nothing until a field has asked, and a field on a one-pixel overlay layer surface does ask (`ColdStartHold.qml`). | A tap on the tray entry straight after signing in shows no keys. | `tests/verify-raise.sh` |
+
+The way out of all three is upstream: a way for an input method to be placed
+again, and to show itself without a text field, in KWin, and dropping the
+private Qt call once Qt offers a public one.
+
 ## Physical acceptance
 
 Automated tests cannot establish finger comfort, pointer feel, portal-consent

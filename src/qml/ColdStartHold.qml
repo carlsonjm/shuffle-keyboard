@@ -11,19 +11,24 @@ import QtQuick.Window
 import org.kde.layershell as LayerShell
 import org.kde.plasma.keyboard
 
-// Brings the keys up when Kadunce says a swipe up from the bottom bezel asked
-// for them, including straight after signing in.
+// Brings the keys up when their tray entry asked for them, including straight
+// after signing in.
 //
-// Kadunce asks the compositor for the keys itself, which leaves the focus where
-// it is: a text box that was ready is typed into, and the card that holds it
-// pans it into view. Only a cold start needs more. Plasma shows a raised
-// keyboard only once it has been allowed to, and straight after signing in a
-// direct raise did nothing until some text field had been touched. When the
-// keys have not come up shortly after Kadunce's request, this raises the way a
-// text field does: a field nobody sees takes typing focus for as long as the
-// keys are up, and gives the focus back when they go. Whatever is typed then
-// goes nowhere until a text box is tapped, which is what a raise with nothing
-// selected has always meant.
+// The tray entry asks for the keys through Kadunce, or the compositor directly
+// where Kadunce is not running, which leaves the focus where it is: a text box
+// that was ready is typed into. Only a cold start needs more. Plasma shows a
+// raised keyboard only once it has been allowed to, and straight after signing
+// in a direct raise did nothing until some text field had been touched. When
+// the keys have not come up shortly after the tray entry's request, this raises
+// the way a text field does: a field nobody sees takes typing focus for as long
+// as the keys are up, and gives the focus back when they go. Whatever is typed
+// then goes nowhere until a text box is tapped, which is what a raise with
+// nothing selected has always meant.
+//
+// That a direct raise shows nothing on a cold start, and that a field on an
+// overlay layer surface brings the keys up, are KWin's behaviour, not a
+// promise it makes (FEASIBILITY.md § What KWin does that it does not promise).
+// A hold that brings no keys up says so in the log.
 //
 // The field is presented from this window: one transparent pixel that takes
 // no touches, on the overlay layer, since KWin gives a layer surface the focus
@@ -148,6 +153,7 @@ Window {
 
         interval: 1500
         onTriggered: if (!root.heldKeyboardShown) {
+            console.warn("KWin dependency: the cold-start raise held a field for 1.5 s and no keys came up");
             root.releaseFocus();
         }
     }
