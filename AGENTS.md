@@ -55,3 +55,20 @@ longer maintained and stays only as a record.
   `docs/PHYSICAL_ACCEPTANCE.md`.
 - A change whose behavior saved tests fully prove merges once `./verify.sh`
   passes; the physical pass covers only what automated checks cannot establish.
+
+## Git history
+
+Work freely on task branches and commit as needed during implementation. Before
+opening or merging a pull request, clean the branch so its history reflects
+meaningful product or engineering changes, not the debugging process.
+
+- Keep commits that represent distinct behavior, architecture, migration or
+  design decisions. Squash failed attempts, test-only repair churn, typo fixes,
+  CI retries, forgotten-file follow-ups and other mechanical corrections into
+  the commit they belong to.
+- Prefer one to three meaningful commits per pull request. Do not combine
+  unrelated changes merely to reduce the count.
+- Clean the branch before its head is handed over for an install or a hands-on
+  check, so the head tested there is the head that merges. Rewriting a head
+  after hand-over breaks the hand-over.
+- Never rewrite history already merged to `shuffle-1.0`.
