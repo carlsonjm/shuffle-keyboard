@@ -200,7 +200,7 @@ void PrecisionController::ensureSession()
 
     setState(Connecting, QStringLiteral("Requesting system pointer access"));
     QVariantMap options;
-    options.insert(QStringLiteral("session_handle_token"), QStringLiteral("shuffle_session_") + QUuid::createUuid().toString(QUuid::Id128));
+    options.insert(QStringLiteral("session_handle_token"), QString(QStringLiteral("shuffle_session_") + QUuid::createUuid().toString(QUuid::Id128)));
     ask(Step::Create, QStringLiteral("CreateSession"), {}, options);
 }
 
