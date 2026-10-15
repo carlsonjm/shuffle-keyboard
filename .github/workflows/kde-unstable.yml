@@ -43,7 +43,7 @@ jobs:
             extra-cmake-modules qt6-base qt6-declarative qt6-virtualkeyboard \
             qt6-wayland qt6-tools kcoreaddons ki18n kcmutils kconfig kcrash \
             libplasma libxkbcommon wayland wayland-protocols \
-            plasma-wayland-protocols layer-shell-qt
+            plasma-wayland-protocols layer-shell-qt dbus
 
       - uses: actions/checkout@v5
 

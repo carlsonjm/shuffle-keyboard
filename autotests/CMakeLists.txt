@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Aleix Pol <aleixpol@kde.org>
 # SPDX-License-Identifier: BSD-2-Clause
 
-find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Test Widgets)
+find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS DBus Test Widgets)
 find_package(Qt6WaylandCompositor ${QT_MIN_VERSION} QUIET)
 include(ECMAddTests)
 
@@ -34,6 +34,23 @@ endif()
 # When the keys are drawn light, without a theme to read.
 ecm_add_test(keysthemetest.cpp LINK_LIBRARIES Qt::Gui Qt::Test)
 target_include_directories(keysthemetest PRIVATE ${CMAKE_SOURCE_DIR}/src)
+
+# The bottom of the screen against stand-ins for KWin, the Bottom Surface and
+# Plasma's shell, on a session bus of the test's own.
+find_program(DBUS_RUN_SESSION dbus-run-session)
+if(DBUS_RUN_SESSION)
+    qt_add_executable(bottomsurfacecoordinatortest
+        bottomsurfacecoordinatortest.cpp
+        ${CMAKE_SOURCE_DIR}/src/bottomsurfacecoordinator.cpp
+        ${CMAKE_SOURCE_DIR}/src/keystrayentry.cpp
+    )
+    target_include_directories(bottomsurfacecoordinatortest PRIVATE ${CMAKE_SOURCE_DIR}/src)
+    target_link_libraries(bottomsurfacecoordinatortest PRIVATE KF6::I18n Qt::DBus Qt::Gui Qt::Qml Qt::Test)
+    add_test(NAME bottomsurfacecoordinator COMMAND ${DBUS_RUN_SESSION} -- $<TARGET_FILE:bottomsurfacecoordinatortest>)
+    set_tests_properties(bottomsurfacecoordinator PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+else()
+    message(STATUS "dbus-run-session is unavailable; skipping the bottom surface coordinator test")
+endif()
 
 qt_add_executable(shuffle-geometry-target geometrytarget.cpp)
 target_link_libraries(shuffle-geometry-target PRIVATE Qt::Widgets)
