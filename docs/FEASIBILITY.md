@@ -86,7 +86,10 @@ Three things the Keyboard does rest on how KWin and Qt behave today rather
 than on anything either promises, and a minor release of either can change
 them without notice. Each has a sealed session that proves it against a real
 KWin, run on every change against the released Plasma and every night against
-the next one (Arch's kde-unstable). The focus and the cold start also say so
+the next one (Arch's kde-unstable). The next KWin no longer composites without
+a GPU, which a hosted runner lacks, so until that lane has one it reports its
+sessions as skipped rather than passed, and the tablet is where a change in the
+next KWin is first seen. The focus and the cold start also say so
 in the log when they stop working, with a line that starts `KWin dependency:`;
 where KWin placed the keys cannot be seen from inside the Keyboard, so only its
 session catches that one.

@@ -106,7 +106,29 @@ jobs:
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
           cmake --build build
 
+      # The next KWin no longer composites without a GPU render node, which
+      # a hosted runner's container does not have; it then quits before any
+      # session can start. That is this runner, not the Keyboard, so it is
+      # reported as a skip of the whole lane rather than as eight failures.
+      - name: Check that this KWin can run here
+        id: kwin
+        run: |
+          mkdir -p -m 0700 /tmp/kwin-probe
+          XDG_RUNTIME_DIR=/tmp/kwin-probe timeout 30s dbus-run-session -- \
+            kwin_wayland --virtual --width 640 --height 480 \
+            --no-lockscreen --no-global-shortcuts --no-kactivities \
+            --exit-with-session /usr/bin/true > /tmp/kwin-probe.log 2>&1 || true
+          if grep -q 'requires compositing\|going to quit KWin now as it is broken' /tmp/kwin-probe.log; then
+            cat /tmp/kwin-probe.log
+            echo "::warning::This KWin cannot composite on this runner (no render device); the sealed sessions were skipped, not passed."
+            echo "**Sealed sessions skipped:** this KWin cannot composite without a render device on this runner." >> "$GITHUB_STEP_SUMMARY"
+            echo "runs=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "runs=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run every sealed session
+        if: steps.kwin.outputs.runs == 'true'
         env:
           SHUFFLE_KEYBOARD_BUILD: ${{ github.workspace }}/build
         run: |

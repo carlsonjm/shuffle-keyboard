@@ -29,5 +29,7 @@ Each `tests/verify-*.sh` runs in a compositor of its own and touches nothing in
 the running session. CI runs every one, against the released KWin on every
 change and against the next one from Arch's kde-unstable every night; one that
 cannot run where it is, for want of a tool, says so and is a skip, not a pass.
+The next KWin cannot composite on a hosted runner, which has no GPU, so that
+lane currently skips its sessions and says so.
 
 The suite's plan is kept privately, outside this repository.
