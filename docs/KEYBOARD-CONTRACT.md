@@ -147,7 +147,9 @@ pointer does. The mark stays live, and lit, and so does Hide, undimmed.
 Putting the keys away, with Hide or the tray entry, ends the latch, and they
 stay away until they are next asked for. The surface is the keyboard's
 full footprint below the top strip. Until the portal has granted pointer
-control, it says so in place of pointing.
+control, it says so in place of pointing, and if the portal ends that control,
+by restarting or by the permission being taken back, it says so again and the
+next touch asks afresh.
 
 The mark and the caret trackpad share the space bar and do not overlap: a touch
 that begins on the mark latches the pointer, and a touch anywhere else on the

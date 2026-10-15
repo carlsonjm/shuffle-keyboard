@@ -6,8 +6,13 @@
 #pragma once
 
 #include <QObject>
+#include <QStringList>
+#include <QTimer>
 #include <QVariantMap>
 #include <qqmlintegration.h>
+
+class QDBusPendingCallWatcher;
+class QDBusServiceWatcher;
 
 class PrecisionController : public QObject
 {
@@ -51,21 +56,37 @@ Q_SIGNALS:
     void stateChanged();
 
 private Q_SLOTS:
-    void handleCreateResponse(uint response, const QVariantMap &results);
-    void handleSelectResponse(uint response, const QVariantMap &results);
-    void handleStartResponse(uint response, const QVariantMap &results);
+    void handleResponse(uint response, const QVariantMap &results);
+    void handleSessionClosed(const QVariantMap &details);
 
 private:
-    QString token(const QString &prefix) const;
-    bool watchRequest(const QString &path, const char *slot);
+    enum class Step {
+        None,
+        Create,
+        Select,
+        Start,
+    };
+
+    /// Asks the portal for one step of the session. The answer arrives as a
+    /// Response signal on a request object the portal names after the
+    /// handle_token, and it can arrive before the call itself returns, so the
+    /// answer is listened for on that predicted path before the call goes out.
+    void ask(Step step, const QString &method, QList<QVariant> arguments, QVariantMap options);
+    void stopListening();
+    void endSession(const QString &message, State state = Idle);
     void setState(State state, const QString &message = {});
     void selectDevices();
     void startSession();
+    void notify(const QString &method, const QList<QVariant> &arguments);
     void notifyButton(int button, uint state);
 
     State m_state = Idle;
     QString m_message;
     QString m_sessionPath;
     QString m_restoreToken;
+    Step m_step = Step::None;
+    QStringList m_requestPaths;
+    QDBusServiceWatcher *m_portalWatcher = nullptr;
+    QTimer m_answerTimeout;
     bool m_primaryPressed = false;
 };

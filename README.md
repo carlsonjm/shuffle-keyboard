@@ -56,4 +56,10 @@ there is one; the Keyboard in use changes at the next sign-in. Enabling it is
 [`docs/PHYSICAL_ACCEPTANCE.md`](docs/PHYSICAL_ACCEPTANCE.md) § Install and
 enable. KWin must start the binary as its virtual keyboard: run as a normal
 application it exits, unless `SHUFFLE_PREVIEW_MODE=1` is set for an isolated
-test.
+test. `./uninstall-keyboard.sh` removes exactly what `./install-keyboard.sh`
+put in your prefix.
+
+The fork still installs under Plasma Keyboard's own names: its QML modules,
+settings page, layouts and `plasmakeyboardrc`. The Shuffle package declares
+the conflict and replaces `plasma-keyboard`; a copy in your own prefix cannot,
+so `./install-keyboard.sh` warns when Plasma's is installed too.

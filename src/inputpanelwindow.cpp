@@ -15,7 +15,9 @@
 
 #include <KSandbox>
 #include <QDesktopServices>
+#include <QGuiApplication>
 #include <QProcess>
+#include <QTimer>
 #include <qnamespace.h>
 
 InputPanelWindow::InputPanelWindow(QWindow *parent)
@@ -88,23 +90,24 @@ void InputPanelWindow::reclaimFocus()
 {
     // Qt's focus window is the most recently activated one it holds, and an
     // activation of a window it already holds is ignored, so this one is
-    // taken out and put back at the end.
-    if (auto *wayland = dynamic_cast<QtWaylandClient::QWaylandWindow *>(handle())) {
-        wayland->display()->handleWindowDeactivated(wayland);
-        wayland->display()->handleWindowActivated(wayland);
+    // taken out and put back at the end. QWaylandDisplay is Qt's private API,
+    // with no promise between releases (FEASIBILITY.md § What KWin does that
+    // it does not promise), so a Qt that no longer does this says so rather
+    // than leaving the keys typing into nothing without a word.
+    auto *wayland = dynamic_cast<QtWaylandClient::QWaylandWindow *>(handle());
+    if (!wayland) {
+        qWarning("KWin dependency: the keys' window is not a Qt Wayland window, so Qt's focus cannot be put back on it");
+        return;
     }
-}
-
-void InputPanelWindow::persistKeyboardHeight(int height)
-{
-    PlasmaKeyboardSettings::self()->setKeyboardHeight(height);
-    PlasmaKeyboardSettings::self()->save();
-}
-
-void InputPanelWindow::persistKeyboardWidthPercent(int widthPercent)
-{
-    PlasmaKeyboardSettings::self()->setKeyboardWidthPercent(widthPercent);
-    PlasmaKeyboardSettings::self()->save();
+    wayland->display()->handleWindowDeactivated(wayland);
+    wayland->display()->handleWindowActivated(wayland);
+    // Qt hands activation to its focus logic through its queue of window
+    // system events, so whether it took is known only once that has run.
+    QTimer::singleShot(100, this, [this] {
+        if (QGuiApplication::focusWindow() != this) {
+            qWarning("KWin dependency: Qt did not make the keys' window its focus window again; typing may go nowhere");
+        }
+    });
 }
 
 #include "moc_inputpanelwindow.cpp"

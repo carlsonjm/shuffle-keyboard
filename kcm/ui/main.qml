@@ -28,29 +28,10 @@ KCM.ScrollViewKCM {
     footer: Kirigami.FormLayout {
         id: formLayout
 
-        QQC2.CheckBox {
-            id: soundsEnabled
-            Kirigami.FormData.label: i18n("Key press feedback:")
-            text: i18n("Sound")
-
-            checked: kcm.soundEnabled
-            onCheckedChanged: {
-                kcm.soundEnabled = checked;
-                checked = Qt.binding(() => kcm.soundEnabled);
-            }
-        }
-
-        QQC2.CheckBox {
-            id: vibrationEnabled
-            text: i18n("Vibration")
-
-            checked: kcm.vibrationEnabled
-            onCheckedChanged: {
-                kcm.vibrationEnabled = checked;
-                checked = Qt.binding(() => kcm.vibrationEnabled);
-            }
-        }
-
+        // Shuffle's keys make no sound, do not vibrate and decide their own
+        // capitals (docs/INPUT.md § Keys), so upstream's sound, vibration
+        // and auto-capitalization switches are not offered: each would change
+        // nothing.
         QQC2.CheckBox {
             id: keyboardNavigationEnabled
             Kirigami.FormData.label: i18n("General:")
@@ -60,17 +41,6 @@ KCM.ScrollViewKCM {
             onCheckedChanged: {
                 kcm.keyboardNavigationEnabled = checked;
                 checked = Qt.binding(() => kcm.keyboardNavigationEnabled);
-            }
-        }
-
-        QQC2.CheckBox {
-            id: autoCapitalizationEnabled
-            text: i18n("Auto-capitalization")
-
-            checked: kcm.autoCapitalizationEnabled
-            onCheckedChanged: {
-                kcm.autoCapitalizationEnabled = checked;
-                checked = Qt.binding(() => kcm.autoCapitalizationEnabled);
             }
         }
     }
