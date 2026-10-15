@@ -203,9 +203,14 @@ bottom of the screen.
 
 The region follows keys on screen, not requests for them. While keys are shown,
 the Keyboard asks the Bottom Surface for the region, and the surface decides
-what giving it up means. The region goes back once the keys have gone. Where no
-Bottom Surface answers, Plasma's bottom panels autohide while the keys are up
-and return to their previous hiding mode afterwards. `bottomsurfacecoordinator`
+what giving it up means. The region goes back once the keys have gone. A
+surface that refuses, or is slow to answer, still owns the region, and the
+Keyboard leaves every panel alone. Only where no Bottom Surface is on the bus at
+all do Plasma's bottom panels autohide while the keys are up and return to their
+previous hiding mode afterwards. Those modes are kept on disk before any panel
+changes, so a Keyboard that crashed or was killed with the keys up puts them
+back the next time it starts. Nothing here waits on the surface or the shell to
+answer, so a busy desktop never holds the keys. `bottomsurfacecoordinator`
 is this whole boundary. It finds the surface on the session bus as
 `co.goodinput.BottomSurface`, asks for the region with `yieldRegion`, gives it
 back with `releaseRegion`, and follows `dockExtentChanged` so the keys rise only

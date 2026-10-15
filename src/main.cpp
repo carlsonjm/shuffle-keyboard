@@ -179,6 +179,8 @@ int main(int argc, char **argv)
 #ifdef Q_OS_UNIX
     // KWin stops the keyboard with SIGTERM. Quitting through the event loop
     // lets the bottom-surface coordinator restore Plasma's bottom panel.
+    // Every other way out, the alarm below among them, leaves the panel's own
+    // hiding mode on disk, and the next start puts it back.
     KSignalHandler::self()->watchSignal(SIGINT);
     KSignalHandler::self()->watchSignal(SIGTERM);
     QObject::connect(KSignalHandler::self(), &KSignalHandler::signalReceived, &application, [](int signal) {

@@ -5,10 +5,12 @@
 
 #pragma once
 
+#include <QJsonArray>
 #include <QObject>
 #include <qqmlintegration.h>
 
 class KeysTrayEntry;
+class QDBusServiceWatcher;
 
 /**
  * The Keyboard's whole relationship with the Bottom Surface.
@@ -69,6 +71,14 @@ public:
 
     bool regionReserving() const;
 
+    /**
+     * Where the bottom panels' own hiding modes are kept while the Keyboard
+     * has set them to autohide. It is written before any panel is changed and
+     * removed once the shell has put them back, so a Keyboard that ended
+     * without putting them back finds it on its next start and does it then.
+     */
+    static QString panelStatePath();
+
 Q_SIGNALS:
     void keyboardVisibleChanged();
     void requestedVisibleChanged();
@@ -91,14 +101,24 @@ Q_SIGNALS:
 private:
     void setKeyboardVisible(bool visible);
     void toggleKeysFromTray();
-    QString evaluate(const QString &script);
     void yieldBottomPanels();
     void restoreBottomPanels();
 
-    /// Ask the Bottom Surface for the region. False means there is no surface
-    /// to ask, not that it refused --- the caller then falls back to the panel
-    /// behaviour this component has always had.
-    bool askSurface(bool yield);
+    /// Ask the Bottom Surface for the region, without waiting for its answer.
+    /// Only a bus name nobody owns sends the Keyboard to Plasma's panels: a
+    /// surface that refuses, or is too slow to answer, still owns the region,
+    /// and the Keyboard then leaves every panel alone.
+    void askSurface();
+    void releaseSurface();
+
+    /// The fallback where no Bottom Surface is installed: read the bottom
+    /// panels' hiding modes, keep them on disk, then set the panels to
+    /// autohide. Each step waits on the shell without holding the keys.
+    void yieldPanels();
+    void restorePanels(const QJsonArray &saved, bool fromLastRun);
+    void restoreLastRunPanels();
+    void restoreLastRunPanelsOnceShellArrives();
+
     void readExtent();
     void setError(const QString &error);
 
@@ -110,11 +130,27 @@ private:
     KeysTrayEntry *m_trayEntry = nullptr;
     bool m_keyboardVisible = false;
     bool m_requestedVisible = false;
-    QString m_savedPanels;
 
-    /// True while the surface is the one that yielded, so the release goes
-    /// back the same way it was taken.
+    /// True from asking the surface for the region until it is given back, so
+    /// the hand-back is sent even for an ask that has not been answered yet.
+    bool m_surfaceAsked = false;
+    /// True once the surface has said yes, so the release goes back the same
+    /// way it was taken.
     bool m_surfaceYielded = false;
+    /// Counts asks of the surface and of the shell, so an answer that comes
+    /// after the keys have gone again is recognised as stale and dropped.
+    quint64 m_surfaceRequest = 0;
+    quint64 m_panelRequest = 0;
+    quint64 m_extentRequest = 0;
+
+    enum class PanelState {
+        Untouched,
+        Reading,
+        Yielded,
+    };
+    PanelState m_panelState = PanelState::Untouched;
+    QJsonArray m_savedPanels;
+    QDBusServiceWatcher *m_shellWatcher = nullptr;
     bool m_leaving = false;
     bool m_surfacePresent = false;
     int m_bandHeight = 0;
