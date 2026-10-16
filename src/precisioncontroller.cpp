@@ -4,6 +4,7 @@
 */
 
 #include "precisioncontroller.h"
+#include "directpointer.h"
 #include "keysrequest.h"
 
 #include <KConfigGroup>
@@ -30,6 +31,18 @@ constexpr int LeftButton = 0x110;
 constexpr int RightButton = 0x111;
 // Long enough for a person to read and answer the consent prompt.
 constexpr int AnswerTimeoutMs = 120000;
+
+DirectPointer *s_directPointer = nullptr;
+}
+
+void PrecisionController::setDirectPointer(DirectPointer *pointer)
+{
+    s_directPointer = pointer;
+}
+
+bool PrecisionController::direct() const
+{
+    return s_directPointer && s_directPointer->isAvailable();
 }
 
 PrecisionController::PrecisionController(QObject *parent)
@@ -193,6 +206,11 @@ void PrecisionController::ensureSession()
     if (m_state == Connecting || m_state == Ready) {
         return;
     }
+    // Nothing to ask for: the compositor already trusts the Keyboard.
+    if (direct()) {
+        setState(Ready);
+        return;
+    }
     // A session refused part way, at device selection or start, is let go,
     // so that its closing later cannot end the one asked for now.
     if (!m_sessionPath.isEmpty()) {
@@ -350,11 +368,23 @@ void PrecisionController::notify(const QString &method, const QList<QVariant> &a
 
 void PrecisionController::move(qreal dx, qreal dy)
 {
+    if (direct()) {
+        if (ready()) {
+            s_directPointer->pointerMotion(dx, dy);
+        }
+        return;
+    }
     notify(QStringLiteral("NotifyPointerMotion"), {QVariantMap(), dx, dy});
 }
 
 void PrecisionController::scroll(qreal dx, qreal dy, bool finished)
 {
+    if (direct()) {
+        if (ready() && !finished) {
+            s_directPointer->pointerAxis(dx, dy);
+        }
+        return;
+    }
     QVariantMap options;
     options.insert(QStringLiteral("finish"), finished);
     notify(QStringLiteral("NotifyPointerAxis"), {options, dx, dy});
@@ -362,6 +392,12 @@ void PrecisionController::scroll(qreal dx, qreal dy, bool finished)
 
 void PrecisionController::notifyButton(int button, uint state)
 {
+    if (direct()) {
+        if (ready()) {
+            s_directPointer->pointerButton(button, state != 0);
+        }
+        return;
+    }
     notify(QStringLiteral("NotifyPointerButton"), {QVariantMap(), button, state});
 }
 

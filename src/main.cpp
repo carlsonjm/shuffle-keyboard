@@ -10,6 +10,10 @@
 #include "layoutpathhelper.h"
 #include "logging.h"
 #include "plasmakeyboardsettings.h"
+#include "precisioncontroller.h"
+#ifdef SHUFFLE_KEYBOARD_FAKE_INPUT
+#include "fakeinputpointer.h"
+#endif
 #include <plasma_keyboard_version.h>
 
 #include <KAboutData>
@@ -26,6 +30,7 @@
 #include <QQuickWindow>
 #include <QTimer>
 #include <QWindow>
+#include <optional>
 #include <qpa/qwindowsysteminterface.h>
 
 #ifdef Q_OS_UNIX
@@ -118,6 +123,16 @@ int main(int argc, char **argv)
             PlasmaKeyboardSettings::self()->load();
         });
     // clang-format on
+
+#ifdef SHUFFLE_KEYBOARD_FAKE_INPUT
+    // Before the engine, so that it outlives every precision surface. Only a
+    // Wayland client can hold it; anywhere else the surface asks the portal.
+    std::optional<FakeInputPointer> directPointer;
+    if (QGuiApplication::platformName().startsWith(QLatin1String("wayland"))) {
+        directPointer.emplace();
+        PrecisionController::setDirectPointer(&*directPointer);
+    }
+#endif
 
     QQmlApplicationEngine view;
     KLocalization::setupLocalizedContext(&view);

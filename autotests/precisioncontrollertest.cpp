@@ -9,6 +9,7 @@
 // returned, which is the answer a surface listening only afterwards misses.
 
 #include "precisioncontroller.h"
+#include "directpointer.h"
 
 #include <QDBusConnection>
 #include <QDBusContext>
@@ -105,6 +106,31 @@ public Q_SLOTS:
     }
 };
 
+// The pointer the compositor trusts the Keyboard with.
+class FakeDirectPointer : public DirectPointer
+{
+public:
+    bool available = true;
+    int motions = 0;
+    int buttons = 0;
+
+    bool isAvailable() const override
+    {
+        return available;
+    }
+    void pointerMotion(qreal, qreal) override
+    {
+        ++motions;
+    }
+    void pointerButton(int, bool) override
+    {
+        ++buttons;
+    }
+    void pointerAxis(qreal, qreal) override
+    {
+    }
+};
+
 class PrecisionControllerTest : public QObject
 {
     Q_OBJECT
@@ -121,6 +147,8 @@ private Q_SLOTS:
     void nothingIsAskedUntilTheSurfaceIsUsed();
     void lettingGoClosesTheSession();
     void aSessionLetGoWhileCreatedIsClosed();
+    void aTrustedPointerAsksNoPortal();
+    void anUntrustedPointerAsksThePortal();
 
 private:
     void becomeReady();
@@ -150,6 +178,7 @@ void PrecisionControllerTest::init()
 void PrecisionControllerTest::cleanup()
 {
     m_controller.reset();
+    PrecisionController::setDirectPointer(nullptr);
     fakes().unregisterService(kPortalService);
     fakes().unregisterObject(QStringLiteral("/org/freedesktop/portal/desktop"));
     fakes().unregisterObject(kSessionPath);
@@ -240,6 +269,49 @@ void PrecisionControllerTest::aSessionLetGoWhileCreatedIsClosed()
     QTRY_COMPARE(m_session->closes, 1);
     QCOMPARE(m_portal->selects, 0);
     QCOMPARE(m_controller->state(), PrecisionController::Idle);
+}
+
+// Where the compositor trusts the Keyboard with the pointer, the surface
+// moves it straight away and the portal, with its prompt and Plasma's
+// remote-control notice, is never asked.
+void PrecisionControllerTest::aTrustedPointerAsksNoPortal()
+{
+    FakeDirectPointer pointer;
+    PrecisionController::setDirectPointer(&pointer);
+
+    m_controller->move(1, 1);
+    QCOMPARE(pointer.motions, 0);
+
+    m_controller->ensureSession();
+    QCOMPARE(m_controller->state(), PrecisionController::Ready);
+    m_controller->move(1, 1);
+    m_controller->primaryDown();
+    QCOMPARE(pointer.motions, 1);
+    QCOMPARE(pointer.buttons, 1);
+
+    // Letting go lets go of the button too.
+    m_controller->release();
+    QCOMPARE(pointer.buttons, 2);
+    QCOMPARE(m_controller->state(), PrecisionController::Idle);
+    m_controller->move(1, 1);
+    QCOMPARE(pointer.motions, 1);
+
+    QTest::qWait(100);
+    QCOMPARE(m_portal->creates, 0);
+}
+
+// Where it does not, the surface asks the portal as before.
+void PrecisionControllerTest::anUntrustedPointerAsksThePortal()
+{
+    FakeDirectPointer pointer;
+    pointer.available = false;
+    PrecisionController::setDirectPointer(&pointer);
+
+    becomeReady();
+    QCOMPARE(m_portal->creates, 1);
+    m_controller->move(1, 1);
+    QTRY_COMPARE(m_portal->motions, 1);
+    QCOMPARE(pointer.motions, 0);
 }
 
 QTEST_GUILESS_MAIN(PrecisionControllerTest)

@@ -71,6 +71,12 @@ pkg_check_modules(XKBCommon REQUIRED IMPORTED_TARGET xkbcommon)
 find_package(Wayland 1.2 REQUIRED COMPONENTS Client)
 find_package(QtWaylandScanner REQUIRED ${QT_MIN_VERSION})
 find_package(WaylandProtocols 1.19 REQUIRED)
+# KWin's fake-input protocol, the precision surface's own pointer. Without it
+# the surface still works, through the desktop portal, under Plasma's
+# remote-control notice.
+find_package(PlasmaWaylandProtocols 1.6)
+set_package_properties(PlasmaWaylandProtocols PROPERTIES TYPE RECOMMENDED
+    PURPOSE "The precision surface moves the pointer without the portal's prompt and notice")
 
 # A raise on a cold start holds the focus from a one-pixel layer surface of the
 # Keyboard's own, since the keyboard's window is an input panel and the
