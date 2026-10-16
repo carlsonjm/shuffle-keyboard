@@ -61,6 +61,16 @@ int main(int argc, char **argv)
 
     initLayoutsPath();
 
+    // The desktop portal knows an application by the ID it registers before
+    // its first portal call, and Qt registers that ID while the application
+    // is being built, but only if it is already known. KWin starts the
+    // Keyboard, not a launcher, so the portal has nothing else to go on:
+    // named any later, Plasma shows the precision surface's pointer access as
+    // an unidentifiable application's. The sign-in screen asks no portal.
+    if (qEnvironmentVariable("XDG_SESSION_CLASS") != QLatin1String("greeter")) {
+        QGuiApplication::setDesktopFileName(QStringLiteral("org.shuffle.Keyboard"));
+    }
+
     QGuiApplication application(argc, argv);
 
     KLocalizedString::setApplicationDomain("plasma-keyboard");

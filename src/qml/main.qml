@@ -326,7 +326,6 @@ InputPanelWindow {
         root.compositorShown = false;
         if (visible) {
             beginArrival();
-            precisionController.warmIfGranted();
         } else {
             // The carry stays where the keys were. The panel is still mapped
             // while this runs, so returning it to zero would report the whole
@@ -348,6 +347,7 @@ InputPanelWindow {
 
     onPrecisionActiveChanged: {
         if (precisionActive) beginPrecision();
+        else precisionController.release();
     }
 
     onPanelHeightChanged: Qt.callLater(refreshInteractiveRegion)

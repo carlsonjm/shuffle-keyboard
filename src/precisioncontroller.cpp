@@ -189,6 +189,7 @@ void PrecisionController::ask(Step step, const QString &method, QList<QVariant> 
 
 void PrecisionController::ensureSession()
 {
+    m_wanted = true;
     if (m_state == Connecting || m_state == Ready) {
         return;
     }
@@ -204,11 +205,30 @@ void PrecisionController::ensureSession()
     ask(Step::Create, QStringLiteral("CreateSession"), {}, options);
 }
 
-void PrecisionController::warmIfGranted()
+void PrecisionController::release()
 {
-    if (!m_restoreToken.isEmpty()) {
-        ensureSession();
+    m_wanted = false;
+    // A drag let go of by the latch ending lets go of its button, without
+    // asking for the keys back as a lifted finger does.
+    if (m_primaryPressed) {
+        m_primaryPressed = false;
+        notifyButton(LeftButton, 0);
     }
+    // A session still being created has no handle to close yet. It is
+    // closed when the portal names it.
+    if (m_step == Step::Create) {
+        return;
+    }
+    closeSession();
+}
+
+void PrecisionController::closeSession()
+{
+    if (!m_sessionPath.isEmpty()) {
+        QDBusConnection::sessionBus().send(
+            QDBusMessage::createMethodCall(QString::fromLatin1(PortalService), m_sessionPath, QString::fromLatin1(SessionInterface), QStringLiteral("Close")));
+    }
+    endSession(QString());
 }
 
 void PrecisionController::handleResponse(uint response, const QVariantMap &results)
@@ -228,6 +248,11 @@ void PrecisionController::handleResponse(uint response, const QVariantMap &resul
         m_sessionPath = handle.canConvert<QDBusObjectPath>() ? qvariant_cast<QDBusObjectPath>(handle).path() : handle.toString();
         if (m_sessionPath.isEmpty()) {
             setState(Failed, QStringLiteral("The portal did not return a session"));
+            return;
+        }
+        // Let go while it was being created.
+        if (!m_wanted) {
+            closeSession();
             return;
         }
         // A revoked grant, or the portal ending the session for its own
@@ -299,7 +324,9 @@ void PrecisionController::keepKeyboardVisible()
 void PrecisionController::notify(const QString &method, const QList<QVariant> &arguments)
 {
     if (!ready()) {
-        ensureSession();
+        if (m_wanted) {
+            ensureSession();
+        }
         return;
     }
     QDBusMessage message = QDBusMessage::createMethodCall(QString::fromLatin1(PortalService),

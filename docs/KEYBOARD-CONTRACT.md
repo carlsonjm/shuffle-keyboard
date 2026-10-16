@@ -16,8 +16,11 @@ locale, keymaps and application compatibility.
 [`FEASIBILITY.md`](FEASIBILITY.md) records why this base was chosen.
 
 The precision surface moves the pointer through the desktop's RemoteDesktop
-portal, which owns consent and the pointer device. Plasma asks the person once
-and remembers the answer.
+portal, which owns consent and the pointer device. The Keyboard names itself to
+the portal as `org.shuffle.Keyboard` before its first portal call, so Plasma
+asks the person once, by name, and remembers the answer. It holds pointer
+control only while the surface is latched, so Plasma's notice that an
+application is controlling the pointer appears only then.
 
 ## The card
 
@@ -146,8 +149,9 @@ While latched, the keys dim and do not type, and they stay up whatever the
 pointer does. The mark stays live, and lit, and so does Hide, undimmed.
 Putting the keys away, with Hide or the tray entry, ends the latch, and they
 stay away until they are next asked for. The surface is the keyboard's
-full footprint below the top strip. Until the portal has granted pointer
-control, it says so in place of pointing, and if the portal ends that control,
+full footprint below the top strip. Latching asks the portal for pointer
+control, and ending the latch gives it back. Until the portal has granted
+pointer control, it says so in place of pointing, and if the portal ends that control,
 by restarting or by the permission being taken back, it says so again and the
 next touch asks afresh.
 

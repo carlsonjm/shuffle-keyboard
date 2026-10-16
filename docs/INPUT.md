@@ -123,7 +123,7 @@ terminals included.
 | Tap the trackpad mark at the space bar's right end | The keys dim and the whole keyboard becomes a trackpad. The keys stay up, whatever the pointer does, until the mark is tapped again or they are put away. |
 | Tap the trackpad mark while latched | Back to typing. |
 | Tap Hide, or the tray entry, while latched | The latch ends and the keys slide away, and they stay away. The next text field brings them back for typing. |
-| Latch for the first time | Plasma asks once whether the Keyboard may control the pointer. Until it is allowed, the surface says so. |
+| Latch for the first time | Plasma asks once whether Shuffle Keyboard may control the pointer. Until it is allowed, the surface says so. Plasma shows the pointer as controlled only while the surface is latched. |
 | Move one finger | Moves the pointer. |
 | Tap one finger | Clicks. |
 | Hold one finger still, then move | Presses and drags, to select text or move an item. Lifting lets go. |

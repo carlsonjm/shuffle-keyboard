@@ -40,10 +40,10 @@ public:
     QString message() const;
 
     Q_INVOKABLE void ensureSession();
-    /// Opens the session ahead of use, but only where access was granted
-    /// before and restores without asking, so the first slide of the space
-    /// bar is not spent waiting and no prompt interrupts typing.
-    Q_INVOKABLE void warmIfGranted();
+    /// Closes the session once the surface is no longer in use. Plasma shows
+    /// pointer control for as long as a session is open, so it is open only
+    /// while the precision surface is latched.
+    Q_INVOKABLE void release();
     Q_INVOKABLE void keepKeyboardVisible();
     Q_INVOKABLE void move(qreal dx, qreal dy);
     Q_INVOKABLE void scroll(qreal dx, qreal dy, bool finished = false);
@@ -74,6 +74,7 @@ private:
     void ask(Step step, const QString &method, QList<QVariant> arguments, QVariantMap options);
     void stopListening();
     void endSession(const QString &message, State state = Idle);
+    void closeSession();
     void setState(State state, const QString &message = {});
     void selectDevices();
     void startSession();
@@ -89,4 +90,5 @@ private:
     QDBusServiceWatcher *m_portalWatcher = nullptr;
     QTimer m_answerTimeout;
     bool m_primaryPressed = false;
+    bool m_wanted = false;
 };
