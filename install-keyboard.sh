@@ -80,6 +80,11 @@ echo "[3/6] Replacing it..."
 ( cd "${staged_root}" && find . \( -type f -o -type l \) | sed 's|^\./||' | LC_ALL=C sort ) > "${work}/files.txt"
 mkdir -p "${prefix}"
 cp -a --remove-destination "${staged_root}/." "${prefix}/"
+# KWin lets the precision surface move the pointer itself, with no portal and
+# no notice, for the program its desktop entry runs, matched by full path. The
+# build names the system copy, so the entry is pointed at the one here.
+entry="${prefix}/share/applications/org.shuffle.Keyboard.desktop"
+[[ -f "${entry}" ]] && sed -i "s|^Exec=.*|Exec=${installed}|" "${entry}"
 
 # What an earlier build installed and this one does not is removed, so a name
 # this build has moved away from is not left behind for anything to load.

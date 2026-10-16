@@ -11,6 +11,7 @@
 #include <QVariantMap>
 #include <qqmlintegration.h>
 
+class DirectPointer;
 class QDBusPendingCallWatcher;
 class QDBusServiceWatcher;
 
@@ -38,6 +39,10 @@ public:
     State state() const;
     bool ready() const;
     QString message() const;
+
+    /// The pointer the compositor trusts the Keyboard with, used in place of
+    /// the portal whenever it is available. It outlives every controller.
+    static void setDirectPointer(DirectPointer *pointer);
 
     Q_INVOKABLE void ensureSession();
     /// Closes the session once the surface is no longer in use. Plasma shows
@@ -80,6 +85,7 @@ private:
     void startSession();
     void notify(const QString &method, const QList<QVariant> &arguments);
     void notifyButton(int button, uint state);
+    bool direct() const;
 
     State m_state = Idle;
     QString m_message;

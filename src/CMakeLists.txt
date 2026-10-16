@@ -12,6 +12,11 @@ ecm_add_qtwayland_client_protocol(plasma-keyboard PROTOCOL ${WaylandProtocols_DA
 ecm_add_qtwayland_client_protocol(plasma-keyboard PROTOCOL ${WaylandProtocols_DATADIR}/unstable/text-input/text-input-unstable-v1.xml BASENAME text-input-unstable-v1)
 ecm_add_qtwayland_client_protocol(plasma-keyboard PROTOCOL ${WaylandProtocols_DATADIR}/unstable/text-input/text-input-unstable-v3.xml BASENAME text-input-unstable-v3)
 ecm_add_qtwayland_client_protocol(plasma-keyboard PROTOCOL "${Wayland_DATADIR}/wayland.xml" BASENAME wayland)
+if(PlasmaWaylandProtocols_FOUND)
+    ecm_add_qtwayland_client_protocol(plasma-keyboard PROTOCOL ${PLASMA_WAYLAND_PROTOCOLS_DIR}/fake-input.xml BASENAME fake-input)
+    target_sources(plasma-keyboard PRIVATE fakeinputpointer.cpp fakeinputpointer.h)
+    target_compile_definitions(plasma-keyboard PRIVATE SHUFFLE_KEYBOARD_FAKE_INPUT)
+endif()
 
 target_sources(plasma-keyboard PRIVATE
     main.cpp
@@ -38,6 +43,7 @@ target_sources(plasma-keyboard PRIVATE
     textinputhold.h
     precisioncontroller.cpp
     precisioncontroller.h
+    directpointer.h
     qwaylandinputpanelshellintegration.cpp
     qwaylandinputpanelshellintegration_p.h
     qwaylandinputpanelsurface.cpp
@@ -142,7 +148,12 @@ target_link_libraries(plasma-keyboard
 )
 
 install(TARGETS plasma-keyboard ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
-install(PROGRAMS org.shuffle.Keyboard.desktop DESTINATION ${KDE_INSTALL_APPDIR})
+# KWin grants a restricted Wayland interface to the program whose desktop
+# entry's Exec resolves to that program's own executable, so the entry names
+# the installed binary in full. install-keyboard.sh rewrites it for a home
+# prefix.
+configure_file(org.shuffle.Keyboard.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/org.shuffle.Keyboard.desktop @ONLY)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/org.shuffle.Keyboard.desktop DESTINATION ${KDE_INSTALL_APPDIR})
 
 add_subdirectory(styles)
 add_subdirectory(qmlplugin)

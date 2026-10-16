@@ -9,8 +9,9 @@
 # entry asks for them again. The trackpad latch keeps the keys up while the
 # pointer clicks into other applications; it is no reason to bring them back
 # once Hide or the tray entry has put them away. An application holds a
-# focused field, stand-ins answer for Kadunce and for the pointer portal, and
-# Hide is clicked with the mouse or tapped by a finger.
+# focused field, stand-ins answer for Kadunce and for the pointer portal, which
+# the trackpad must never need, and Hide is clicked with the mouse or tapped
+# by a finger.
 
 set -uo pipefail
 
@@ -94,6 +95,21 @@ raise_requests() {
     grep -c '^raiseKeyboard' "${kadunce_log}" 2>/dev/null
 }
 
+# Where the compositor has the pointer, across.
+cursor_x() {
+    script_count=$((script_count + 1))
+    local name="cursorprobe${script_count}"
+    gdbus call --session --dest org.kde.KWin --object-path /Scripting \
+        --method org.kde.kwin.Scripting.loadScript \
+        "${tests_dir}/cursor-probe.js" "${name}" > /dev/null 2>&1
+    gdbus call --session --dest org.kde.KWin --object-path /Scripting \
+        --method org.kde.kwin.Scripting.start > /dev/null 2>&1
+    sleep 0.4
+    gdbus call --session --dest org.kde.KWin --object-path /Scripting \
+        --method org.kde.kwin.Scripting.unloadScript "${name}" > /dev/null 2>&1
+    grep -oE 'record cursor .*' "${stand_in_log}" | tail -1 | awk '{print $3}'
+}
+
 # The keys' entry in the system tray, by the name the Keyboard gave it.
 tray_entry() {
     gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \
@@ -151,12 +167,11 @@ if ! wait_for "${PROBE_ROOT}/input.log" '^ready' 50; then
     echo FAIL > "${PROBE_ROOT}/result"
     exit 1
 fi
-if [[ "${LATCH_PATH}" == touch ]]; then
-    # The touchscreen only appears with its first touch, which reaches no
-    # window; that one lands in an empty corner.
-    send "tdown 9 1450 10" "wait 60" "tup 9"
-    sleep 0.3
-fi
+# The touchscreen only appears with its first touch, which reaches no window;
+# that one lands in an empty corner. The trackpad is touched by a finger on
+# either path.
+send "tdown 9 1450 10" "wait 60" "tup 9"
+sleep 0.3
 
 echo
 echo "A text field brings the keys up"
@@ -196,6 +211,32 @@ PY
 latch_x="${mark_x}"
 latch_y="${row_y}"
 
+# One finger drawn rightwards across the middle of the trackpad. It never
+# rests long enough to press or lifts soon enough to tap, so it only moves the
+# pointer, and the pointer moves by the Keyboard's hand alone.
+stroke_trackpad() {
+    local x=$((frame_x + frame_w / 2 - 120)) y=$((frame_y + frame_h / 2)) step
+    send "tdown 2 ${x} ${y}"
+    for step in 1 2 3 4 5 6 7 8; do
+        send "wait 16" "tmove 2 $((x + step * 30)) ${y}"
+    done
+    send "wait 16" "tup 2"
+}
+
+# The latched trackpad moves the pointer, and no portal was asked for it: a
+# portal session is what lights Plasma's remote-control notice.
+check_trackpad() {
+    local label="$1" before after
+    before="$(cursor_x)"
+    stroke_trackpad
+    sleep 0.6
+    after="$(cursor_x)"
+    check "${label}: a finger across the trackpad moved the pointer (${before} to ${after})" \
+        "$((after - before > 100))" "1"
+    check "${label}: no portal was asked for the pointer" \
+        "$(grep -c '^portal ' "${portal_log}" 2>/dev/null)" "0"
+}
+
 if [[ "${LATCH_PATH}" == touch ]]; then
     gesture="tapped by a finger"
 else
@@ -220,15 +261,8 @@ wait_keyboard true
 check "the keys are up" "$(keyboard visible)" "(<true>,)"
 sleep 1
 tap_at "${latch_x}" "${latch_y}"
-if wait_for "${portal_log}" '^portal Start' 30; then
-    printf '  ok   %s\n' "the latch took: the trackpad asked for the pointer"
-    pass=$((pass + 1))
-else
-    printf '  FAIL %s\n         portal: %s\n' "the latch took: the trackpad asked for the pointer" \
-        "$(grep -oE '^portal .*' "${portal_log}" | tr '\n' ' ')"
-    fail=$((fail + 1))
-fi
 sleep 1
+check_trackpad "the latch took"
 check "the keys are up" "$(keyboard visible)" "(<true>,)"
 
 echo
@@ -257,17 +291,7 @@ check "the tray entry brought the keys up" "$(keyboard visible)" "(<true>,)"
 sleep 1
 tap_at "${latch_x}" "${latch_y}"
 sleep 1
-# The pointer was allowed the first time, so the latch asks the portal for
-# nothing new; a tap on the trackpad it opens moves the pointer's button.
-notes_before=$(grep -c '^portal NotifyPointer' "${portal_log}" 2>/dev/null)
-tap_at "$((frame_x + frame_w / 2))" "$((frame_y + frame_h / 2))"
-waited=0
-until (($(grep -c '^portal NotifyPointer' "${portal_log}" 2>/dev/null) > notes_before)) || ((waited >= 30)); do
-    sleep 0.1
-    waited=$((waited + 1))
-done
-check "the latch took again: a tap on the trackpad reached the pointer" \
-    "$(($(grep -c '^portal NotifyPointer' "${portal_log}" 2>/dev/null) > notes_before))" "1"
+check_trackpad "the latch took again"
 check "the keys are up" "$(keyboard visible)" "(<true>,)"
 sleep 1
 before=$(raise_requests)
