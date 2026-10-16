@@ -40,6 +40,7 @@ public:
     bool refuseEvents = false;
     int motions = 0;
     int creates = 0;
+    int selects = 0;
 
 public Q_SLOTS:
     Q_SCRIPTABLE QDBusObjectPath CreateSession(const QVariantMap &options)
@@ -51,6 +52,7 @@ public Q_SLOTS:
     Q_SCRIPTABLE QDBusObjectPath SelectDevices(const QDBusObjectPath &session, const QVariantMap &options)
     {
         Q_UNUSED(session)
+        ++selects;
         return answerFirst(options, {});
     }
 
@@ -88,6 +90,21 @@ private:
     }
 };
 
+class FakeSession : public QObject
+{
+    Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "org.freedesktop.portal.Session")
+
+public:
+    int closes = 0;
+
+public Q_SLOTS:
+    Q_SCRIPTABLE void Close()
+    {
+        ++closes;
+    }
+};
+
 class PrecisionControllerTest : public QObject
 {
     Q_OBJECT
@@ -101,11 +118,15 @@ private Q_SLOTS:
     void aClosedSessionAsksAgain();
     void aRefusedEventAsksAgain();
     void aPortalThatStopsAsksAgain();
+    void nothingIsAskedUntilTheSurfaceIsUsed();
+    void lettingGoClosesTheSession();
+    void aSessionLetGoWhileCreatedIsClosed();
 
 private:
     void becomeReady();
 
     std::unique_ptr<FakePortal> m_portal;
+    std::unique_ptr<FakeSession> m_session;
     std::unique_ptr<PrecisionController> m_controller;
 };
 
@@ -120,6 +141,8 @@ void PrecisionControllerTest::init()
 {
     m_portal = std::make_unique<FakePortal>();
     QVERIFY(fakes().registerObject(QStringLiteral("/org/freedesktop/portal/desktop"), m_portal.get(), QDBusConnection::ExportScriptableSlots));
+    m_session = std::make_unique<FakeSession>();
+    QVERIFY(fakes().registerObject(kSessionPath, m_session.get(), QDBusConnection::ExportScriptableSlots));
     QVERIFY(fakes().registerService(kPortalService));
     m_controller = std::make_unique<PrecisionController>();
 }
@@ -129,7 +152,9 @@ void PrecisionControllerTest::cleanup()
     m_controller.reset();
     fakes().unregisterService(kPortalService);
     fakes().unregisterObject(QStringLiteral("/org/freedesktop/portal/desktop"));
+    fakes().unregisterObject(kSessionPath);
     m_portal.reset();
+    m_session.reset();
 }
 
 void PrecisionControllerTest::becomeReady()
@@ -178,6 +203,43 @@ void PrecisionControllerTest::aPortalThatStopsAsksAgain()
     becomeReady();
     QVERIFY(fakes().unregisterService(kPortalService));
     QTRY_COMPARE(m_controller->state(), PrecisionController::Idle);
+}
+
+// Plasma shows pointer control for as long as a session is open, so a pointer
+// event without the surface in use asks for nothing.
+void PrecisionControllerTest::nothingIsAskedUntilTheSurfaceIsUsed()
+{
+    m_controller->move(1, 1);
+    QTest::qWait(100);
+    QCOMPARE(m_portal->creates, 0);
+    QCOMPARE(m_controller->state(), PrecisionController::Idle);
+}
+
+// The latch ending closes the session, and the next latch opens a new one.
+void PrecisionControllerTest::lettingGoClosesTheSession()
+{
+    becomeReady();
+    m_controller->release();
+    QTRY_COMPARE(m_session->closes, 1);
+    QCOMPARE(m_controller->state(), PrecisionController::Idle);
+
+    m_controller->move(1, 1);
+    QTest::qWait(100);
+    QCOMPARE(m_portal->creates, 1);
+
+    becomeReady();
+    QCOMPARE(m_portal->creates, 2);
+}
+
+// A session let go before the portal named it is closed once it is named, and
+// goes no further.
+void PrecisionControllerTest::aSessionLetGoWhileCreatedIsClosed()
+{
+    m_controller->ensureSession();
+    m_controller->release();
+    QTRY_COMPARE(m_session->closes, 1);
+    QCOMPARE(m_portal->selects, 0);
+    QCOMPARE(m_controller->state(), PrecisionController::Idle);
 }
 
 QTEST_GUILESS_MAIN(PrecisionControllerTest)
