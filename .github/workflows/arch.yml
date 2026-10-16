@@ -15,10 +15,13 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     container:
-      image: public.ecr.aws/docker/library/archlinux:latest
+      image: ghcr.io/archlinux/archlinux:latest
     steps:
       - name: Install build dependencies
         run: |
+          # The image lists one mirror. A dropped connection there fails the
+          # whole install, so pacman gets others to fall back to.
+          printf 'Server = %s/$repo/os/$arch\n' https://geo.mirror.pkgbuild.com https://mirrors.kernel.org/archlinux https://mirror.rackspace.com/archlinux >> /etc/pacman.d/mirrorlist
           pacman -Syu --noconfirm --needed \
             base-devel clang cmake extra-cmake-modules git ninja pkgconf \
             qt6-base qt6-declarative qt6-virtualkeyboard qt6-wayland \
@@ -38,7 +41,7 @@ jobs:
   sessions:
     runs-on: ubuntu-latest
     container:
-      image: public.ecr.aws/docker/library/archlinux:latest
+      image: ghcr.io/archlinux/archlinux:latest
       # kwin_wayland carries the capability to raise its own priority, and a
       # container without it may not run the binary at all.
       options: --cap-add=SYS_NICE
