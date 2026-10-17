@@ -12,8 +12,8 @@ import QtQuick.Effects
 
 import org.kde.kirigami as Kirigami
 
-import org.kde.plasma.keyboard
-import org.kde.plasma.keyboard.lib as PlasmaKeyboard
+import org.shuffle.keyboard
+import org.shuffle.keyboard.lib as PlasmaKeyboard
 
 KeyboardStyle {
     id: currentStyle

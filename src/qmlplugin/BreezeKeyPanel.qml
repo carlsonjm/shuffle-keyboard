@@ -6,7 +6,7 @@ import QtQuick.Controls as QQC2
 import QtQuick.VirtualKeyboard
 import QtQuick.VirtualKeyboard.Styles
 
-import org.kde.plasma.keyboard
+import org.shuffle.keyboard
 import org.kde.kirigami as Kirigami
 
 KeyPanel {

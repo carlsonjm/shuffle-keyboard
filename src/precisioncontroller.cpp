@@ -48,7 +48,7 @@ bool PrecisionController::direct() const
 PrecisionController::PrecisionController(QObject *parent)
     : QObject(parent)
 {
-    const KConfigGroup group(KSharedConfig::openConfig(QStringLiteral("plasmakeyboardrc")), QStringLiteral("General"));
+    const KConfigGroup group(KSharedConfig::openConfig(QStringLiteral("shufflekeyboardrc")), QStringLiteral("General"));
     m_restoreToken = group.readEntry(QStringLiteral("precisionRestoreToken"), QString());
 
     // A portal that restarts takes every session and request with it, and
@@ -304,7 +304,7 @@ void PrecisionController::handleResponse(uint response, const QVariantMap &resul
     const QString restoreToken = results.value(QStringLiteral("restore_token")).toString();
     if (!restoreToken.isEmpty()) {
         m_restoreToken = restoreToken;
-        KConfigGroup group(KSharedConfig::openConfig(QStringLiteral("plasmakeyboardrc")), QStringLiteral("General"));
+        KConfigGroup group(KSharedConfig::openConfig(QStringLiteral("shufflekeyboardrc")), QStringLiteral("General"));
         group.writeEntry(QStringLiteral("precisionRestoreToken"), m_restoreToken);
         group.sync();
     }

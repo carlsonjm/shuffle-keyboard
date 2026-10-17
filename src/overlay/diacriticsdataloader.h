@@ -19,7 +19,7 @@ class QChar;
  * from JSON data files.
  *
  * Discovers data files via QStandardPaths using the path
- * "plasma/keyboard/diacritics/". Falls back to compiled-in Qt resource files
+ * "shuffle-keyboard/diacritics/". Falls back to compiled-in Qt resource files
  * when filesystem files are not found (requires diacritics.qrc to be present).
  *
  * Two levels of data files are supported:
@@ -60,7 +60,7 @@ public:
      * Load the base diacritics map from the "base.json" data file.
      *
      * Looks up the file via QStandardPaths (GenericDataLocation,
-     * "plasma/keyboard/diacritics/base.json") first. Falls back to the
+     * "shuffle-keyboard/diacritics/base.json") first. Falls back to the
      * compiled-in Qt resource copy at ":/diacritics/base.json" if the
      * filesystem file is not found.
      *
@@ -76,7 +76,7 @@ public:
      * Load the locale-specific diacritics map for the given locale.
      *
      * The locale file is expected at
-     * "plasma/keyboard/diacritics/<locale>.json" under GenericDataLocation.
+     * "shuffle-keyboard/diacritics/<locale>.json" under GenericDataLocation.
      * Only keys whose ordering or candidates differ from the base need to be
      * specified; absent keys fall through to the base map during merging.
      *

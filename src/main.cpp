@@ -11,6 +11,7 @@
 #include "logging.h"
 #include "plasmakeyboardsettings.h"
 #include "precisioncontroller.h"
+#include "settingsfile.h"
 #ifdef SHUFFLE_KEYBOARD_FAKE_INPUT
 #include "fakeinputpointer.h"
 #endif
@@ -78,7 +79,7 @@ int main(int argc, char **argv)
 
     QGuiApplication application(argc, argv);
 
-    KLocalizedString::setApplicationDomain("plasma-keyboard");
+    KLocalizedString::setApplicationDomain("shuffle-keyboard");
 
     KAboutData aboutData(QStringLiteral("shuffle-keyboard"),
                          i18n("Shuffle Keyboard"),
@@ -103,6 +104,8 @@ int main(int argc, char **argv)
         parser.process(application);
         aboutData.processCommandLine(&parser);
     }
+
+    adoptEarlierSettings();
 
     if (!PLASMA_KEYBOARD_SOUND_ENABLED) {
         PlasmaKeyboardSettings::self()->setSoundEnabled(false);
@@ -154,8 +157,8 @@ int main(int argc, char **argv)
     // The keyboard is an input panel; the cold-start hold is not. They are two
     // surfaces with two shell protocols, so which one arrived has to be known
     // before anything is done to it.
-    const QUrl keyboardUrl(QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/main.qml"));
-    const QUrl holdUrl(QStringLiteral("qrc:/qt/qml/org/kde/plasma/keyboard/ColdStartHold.qml"));
+    const QUrl keyboardUrl(QStringLiteral("qrc:/qt/qml/org/shuffle/keyboard/main.qml"));
+    const QUrl holdUrl(QStringLiteral("qrc:/qt/qml/org/shuffle/keyboard/ColdStartHold.qml"));
 
     QObject::connect(&view, &QQmlApplicationEngine::objectCreated, &application, [previewMode, previewScreenshot, holdUrl](QObject *object, const QUrl &url) {
         if (url == holdUrl) {

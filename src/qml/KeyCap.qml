@@ -27,10 +27,10 @@ Rectangle {
     required property KeysPalette colours
 
     // What the key draws as a finger works it, for the sealed sessions; off
-    // unless org.kde.plasma.keyboard.feedback is enabled.
+    // unless org.shuffle.keyboard.feedback is enabled.
     LoggingCategory {
         id: feedbackLog
-        name: "org.kde.plasma.keyboard.feedback"
+        name: "org.shuffle.keyboard.feedback"
         defaultLogLevel: LoggingCategory.Warning
     }
     onDownChanged: console.debug(feedbackLog, "key", label, "down", down)

@@ -18,7 +18,7 @@ void Vibration::vibrate(int durationMs)
         m_interface = new OrgSigxcpuFeedbackHapticInterface(QStringLiteral("org.sigxcpu.Feedback"), objectPath, QDBusConnection::sessionBus(), this);
     }
 
-    const QString appId = QStringLiteral("org.kde.plasma.keyboard");
+    const QString appId = QStringLiteral("org.shuffle.Keyboard");
     const VibrationEvent event{1.0, static_cast<quint32>(durationMs)};
     const VibrationEventList pattern = {event};
 

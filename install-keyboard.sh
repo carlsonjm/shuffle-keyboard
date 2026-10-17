@@ -22,23 +22,6 @@ prefix="${SHUFFLE_KEYBOARD_PREFIX:-${HOME}/.local}"
 installed="${prefix}/bin/shuffle-keyboard"
 manifest="${prefix}/share/shuffle-keyboard/installed-files.txt"
 
-# This fork installs under the same QML, settings-page and data names as
-# Plasma's own plasma-keyboard, so with both installed either program can load
-# the other's pieces. The Shuffle package declares the conflict and replaces
-# it; a copy in your own prefix cannot, so it says so.
-distro_owner=""
-if [[ -e /usr/bin/plasma-keyboard && "$(readlink /usr/bin/plasma-keyboard 2>/dev/null)" != shuffle-keyboard ]]; then
-    distro_owner="$(pacman -Qqo /usr/bin/plasma-keyboard 2>/dev/null || echo "another package")"
-fi
-if [[ -n "${distro_owner}" && "${distro_owner}" != shuffle-keyboard ]]; then
-    cat >&2 <<WARN
-Plasma's own keyboard (${distro_owner}) is installed in /usr. It uses the same
-names as this one, so the Shuffle Keyboard and its settings page can pick up
-pieces of Plasma's. Remove it (sudo pacman -R ${distro_owner}) or install the
-Shuffle package, which replaces it.
-WARN
-fi
-
 before="missing"
 if [[ -f "${installed}" ]]; then
     before="$(sha256sum "${installed}" | cut -d' ' -f1)"
@@ -101,6 +84,28 @@ if [[ -f "${manifest}" ]]; then
     done < <(LC_ALL=C sort "${manifest}" | LC_ALL=C comm -23 - "${work}/files.txt")
     ((stale == 0)) || echo "      removed ${stale} file(s) the previous build installed and this one does not."
 fi
+# Builds from before the Keyboard took names of its own installed under
+# Plasma's keyboard's, and one installed before this list was kept left them
+# with nothing to say they are there. Left, they are what Plasma's own keyboard
+# and System Settings find, so they go whether listed or not.
+earlier=0
+for old in lib/qt6/qml/org/kde/plasma/keyboard \
+    lib/qt6/qml/QtQuick/VirtualKeyboard/Styles/Breeze \
+    share/plasma/keyboard \
+    lib/qt6/plugins/plasma/kcms/systemsettings/kcm_plasmakeyboard.so \
+    share/locale/*/LC_MESSAGES/plasma-keyboard.mo \
+    share/locale/*/LC_MESSAGES/kcm_plasmakeyboard.mo; do
+    for path in "${prefix}"/${old}; do
+        [[ -e "${path}" || -L "${path}" ]] || continue
+        rm -rf -- "${path}"
+        dir="$(dirname -- "${path}")"
+        while [[ "${dir}" != "${prefix}" ]] && rmdir -- "${dir}" 2> /dev/null; do
+            dir="$(dirname -- "${dir}")"
+        done
+        earlier=$((earlier + 1))
+    done
+done
+((earlier == 0)) || echo "      removed ${earlier} piece(s) an earlier build installed under Plasma's keyboard's names."
 mkdir -p "$(dirname -- "${manifest}")"
 cp "${work}/files.txt" "${manifest}"
 
@@ -112,7 +117,7 @@ echo "[4/6] Checking what is actually on disk..."
 landed="$(sha256sum "${installed}" | cut -d' ' -f1)"
 # Where the QML modules land matters as much as the binary: one laid out the
 # other way is a second copy that nothing loads.
-if [[ ! -f "${prefix}/lib/qt6/qml/org/kde/plasma/keyboard/lib/qmldir" ]]; then
+if [[ ! -f "${prefix}/lib/qt6/qml/org/shuffle/keyboard/lib/qmldir" ]]; then
     echo "The QML modules are not where Qt looks for them. Do not sign out yet." >&2
     exit 1
 fi

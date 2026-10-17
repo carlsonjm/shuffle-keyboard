@@ -46,9 +46,9 @@ void InputPanelWindow::setInteractiveRegion(QRect interactiveRegion)
 void InputPanelWindow::showSettings()
 {
     if (KSandbox::isInside()) {
-        QProcess::startDetached(QStringLiteral("kcmshell6"), {QStringLiteral("kcm_plasmakeyboard")});
+        QProcess::startDetached(QStringLiteral("kcmshell6"), {QStringLiteral("kcm_shufflekeyboard")});
     } else {
-        QDesktopServices::openUrl(QUrl(QStringLiteral("systemsettings:kcm_plasmakeyboard")));
+        QDesktopServices::openUrl(QUrl(QStringLiteral("systemsettings:kcm_shufflekeyboard")));
     }
 }
 

@@ -73,7 +73,7 @@ run_path() {
         KWIN_WAYLAND_NO_PERMISSION_CHECKS=1 \
         QT_QPA_PLATFORM=wayland \
         QT_FORCE_STDERR_LOGGING=1 \
-        QT_LOGGING_RULES="org.kde.plasma.keyboard.debug=true" \
+        QT_LOGGING_RULES="org.shuffle.keyboard.debug=true" \
         dbus-run-session -- kwin_wayland \
             --virtual --width 1463 --height 915 \
             --no-lockscreen --no-global-shortcuts --no-kactivities \

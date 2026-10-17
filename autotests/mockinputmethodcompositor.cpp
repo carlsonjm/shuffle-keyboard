@@ -475,7 +475,7 @@ private Q_SLOTS:
         }
 
         {
-            KConfig cfg(QStringLiteral("plasmakeyboardrc"));
+            KConfig cfg(QStringLiteral("shufflekeyboardrc"));
             KConfigGroup grp(&cfg, QStringLiteral("General"));
             grp.writeEntry(QStringLiteral("enabledLocales"), QStringLiteral("it_IT"));
         }

@@ -87,13 +87,13 @@ endif()
 ecm_qt_declare_logging_category(plasma-keyboard
     HEADER logging.h
     IDENTIFIER "PlasmaKeyboard"
-    CATEGORY_NAME "org.kde.plasma.keyboard"
+    CATEGORY_NAME "org.shuffle.keyboard"
     DESCRIPTION "Shuffle Keyboard"
     DEFAULT_SEVERITY Warning
 )
 
 ecm_add_qml_module(plasma-keyboard
-    URI "org.kde.plasma.keyboard"
+    URI "org.shuffle.keyboard"
     GENERATE_PLUGIN_SOURCE
     DEPENDENCIES
     QtQuick
@@ -158,5 +158,5 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/org.shuffle.Keyboard.desktop DESTIN
 add_subdirectory(styles)
 add_subdirectory(qmlplugin)
 
-install(DIRECTORY layouts DESTINATION ${KDE_INSTALL_DATADIR}/plasma/keyboard)
-install(DIRECTORY overlay/diacritics DESTINATION ${KDE_INSTALL_DATADIR}/plasma/keyboard)
+install(DIRECTORY layouts DESTINATION ${KDE_INSTALL_DATADIR}/shuffle-keyboard)
+install(DIRECTORY overlay/diacritics DESTINATION ${KDE_INSTALL_DATADIR}/shuffle-keyboard)
