@@ -23,9 +23,9 @@ Every input is in [`docs/INPUT.md`](docs/INPUT.md).
 
 ## Built on KDE's Plasma Keyboard
 
-It is a fork of KDE's Plasma Keyboard 6.7.5 and keeps its input delivery, Qt
-Virtual Keyboard and KWin's input-method path, with no input engine of its own.
-It carries KDE's licence.
+It is a fork of KDE's Plasma Keyboard 6.7.5. It keeps Plasma Keyboard's input
+delivery, Qt Virtual Keyboard and KWin's input-method path, and adds no input
+engine of its own. It carries KDE's licence.
 
 ## Build
 
@@ -50,16 +50,17 @@ staging prefix first:
 cmake --install build --prefix "$PWD/stage"
 ```
 
-For the device, `./install-keyboard.sh` builds and replaces the copy in your own
-prefix, and brings the sign-in screen's copy under `/usr/local` level too where
-there is one; the Keyboard in use changes at the next sign-in. Enabling it is
+On the device, `./install-keyboard.sh` builds the Keyboard and replaces the copy
+in your own prefix. Where the sign-in screen has its own copy under
+`/usr/local`, it updates that too. The new Keyboard takes over at the next
+sign-in. To enable it, follow
 [`docs/PHYSICAL_ACCEPTANCE.md`](docs/PHYSICAL_ACCEPTANCE.md) § Install and
-enable. KWin must start the binary as its virtual keyboard: run as a normal
+enable. KWin must start the binary as its virtual keyboard. Started as a normal
 application it exits, unless `SHUFFLE_PREVIEW_MODE=1` is set for an isolated
 test. `./uninstall-keyboard.sh` removes exactly what `./install-keyboard.sh`
 put in your prefix.
 
 The fork still installs under Plasma Keyboard's own names: its QML modules,
 settings page, layouts and `plasmakeyboardrc`. The Shuffle package declares
-the conflict and replaces `plasma-keyboard`; a copy in your own prefix cannot,
-so `./install-keyboard.sh` warns when Plasma's is installed too.
+the conflict and replaces `plasma-keyboard`. A copy in your own prefix cannot do
+that, so `./install-keyboard.sh` warns when Plasma's is installed too.
