@@ -7,19 +7,21 @@
 
 #include "plasmakeyboardkcm.h"
 #include "../src/layoutpathhelper.h"
+#include "../src/settingsfile.h"
 
 #include <qqml.h>
 
-K_PLUGIN_CLASS_WITH_JSON(PlasmaKeyboardKcm, "kcm_plasmakeyboard.json")
+K_PLUGIN_CLASS_WITH_JSON(PlasmaKeyboardKcm, "kcm_shufflekeyboard.json")
 
 PlasmaKeyboardKcm::PlasmaKeyboardKcm(QObject *parent, const KPluginMetaData &metaData)
     : KQuickManagedConfigModule(parent, metaData)
 {
     initLayoutsPath();
+    adoptEarlierSettings();
 
     // clang-format off
     qmlRegisterSingletonInstance<PlasmaKeyboardSettings>(
-        "org.kde.plasma.keyboard.settings",
+        "org.shuffle.keyboard.settings",
         1,
         0,
         "PlasmaKeyboardSettings",

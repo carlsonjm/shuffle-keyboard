@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 Devin Lin <devin@kde.org>
 # SPDX-License-Identifier: BSD-2-Clause
 
-ecm_add_qml_module(keyboardlib URI org.kde.plasma.keyboard.lib GENERATE_PLUGIN_SOURCE DEPENDENCIES QtQuick)
+ecm_add_qml_module(keyboardlib URI org.shuffle.keyboard.lib GENERATE_PLUGIN_SOURCE DEPENDENCIES QtQuick)
 
 set_source_files_properties(
     BreezeConstants.qml

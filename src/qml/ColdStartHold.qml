@@ -9,7 +9,7 @@ import QtQuick
 import QtQuick.Window
 
 import org.kde.layershell as LayerShell
-import org.kde.plasma.keyboard
+import org.shuffle.keyboard
 
 // Brings the keys up when their tray entry asked for them, including straight
 // after signing in.

@@ -78,7 +78,7 @@ run_mode() {
         KWIN_WAYLAND_NO_PERMISSION_CHECKS=1 \
         QT_QPA_PLATFORM=wayland \
         QT_FORCE_STDERR_LOGGING=1 \
-        QT_LOGGING_RULES="org.kde.plasma.keyboard.feedback.debug=true" \
+        QT_LOGGING_RULES="org.shuffle.keyboard.feedback.debug=true" \
         SHUFFLE_PROBE_KADUNCE_SERVICE=co.goodinput.test.Kadunce \
         "${source_only[@]}" \
         dbus-run-session -- kwin_wayland \

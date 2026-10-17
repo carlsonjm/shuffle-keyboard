@@ -677,7 +677,7 @@ Item {
 
     LoggingCategory {
         id: feedbackLog
-        name: "org.kde.plasma.keyboard.feedback"
+        name: "org.shuffle.keyboard.feedback"
         defaultLogLevel: LoggingCategory.Warning
     }
 

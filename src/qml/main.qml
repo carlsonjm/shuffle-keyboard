@@ -10,7 +10,7 @@ import QtQuick.VirtualKeyboard
 import org.kde.kirigami as Kirigami
 import QtQuick.VirtualKeyboard.Settings
 
-import org.kde.plasma.keyboard
+import org.shuffle.keyboard
 
 InputPanelWindow {
     id: root

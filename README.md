@@ -60,7 +60,11 @@ application it exits, unless `SHUFFLE_PREVIEW_MODE=1` is set for an isolated
 test. `./uninstall-keyboard.sh` removes exactly what `./install-keyboard.sh`
 put in your prefix.
 
-The fork still installs under Plasma Keyboard's own names: its QML modules,
-settings page, layouts and `plasmakeyboardrc`. The Shuffle package declares
-the conflict and replaces `plasma-keyboard`. A copy in your own prefix cannot do
-that, so `./install-keyboard.sh` warns when Plasma's is installed too.
+The fork installs under its own names, so it can sit beside Plasma's own
+keyboard and neither loads the other's pieces: the QML modules
+`org.shuffle.keyboard` and `QtQuick.VirtualKeyboard.Styles.Shuffle`, the
+settings page `kcm_shufflekeyboard`, layouts under `share/shuffle-keyboard` and
+settings in `shufflekeyboardrc`, which it fills from `plasmakeyboardrc` the
+first time it runs. The one name it shares is the `plasma-keyboard` program the
+sign-in screen starts, which the Shuffle package and Shuffle's sign-in
+installer point at this one.
