@@ -12,13 +12,13 @@ where a check asks for one.
    ./install-keyboard.sh
    ```
 
-   It builds, replaces the copy in your own prefix, and checks that what
-   landed is what was built, with no password and nothing outside your home
-   directory. Where the sign-in screen has its own copy under `/usr/local`, it
-   then runs Shuffle's `install-signin-keyboard.sh` to bring that copy level,
-   which asks for your password unless the install key is set up. The Keyboard
-   you are typing on is still the previous copy until you have signed out and
-   back in, which the script says as well.
+   It builds the Keyboard, replaces the copy in your own prefix and checks the
+   installed files against the build. This needs no password and writes only
+   inside your home directory. Where the sign-in screen has its own copy under
+   `/usr/local`, it then runs Shuffle's `install-signin-keyboard.sh` to update
+   that copy too; that step asks for your password unless the install key is
+   set up. You keep typing on the previous copy until you sign out and back in,
+   and the script tells you so.
 
 2. Open **System Settings → Keyboard → Virtual Keyboard**.
 3. Select **Shuffle Keyboard** and choose **Apply**.
@@ -26,14 +26,15 @@ where a check asks for one.
 5. Tap a text field. The keys come up and the bottom panel or dock steps aside.
 
 To stop the test at any time, return to **Virtual Keyboard**, select **None**,
-and apply. To take the Keyboard off the device afterwards, run
-`./uninstall-keyboard.sh`, which removes exactly what `./install-keyboard.sh`
-put in your prefix, once **None** is applied.
+and apply. To take the Keyboard off the device afterwards, apply **None**, then
+run `./uninstall-keyboard.sh`. It removes exactly what `./install-keyboard.sh`
+put in your prefix.
 
 ## Pass / Fail / Note
 
-Record one line for each item as `Pass`, `Fail`, or `Note: …`. What each input
-does is [`INPUT.md`](INPUT.md); these checks test it on the device.
+Record one line for each item as `Pass`, `Fail`, or `Note: …`.
+[`INPUT.md`](INPUT.md) says what each input does; these checks test it on the
+device.
 
 - **Every input:** Go through `INPUT.md` row by row by touch, then again with a
   mouse wherever a row can take a click. Each row does what it says. Name any
@@ -49,8 +50,8 @@ does is [`INPUT.md`](INPUT.md); these checks test it on the device.
   sign-in screen the keys are dark.
 - **Dock handoff:** With the Bottom Surface installed instead, raising the
   keyboard slides the dock down and out rather than blinking it away, and
-  dismissing brings it back with a small settle. Nothing is ever left holding
-  space it is not using, and the dock never arrives on top of anything.
+  dismissing brings it back with a small settle. Nothing holds space it is not
+  using, and the dock never lands on top of anything.
 - **Fast text:** Type a sentence quickly in a KDE/Qt app, a GTK app, Firefox,
   Chromium or an Electron app, and a terminal. No character is lost,
   duplicated, reordered, or wrongly mapped.
@@ -135,6 +136,6 @@ does is [`INPUT.md`](INPUT.md); these checks test it on the device.
 
 The row geometry is settled ([`FEASIBILITY.md`](FEASIBILITY.md) § Row
 geometry), so a miss pattern found in this pass is a finding about the Shuffle
-layout itself, not a question about which geometry to use.
+layout itself and does not reopen the choice of geometry.
 
 Include the application name and exact observed behavior in every failure note.

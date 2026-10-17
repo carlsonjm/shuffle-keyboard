@@ -2,34 +2,34 @@
 
 Shuffle Keyboard is the touch keyboard and precision pointer Shuffle 1.0
 requires. On a supported 10–13 inch touch device it types into any application
-and points at anything, with no physical keyboard or mouse. This document says
-what it is. Every input it handles, and what each does, is
-[`INPUT.md`](INPUT.md).
+and points at anything, with no physical keyboard or mouse. This document
+describes the Keyboard; [`INPUT.md`](INPUT.md) lists every input it handles and
+what each does.
 
 ## What it owns
 
-Shuffle owns the layout, height, precision surface, showing and hiding, and
-presentation. It owns no input engine. A touched key goes to Qt Virtual
-Keyboard, Plasma Keyboard's input-method client hands the result to KWin, and
-KWin delivers it through the application's own text-input path. Qt and KWin own
-locale, keymaps and application compatibility.
+Shuffle decides the layout, height, precision surface, showing and hiding, and
+presentation. It has no input engine of its own. A touched key goes to Qt
+Virtual Keyboard, Plasma Keyboard's input-method client hands the result to
+KWin, and KWin delivers it through the application's own text-input path. Qt
+and KWin handle locale, keymaps and application compatibility.
 [`FEASIBILITY.md`](FEASIBILITY.md) records why this base was chosen.
 
-The precision surface moves the pointer as the Keyboard's own, through KWin's
+The precision surface moves the pointer as the Keyboard itself, through KWin's
 fake-input protocol. KWin offers that protocol only to the program its desktop
-entry names in full, and the Keyboard's entry asks for it, so the pointer moves
-with no prompt and no remote-control notice, as the keys type with none. Where
+entry names in full, and the Keyboard's entry asks for it. The pointer then
+moves with no prompt and no remote-control notice, just as the keys type. Where
 KWin does not offer it, the surface falls back to the desktop's RemoteDesktop
-portal: the Keyboard names itself to the portal as `org.shuffle.Keyboard`
-before its first portal call, Plasma asks once, by name, and shows its
-remote-control notice while the surface is latched, and only then.
+portal. Before its first portal call the Keyboard names itself to the portal as
+`org.shuffle.Keyboard`. Plasma then asks once, by that name, and shows its
+remote-control notice only while the surface is latched.
 
 ## The card
 
 The keyboard is a card: the Itasca `#141414` surface with a hairline border and
 8 px rounded top corners, the suite's paper tier, as are its keys and the
-precision surface. It keeps Kadunce's 10 px gutter at either side and
-nowhere else. It sits flush with the screen's bottom edge and lies over the
+precision surface. It keeps Kadunce's 10 px gutter at the left and
+right only. It sits flush with the screen's bottom edge and lies over the
 window above, since a gutter there would only cost rows.
 
 The card is monochrome: Itasca's surface, Ghost White `#F8F8FF` and grey
@@ -38,19 +38,19 @@ and floating Ghost White labels. A key that is on (Shift, Caps, Ctrl, Alt)
 fills. There are no skeuomorphic keys, dense outlines or permanent toolbars.
 
 The card follows the Plasma style, as the desktop's panels do, not the colours
-programs use. It is dark, in exactly the colours above, unless the style is
-light and its text reads on it (WCAG AA, 4.5:1); then the surface is the style's
+programs use. It uses the dark colours above unless the style is light and
+its text reads on it (WCAG AA, 4.5:1). Then the surface is the style's
 window colour, the labels its text colour, and every hairline, fill and the
 trackpad are mixed from those two, so a label and what it sits on always come
-from the same look. The accents' pop-up stands on the style's view colour where
+from the same style. The accents' pop-up stands on the style's view colour where
 the labels read on it, and on the card's own colour where they do not. A style
 that keeps its panels dark under light programs keeps the keys dark. At the
 sign-in screen the keys are always dark.
 
 Its top strip, 10 px above a 6 px band and 10 px below it, is kept clear for
-word predictions, which come after 1.0 (§ 1.0 boundaries). Nothing is drawn
-there and a touch there does nothing. There is no handle: the Hide key puts the
-keys away.
+word predictions, which come after 1.0 (§ 1.0 boundaries). The strip stays
+empty and ignores touches. There is no handle; the Hide key puts the keys
+away.
 
 ## Layout
 
@@ -59,10 +59,10 @@ centred in the card, with the card's surface clear at either side, where the
 hands hold the device. Every character key is one unit, at one pitch on every
 row, except the slash, which fills the bottom row's end. Q begins at 1 unit, A
 at 1.25 and Z at 1.75: the home row a quarter unit right of the top row and the
-bottom row a further half. So placed, the gap between the hands, between T and
-Y, sits at the card's centre ([`FEASIBILITY.md`](FEASIBILITY.md) § Row
-geometry). The footprint, pitch and stagger are re-opened with evidence, not
-with a preference.
+bottom row a further half. This puts the gap between the hands, between T and
+Y, at the card's centre ([`FEASIBILITY.md`](FEASIBILITY.md) § Row
+geometry). Changing the footprint, pitch or stagger takes new evidence, not a
+preference.
 
 | Row | Keys, with widths in units |
 | --- | --- |
@@ -91,13 +91,13 @@ comma, period and slash their ANSI shifts `<` `>` `?`, which Shift also types.
 `123` carries Esc the same way, small and grey above it, since it sits where a
 keyboard puts Esc.
 
-The Tette Dot is a white dot: the protected resting brand mark, not a text
-label. It sits right of the space bar and stands for the bare Meta key as the
-person has bound it, read live from KDE's global shortcuts rather than naming
-an applet.
+The Tette Dot is a white dot, the protected resting brand mark, with no text
+label. It sits right of the space bar and stands for whatever the person has
+bound to the bare Meta key, read live from KDE's global shortcuts rather than
+tied to a named applet.
 
 The space bar is the widest key and carries the trackpad mark at its right end.
-What each key does is [`INPUT.md`](INPUT.md) § Keys.
+[`INPUT.md`](INPUT.md) § Keys says what each key does.
 
 `123` swaps the letters for one symbols layer, and reads `ABC` while it shows.
 Its top row holds the digits. Its home row holds Esc in Tab's place, then the
@@ -113,9 +113,9 @@ to return to the letters.
 
 ## Height
 
-The card is 44% of the screen's height, always. The person does not change it:
+The card is always 44% of the screen's height, and the person cannot change it.
 Shuffle's window roll gives the Active card its room (§ Showing and hiding), so
-there is no screen to win back with shorter keys. At 45% the room left above
+shorter keys would win back no screen. At 45% the room left above
 the keys was shorter than a browser makes itself.
 
 At 44% the four rows set the key height, and a character key is as wide as it
@@ -140,52 +140,51 @@ Editing is on the keys, not beside them:
   until tapped again or the keys go away. Keys reach the application being
   typed into; the desktop's own shortcuts, such as Alt+Tab, do not hear them.
 
-There is no history scrub. What each does is [`INPUT.md`](INPUT.md) § Caret
-trackpad and § Delete.
+There is no history scrub. [`INPUT.md`](INPUT.md) § Caret trackpad and
+§ Delete give each input.
 
 ## Precision surface
 
 The trackpad mark at the space bar's right end latches the whole keyboard as a
-trackpad; [`INPUT.md`](INPUT.md) § Precision surface is what each touch does.
-While latched, the keys dim and do not type, and they stay up whatever the
-pointer does. The mark stays live, and lit, and so does Hide, undimmed.
+trackpad; [`INPUT.md`](INPUT.md) § Precision surface lists what each touch
+does. While latched, the keys dim and do not type, and they stay up whatever the
+pointer does. The mark stays live and lit, and Hide stays live and undimmed.
 Putting the keys away, with Hide or the tray entry, ends the latch, and they
 stay away until they are next asked for. The surface is the keyboard's
 full footprint below the top strip. Through the portal, latching asks for
-pointer control and ending the latch gives it back. Until the portal has
-granted pointer control, the surface says so in place of pointing, and if the portal ends that control,
-by restarting or by the permission being taken back, it says so again and the
-next touch asks afresh.
+pointer control and ending the latch gives it back. Until the portal grants
+pointer control, the surface says it has none instead of pointing. If the
+portal ends that control, because it restarted or the permission was withdrawn,
+the surface says so again and the next touch asks afresh.
 
 The mark and the caret trackpad share the space bar and do not overlap: a touch
 that begins on the mark latches the pointer, and a touch anywhere else on the
-space bar types a space or moves the text cursor. The precision surface does not
-duplicate the system's Shuffle gestures, and editing stays with the keys
+space bar types a space or moves the text cursor. The precision surface leaves
+the system's Shuffle gestures to the system, and editing to the keys
 (§ Editing).
 
 ## Showing and hiding
 
 The keys come up when a text field is tapped, and when their entry in the system
 tray is tapped with them down; tapped with them up, it puts them away. The entry
-speaks the tray protocol itself, since this process loads no widget toolkit, and
-has no menu.
+implements the tray protocol directly, since this process loads no widget
+toolkit. It has no menu.
 
-A raise from the tray entry never takes the focus from a text box that is ready
-to be typed into. Only a cold start needs more: straight after signing in,
-before any text field has been touched, the compositor's ask alone shows
-nothing. Then the Keyboard borrows the focus with a field nobody sees until the
-keys go, and the focus returns to where it was.
+A raise from the tray entry leaves the focus on a text box that is ready to be
+typed into. Only a cold start needs more: straight after signing in, before any
+text field has been touched, the compositor's request alone shows nothing. The
+Keyboard then borrows the focus with an invisible field until the keys go, and
+the focus returns to where it was.
 
 They rise from the screen's bottom edge on their own and go back into it,
 whether the Hide key, the tray entry, the end of typing or the application put
 them away. Keys going because typing ended, or because an application asked the
 compositor to put them away, leave before the window goes. They wait 150 ms
-before setting off, because a field letting go is often handing over to the
-next, as a browser's boxes do, and then nothing moves. Asked for again on the
+before setting off, because a field that lets go is often handing over to the
+next one, as a browser's boxes do; then nothing moves. Asked for again on the
 way out, they come back from where they are.
 
-They rise only once the dock has left and given up its room, so they never rise
-into it.
+They rise only once the dock has left and given up its room.
 
 Their travel follows Plasma's animation speed, so they keep pace with the dock
 and the cards. At the fastest setting they arrive and leave at once.
@@ -194,32 +193,31 @@ Before each motion with a destination, and on a press of the Hide key, the keys
 tell Kadunce where they will rest and when (`keyboardHeading` on
 `co.goodinput.Kadunce`). The Active card follows them, and its application is
 resized once, at rest, not every frame.
-With no Kadunce nothing answers and nothing changes. A request for the keys made
-on the person's behalf, from the tray entry or the precision surface, goes
+Without Kadunce, nothing answers and nothing changes. A request for the keys
+made on the person's behalf, from the tray entry or the precision surface, goes
 through Kadunce when it is running, so Kadunce knows it was asked; otherwise it
 goes to the compositor directly.
 
-KWin starts the Keyboard and stops it, and the Keyboard never outlives the
-compositor that started it. When the session ends it hands the bottom of the
-screen back, waiting no more than a second for an answer, and is gone within
-three seconds, so it never holds a sign-out still. If KWin crashes, the Keyboard
-leaves with it rather than reconnecting: the KWin that comes back starts a
-Keyboard of its own, and there is only ever one, holding the tray entry and the
-bottom of the screen.
+KWin starts and stops the Keyboard, and the Keyboard exits with the compositor
+that started it. When the session ends it hands the bottom of the screen back,
+waiting no more than a second for an answer, and is gone within three seconds,
+so it never delays a sign-out. If KWin crashes, the Keyboard exits with it
+rather than reconnecting. The KWin that comes back starts its own Keyboard, so
+only one ever holds the tray entry and the bottom of the screen.
 
 ### The bottom of the screen
 
 The region follows keys on screen, not requests for them. While keys are shown,
 the Keyboard asks the Bottom Surface for the region, and the surface decides
 what giving it up means. The region goes back once the keys have gone. A
-surface that refuses, or is slow to answer, still owns the region, and the
+surface that refuses, or is slow to answer, still holds the region, and the
 Keyboard leaves every panel alone. Only where no Bottom Surface is on the bus at
 all do Plasma's bottom panels autohide while the keys are up and return to their
 previous hiding mode afterwards. Those modes are kept on disk before any panel
 changes, so a Keyboard that crashed or was killed with the keys up puts them
-back the next time it starts. Nothing here waits on the surface or the shell to
-answer, so a busy desktop never holds the keys. `bottomsurfacecoordinator`
-is this whole boundary. It finds the surface on the session bus as
+back the next time it starts. None of this waits for the surface or the shell to
+answer, so a busy desktop never holds up the keys. `bottomsurfacecoordinator`
+implements this whole boundary. It finds the surface on the session bus as
 `co.goodinput.BottomSurface`, asks for the region with `yieldRegion`, gives it
 back with `releaseRegion`, and follows `dockExtentChanged` so the keys rise only
 once the band has given up its room. The surface's side is the Bottom Surface

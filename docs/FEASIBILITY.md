@@ -11,30 +11,32 @@ The smallest reliable path from a touched key to arbitrary desktop software is:
    protocol, with its compositor key-event fallback for applications without
    a compatible text-input path.
 
-This retains Qt Virtual Keyboard for locale, layout, and input-engine behavior,
-and KWin for application compatibility and the active system keymap. Shuffle is
-therefore a front end and interaction layer, not a new input engine.
+Qt Virtual Keyboard keeps locale, layout and input-engine behavior, and KWin
+keeps application compatibility and the active system keymap. Shuffle is a
+front end and interaction layer on top of them.
 
 ## Alternatives evaluated
 
-- **Qt Virtual Keyboard alone:** mature input engine, but its normal desktop
-  integration is per Qt application and is not an arbitrary-application system
-  input path.
+- **Qt Virtual Keyboard alone:** mature input engine, but it is loaded by each
+  Qt application on its own, so it cannot be system input for arbitrary
+  applications.
 - **Plasma Keyboard plus KWin:** selected. It is the Plasma-native privileged
   input-method path and already bridges Qt, GTK, browser, and fallback clients.
-- **Fcitx5:** mature and appropriate for conventional multilingual IME work,
-  but it does not supply the contracted Shuffle touch and precision surfaces.
-  Making it the foundation would add another integration boundary without
-  improving delivery for this Plasma-specific product.
+- **Fcitx5:** mature and a good fit for conventional multilingual IME work,
+  but it has none of Shuffle's touch and precision surfaces. Building on it
+  would add another integration boundary without improving delivery on
+  Plasma, the only desktop Shuffle targets.
 - **Synthetic per-application input:** rejected. It is less reliable under
-  Wayland and would duplicate compositor responsibilities.
+  Wayland and would duplicate work the compositor already does.
 
-Precision pointer events use the desktop's RemoteDesktop portal. The portal
-owns user consent and device injection; Shuffle only recognizes gestures.
+Precision pointer events go through KWin's fake-input protocol, with the
+desktop's RemoteDesktop portal as the fallback where KWin does not offer it
+(`KEYBOARD-CONTRACT.md`). The compositor or the portal moves the pointer;
+Shuffle only recognizes gestures.
 
 ## Delivery evidence
 
-All application tests ran in an isolated virtual KWin Wayland session, never in
+All application tests ran in an isolated virtual KWin Wayland session, not in
 the developer's active desktop. The stress payload was delivered at 1 ms key
 intervals and compared byte-for-byte.
 
@@ -51,21 +53,22 @@ After integrating the Shuffle UI, a 1,032-character mixed-case, number, and
 punctuation payload was repeated against Qt and GTK with no loss, duplication,
 reordering, or mapping errors.
 
-The compositor-keymap shortcut path was separately exercised with this stateful
+A separate test exercised the compositor-keymap shortcut path with this stateful
 sequence: type `abc`, Select All, Copy, Cut, Paste, Undo, Redo, then type
 `DONE`. Qt, GTK, and Chromium each produced exactly `abcDONE`.
 
 ## Row geometry
 
-The fixed pitch and the Q/A/Z stagger (`KEYBOARD-CONTRACT.md` § Layout) were
-chosen by an on-device comparison against a conventional four-row iPad layout
-built on this keyboard's exact delivery path. It found essentially no misses on
-the fixed pitch. Sharing that path isolated the earlier miss pattern to row
-geometry rather than to input delivery, and Shuffle adopted the same pitch and
-stagger. The comparison keyboard has been removed: it settled one question, and
-shipping a second virtual keyboard to answer it again is not worth carrying.
+The fixed pitch and the Q/A/Z stagger (`KEYBOARD-CONTRACT.md` § Layout) came
+from an on-device comparison against a conventional four-row iPad layout built
+on this keyboard's exact delivery path. It found essentially no misses on the
+fixed pitch. Because both keyboards shared that path, the earlier miss pattern
+came from row geometry rather than input delivery, and Shuffle adopted the same
+pitch and stagger. The comparison keyboard has since been removed. It answered
+one question, and a second virtual keyboard is not worth shipping to answer it
+again.
 
-What was settled is the pitch and the steps between rows: the home row a
+The comparison settled the pitch and the steps between rows: the home row a
 quarter unit right of the top row, the bottom row a further half.
 
 Where the block sits was settled on 1 October 2026 by a typing test on the
@@ -82,17 +85,16 @@ the symbols layer.
 
 ## What KWin does that it does not promise
 
-Three things the Keyboard does rest on how KWin and Qt behave today rather
-than on anything either promises, and a minor release of either can change
-them without notice. Each has a sealed session that proves it against a real
-KWin, run on every change against the released Plasma and every night against
-the next one (Arch's kde-unstable). The next KWin no longer composites without
-a GPU, which a hosted runner lacks, so until that lane has one it reports its
-sessions as skipped rather than passed, and the tablet is where a change in the
-next KWin is first seen. The focus and the cold start also say so
-in the log when they stop working, with a line that starts `KWin dependency:`;
-where KWin placed the keys cannot be seen from inside the Keyboard, so only its
-session catches that one.
+Three things the Keyboard does depend on how KWin and Qt behave today, not on
+anything either promises, and a minor release of either can change them without
+notice. Each has a sealed session that tests it against a real KWin, run on
+every change against the released Plasma and every night against the next one
+(Arch's kde-unstable). The next KWin no longer composites without a GPU, and
+hosted runners have none. Until the nightly lane gets one, it reports those
+sessions as skipped rather than passed, and a change in the next KWin shows up
+first on the tablet. When the focus or the cold start stops working, the
+Keyboard also logs a line that starts `KWin dependency:`. The Keyboard cannot
+see where KWin placed the keys, so only the seat session catches that one.
 
 | Dependency | What breaks if it changes | Proved by |
 | --- | --- | --- |

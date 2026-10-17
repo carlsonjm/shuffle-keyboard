@@ -1,8 +1,7 @@
 # Shuffle Keyboard input
 
 Every input Shuffle Keyboard handles, destination by destination, and what you
-see it do. Other documents cite this list rather than describe an input
-themselves.
+see it do. Other documents link here instead of describing inputs.
 
 | Task | Touch | Keyboard |
 | --- | --- | --- |
@@ -81,9 +80,9 @@ height down. A move mostly sideways is not a flick.
 | Flick `123` down, or `ABC` on the symbols layer | Esc. A pending Ctrl, Alt or Shift goes with it, so Shift+Esc and Ctrl+Alt+Esc work as the application binds them. |
 | Move down less than a full flick, then lift | The key's own character, as a tap, even if the finger has left the key's bottom edge. |
 
-A flick types its character as it is, whatever Shift says, and a pending Shift
-stays pending. Esc from `123` is a key, not a character, and takes the pending
-modifiers with it.
+A flick types its character unchanged, ignoring Shift, and a pending Shift stays
+pending. Esc from `123` is a key press rather than a character, so it takes the
+pending modifiers with it.
 
 ### Caret trackpad
 
@@ -95,7 +94,7 @@ modifiers with it.
 | Move up or down | Up or Down, one line per larger step. |
 | Tap Shift, Ctrl or Alt first, then move | Each step carries it: Shift selects as the cursor moves, and Ctrl moves by words. It lets go at lift. |
 | Lift | The cursor stays where it is and the keys return. |
-| Touch the trackpad mark | Not the caret trackpad: the mark latches the precision surface. |
+| Touch the trackpad mark | Latches the precision surface instead of starting the caret trackpad. |
 
 Every step is an arrow key, so it moves the cursor wherever arrow keys do,
 terminals included.
@@ -123,7 +122,7 @@ terminals included.
 | Tap the trackpad mark at the space bar's right end | The keys dim and the whole keyboard becomes a trackpad. The keys stay up, whatever the pointer does, until the mark is tapped again or they are put away. |
 | Tap the trackpad mark while latched | Back to typing. |
 | Tap Hide, or the tray entry, while latched | The latch ends and the keys slide away, and they stay away. The next text field brings them back for typing. |
-| Latch for the first time | The trackpad works at once, with no prompt and no remote-control notice. Only where KWin does not trust the Keyboard with the pointer does Plasma ask once, show its notice while latched, and the surface say so until it is allowed. |
+| Latch for the first time | The trackpad works at once, with no prompt and no remote-control notice. Where KWin does not trust the Keyboard with the pointer, Plasma asks once and shows its notice while latched, and the surface says so until permission is given. |
 | Move one finger | Moves the pointer. |
 | Tap one finger | Clicks. |
 | Hold one finger still, then move | Presses and drags, to select text or move an item. Lifting lets go. |
