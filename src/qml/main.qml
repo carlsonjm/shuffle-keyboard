@@ -39,22 +39,23 @@ InputPanelWindow {
     // bottom edge and lying over the window above it. Its top strip is kept
     // clear for predictions, which come after 1.0; the Hide key, not a
     // handle, puts the keys away.
-    readonly property real sideGutter: 10
+    readonly property real sideGutter: sizing.sideGutter
     readonly property real cardRadius: 8
-    readonly property real topStrip: 26
+    readonly property real topStrip: sizing.topStrip
 
-    // The card is 44% of the screen's height, always: Shuffle's window roll
-    // gives the Active card its room, so shorter keys would win nothing back.
-    // The four rows set the key height, and a character key is as wide as it
-    // is tall unless a row of them would not fit inside the card, when they
-    // all narrow together.
-    readonly property int heightPercent: 44
-    readonly property real keyGap: Math.max(5, Math.min(10, root.width * 0.0062))
-    readonly property real outerGap: Math.max(6, Math.min(12, root.width * 0.007))
-    readonly property real panelHeight: Math.round(Screen.height * heightPercent / 100)
-    readonly property real rowHeight: (panelHeight - root.topStrip - root.keyGap * 3 - root.outerGap) / 4
-    readonly property real keyUnitWidth: Math.max(1, Math.min(rowHeight,
-        (root.width - root.sideGutter * 2 - root.outerGap * 2 + root.keyGap) / keyField.totalUnits - root.keyGap))
+    // The card's height and its keys' size: 44% of the screen, or more where
+    // that would leave keys under 16 mm (KeySizing.qml).
+    readonly property KeySizing sizing: KeySizing {
+        screenWidth: root.width
+        screenHeight: Screen.height
+        pixelDensity: Screen.pixelDensity
+        totalUnits: keyField.totalUnits
+    }
+    readonly property real keyGap: sizing.keyGap
+    readonly property real outerGap: sizing.outerGap
+    readonly property real panelHeight: sizing.panelHeight
+    readonly property real rowHeight: sizing.rowHeight
+    readonly property real keyUnitWidth: sizing.keyUnitWidth
     property int probeIndex: 0
     property int probeShortcutStep: 0
     property bool probeArmed: shuffleProbeDelay <= 0

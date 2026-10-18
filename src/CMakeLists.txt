@@ -105,6 +105,7 @@ ecm_target_qml_sources(plasma-keyboard SOURCES
     qml/KeyCap.qml
     qml/KeyGlyph.qml
     qml/KeysPalette.qml
+    qml/KeySizing.qml
     qml/EmojiPanel.qml
     qml/PrecisionSurface.qml
     qml/LanguagePopup.qml
