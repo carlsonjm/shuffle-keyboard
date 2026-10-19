@@ -56,7 +56,7 @@ Item {
                 required property int index
                 width: label.implicitWidth + 32
                 height: tabs.height
-                radius: 8
+                radius: 10
                 color: "transparent"
                 border.width: 1
                 border.color: root.currentCategory === index ? root.colours.outline : "transparent"
@@ -111,7 +111,7 @@ Item {
             Rectangle {
                 anchors.fill: parent
                 anchors.margins: 2
-                radius: 8
+                radius: 10
                 color: root.colours.outline
                 opacity: tap.pressed ? 1 : 0
             }

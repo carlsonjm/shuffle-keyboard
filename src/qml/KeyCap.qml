@@ -40,7 +40,7 @@ Rectangle {
     readonly property color outline: colours.outline
 
     // Keys are paper: round keys would read as dots.
-    radius: 8
+    radius: 10
     scale: down ? 0.99 : 1
     color: locked ? paper
          : emphasised ? colours.wash(down ? 0xD9 / 255 : 0xB3 / 255)
