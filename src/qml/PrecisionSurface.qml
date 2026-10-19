@@ -14,7 +14,7 @@ Rectangle {
     required property KeysPalette colours
 
     color: keyboardUnderlayVisible ? "transparent" : colours.recessed
-    radius: keyboardUnderlayVisible ? 0 : 8
+    radius: keyboardUnderlayVisible ? 0 : 10
     border.width: keyboardUnderlayVisible ? 0 : 1
     border.color: colours.recessedEdge
 

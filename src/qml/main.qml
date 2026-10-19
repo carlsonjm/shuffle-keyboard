@@ -40,7 +40,7 @@ InputPanelWindow {
     // clear for predictions, which come after 1.0; the Hide key, not a
     // handle, puts the keys away.
     readonly property real sideGutter: sizing.sideGutter
-    readonly property real cardRadius: 8
+    readonly property real cardRadius: 10
     readonly property real topStrip: sizing.topStrip
 
     // The card's height and its keys' size: 44% of the screen, or more where
@@ -530,7 +530,7 @@ InputPanelWindow {
 
             Rectangle {
                 anchors.fill: parent
-                radius: 8
+                radius: 10
                 color: root.colours.ink
                 opacity: root.precisionHeld ? 0.22 : 0
             }
@@ -554,7 +554,7 @@ InputPanelWindow {
 
             Rectangle {
                 anchors.fill: parent
-                radius: 8
+                radius: 10
                 color: root.colours.ground
             }
             KeyCap {
