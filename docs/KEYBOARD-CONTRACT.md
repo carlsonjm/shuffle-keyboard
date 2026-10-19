@@ -113,15 +113,26 @@ to return to the letters.
 
 ## Height
 
-The card is always 44% of the screen's height, and the person cannot change it.
-Shuffle's window roll gives the Active card its room (§ Showing and hiding), so
-shorter keys would win back no screen. At 45% the room left above
-the keys was shorter than a browser makes itself.
+The card is 44% of the screen's height wherever that gives keys at least 16 mm
+tall, and the person cannot change it. Shuffle's window roll gives the Active
+card its room (§ Showing and hiding), so shorter keys would win back no screen.
+At 45% the room left above the keys was shorter than a browser makes itself,
+so a screen that already reaches 16 mm keeps 44%: on a 13-inch tablet the keys
+are about 17 mm.
 
-At 44% the four rows set the key height, and a character key is as wide as it
-is tall. Where twelve and a half square units would not fit inside the card's
-gutters, every key narrows together until they do, and the pitch stays one on
-every row.
+Keys are never under 16 mm where the screen is wide enough to hold them
+(product owner, 14 and 18 October 2026). Where 44% would give smaller keys, as
+on a 10-inch tablet, the card grows until they reach 16 mm, about half a Surface
+Go's height. It never grows past the size at which twelve and a half square keys
+still fit inside the card's gutters, so it takes no height the keys cannot use.
+Width sets the ceiling: 16 mm on a Surface Go, about 15.6 mm on a 10.1-inch
+16:10 tablet, which takes 53% of its height to get there, and less on a tablet
+held upright. A screen that does not report its size keeps 44%. `src/qml/KeySizing.qml` holds
+the rule and `autotests/qml/tst_keysizing.qml` proves it.
+
+The four rows set the key height, and a character key is as wide as it is tall.
+Where twelve and a half square units would not fit inside the card's gutters,
+every key narrows together until they do, and the pitch stays one on every row.
 
 ## Editing
 
