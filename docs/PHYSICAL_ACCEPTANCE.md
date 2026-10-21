@@ -16,9 +16,9 @@ where a check asks for one.
    installed files against the build. This needs no password and writes only
    inside your home directory. Where the sign-in screen has its own copy under
    `/usr/local`, it then runs Shuffle's `install-signin-keyboard.sh` to update
-   that copy too; that step asks for your password unless the install key is
-   set up. You keep typing on the previous copy until you sign out and back in,
-   and the script tells you so.
+   that copy too; that step asks for your password once. You keep typing on
+   the previous copy until you sign out and back in, and the script tells you
+   so.
 
 2. Open **System Settings → Keyboard → Virtual Keyboard**.
 3. Select **Shuffle Keyboard** and choose **Apply**.
@@ -44,11 +44,11 @@ device.
   a text field brings them back every time.
 - **Panel handoff:** The normal bottom panel yields without overlap or visible
   bouncing and returns after dismissal.
-- **Looks:** With Shuffle Settings on Dark, the keys are dark. On Light, as
-  on any light Plasma style, the card turns light with dark labels, and every
-  label, the accents' pop-up, the emoji panel and the trackpad read. At the
-  sign-in screen the keys are dark.
-- **Dock handoff:** With the Bottom Surface installed instead, raising the
+- **Looks:** With a dark Plasma style (on Shuffle, Shuffle Settings on Dark),
+  the keys are dark. With a light one, the card turns light with dark labels,
+  and every label, the accents' pop-up, the emoji panel and the trackpad read.
+  At the sign-in screen the keys are dark.
+- **Dock handoff:** With Shuffle's Bottom Surface installed instead, raising the
   keyboard slides the dock down and out rather than blinking it away, and
   dismissing brings it back with a small settle. Nothing holds space it is not
   using, and the dock never lands on top of anything.
@@ -112,17 +112,19 @@ device.
 - **Pointer:** While latched, point, click, drag to select text, drag an item,
   scroll a long page and right-click, in a KDE app and in a browser. Each lands
   where the pointer is, and none needs a second try.
-- **Pointer permission:** The first latch asks once for permission to control
-  the pointer. After it is allowed it is not asked again, including after
-  signing out and in.
+- **Pointer permission:** The first latch moves the pointer at once, with no
+  prompt and no remote-control notice. If Plasma asks for permission instead,
+  note it: the Keyboard is using the portal fallback. Once allowed there, it is
+  not asked again, including after signing out and in.
 - **Touch reach:** Type several sentences at normal speed. Note any intended
   key that lands left or right of the target.
 
 ## Raised from the tray entry
 
-- **It rises:** With nothing selected for typing, tap Keyboard in Control Center
-  or the tray. Control Center closes, the keys rise, and the card above makes
-  room as they rise rather than after they arrive.
+- **It rises:** With nothing selected for typing, tap Keyboard in the tray (or,
+  on Shuffle, in Control Center, which closes). The keys rise, and where
+  Kadunce runs, the window above makes room as they rise rather than after
+  they arrive.
 - **It works straight after signing in:** Sign in and, before touching any text
   field, tap the entry. The keys come up the first time.
 - **It keeps the focus where it is:** Tap into a text box, put the keys away,
@@ -135,7 +137,7 @@ device.
 ## Notes
 
 The row geometry is settled ([`FEASIBILITY.md`](FEASIBILITY.md) § Row
-geometry), so a miss pattern found in this pass is a finding about the Shuffle
-layout itself and does not reopen the choice of geometry.
+geometry), so a miss pattern found in this pass is a finding about the layout
+itself and does not reopen the choice of geometry.
 
 Include the application name and exact observed behavior in every failure note.

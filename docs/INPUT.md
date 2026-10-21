@@ -19,8 +19,8 @@ see it do. Other documents link here instead of describing inputs.
 
 ### Tray entry
 
-The keys' entry in the system tray, called Keyboard, which Temperance can also
-show as a pill in Control Center.
+The keys' entry in the system tray, called Keyboard. Where Temperance is
+installed, its Control Center can show the same entry.
 
 | Input | What happens |
 | --- | --- |
@@ -42,7 +42,7 @@ show as a pill in Control Center.
 | Slide off a key before lifting | Nothing is typed, unless the slide is a flick down (§ Flicks). |
 | Tap the same key twice quickly | Types it twice. |
 | Hold a, e, i, o, u, n, c, s or y | Its accents appear above it. Slide to one and lift to type it; lift off them to type nothing. |
-| Hold any other key but Delete | Types it once, as your finger lifts. There is no repeat. |
+| Hold any other key but Delete or the space bar | Types it once, as your finger lifts. There is no repeat. |
 | Tap Shift | The next key is shifted: a capital letter, or the ANSI shift of comma, period or slash, `<` `>` `?`. Shift then lets go; tapping it again first cancels it. |
 | Double-tap Shift | Caps Lock: letters stay capitals until Shift is tapped again. |
 | Tap Shift with Caps Lock on | Caps Lock and Shift both let go. |

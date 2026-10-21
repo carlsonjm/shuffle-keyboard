@@ -1,9 +1,11 @@
 # Shuffle Keyboard
 
-Shuffle Keyboard is the touch keyboard and precision pointer for Shuffle on KDE
-Plasma 6: four large rows centred on the card, flick keys for the digits and
-punctuation, a caret trackpad on the space bar and a pointer trackpad latch,
-drawn as a card over the window above.
+Shuffle Keyboard is a touch keyboard and precision pointer for KDE Plasma 6 on
+Wayland: four large rows centred on a card at the bottom of the screen, flick
+keys for the digits and punctuation, a caret trackpad on the space bar, and a
+latch that turns the whole keyboard into a pointer trackpad. It runs on any
+Plasma 6 desktop. The Shuffle desktop bundles it and adds a dock that steps
+aside for it.
 
 ## Controls
 
@@ -12,12 +14,12 @@ drawn as a card over the window above.
 | Shuffle Keyboard | Tap a text field | — |
 | Precision surface | Tap the trackpad mark at the space bar's right end | — |
 
-Keyboard in the system tray, or in Control Center, brings the keys up at any
-time. Tap Hide, at the bottom right, to put them away.
+The Keyboard entry in the system tray (or, on Shuffle, in Control Center)
+brings the keys up at any time. Tap Hide, at the bottom right, to put them away.
 Every input is in [`docs/INPUT.md`](docs/INPUT.md).
 
 - What it is: [`docs/KEYBOARD-CONTRACT.md`](docs/KEYBOARD-CONTRACT.md)
-- Why this base: [`docs/FEASIBILITY.md`](docs/FEASIBILITY.md)
+- Why it is built this way: [`docs/FEASIBILITY.md`](docs/FEASIBILITY.md)
 - The by-hand pass on a touch device:
   [`docs/PHYSICAL_ACCEPTANCE.md`](docs/PHYSICAL_ACCEPTANCE.md)
 
@@ -25,7 +27,8 @@ Every input is in [`docs/INPUT.md`](docs/INPUT.md).
 
 It is a fork of KDE's Plasma Keyboard 6.7.5. It keeps Plasma Keyboard's input
 delivery, Qt Virtual Keyboard and KWin's input-method path, and adds no input
-engine of its own. It carries KDE's licence.
+engine of its own. It carries KDE's licence. The project's own names and marks
+are covered separately, in [`TRADEMARKS.md`](TRADEMARKS.md).
 
 ## Build
 
@@ -66,5 +69,5 @@ keyboard and neither loads the other's pieces: the QML modules
 settings page `kcm_shufflekeyboard`, layouts under `share/shuffle-keyboard` and
 settings in `shufflekeyboardrc`, which it fills from `plasmakeyboardrc` the
 first time it runs. The one name it shares is the `plasma-keyboard` program the
-sign-in screen starts, which the Shuffle package and Shuffle's sign-in
-installer point at this one.
+sign-in screen starts, which Shuffle's packaging and its sign-in installer
+point at this build.
