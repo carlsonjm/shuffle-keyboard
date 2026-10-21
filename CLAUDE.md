@@ -22,7 +22,7 @@ difference before committing any of it.
 ## Suite position
 
 `kadunce`, `tettegouche`, `temperance`, `gooseberry` and this repository are
-the public components; `shuffle` downstream assembles the product. This
+the public components; `shuffle` downstream assembles the desktop. This
 repository is public, as it must be: it carries KDE's licence, and whoever
 receives a build is entitled to its source.
 

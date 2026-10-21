@@ -3,10 +3,11 @@
 | Document | Authority |
 | --- | --- |
 | [`../README.md`](../README.md) | What this is, building and installing |
+| [`../TRADEMARKS.md`](../TRADEMARKS.md) | The project's names and marks, which the code licences do not cover |
 | [`../AGENTS.md`](../AGENTS.md) | Startup, working contract and holds |
 | [`KEYBOARD-CONTRACT.md`](KEYBOARD-CONTRACT.md) | What the Keyboard is: card, layout, height, editing, precision surface, showing and hiding |
 | [`INPUT.md`](INPUT.md) | Every input the Keyboard handles, and what it does |
-| [`FEASIBILITY.md`](FEASIBILITY.md) | Why this base, the delivery evidence, and what settled the row geometry |
+| [`FEASIBILITY.md`](FEASIBILITY.md) | Why this base, the delivery evidence, what settled the row geometry, and what the Keyboard relies on KWin for |
 | [`PHYSICAL_ACCEPTANCE.md`](PHYSICAL_ACCEPTANCE.md) | The by-hand pass: install, typing, inputs, delivery |
 
 Checking it:
@@ -21,6 +22,7 @@ Checking it:
 | `../tests/verify-panels.sh` | Raises and puts away the keys with no Bottom Surface installed, against a stand-in for Plasma's shell, and checks that the bottom panel autohides, comes back to its own mode, and comes back too after the Keyboard is killed with the keys up. |
 | `../tests/verify-caret.sh` | Drags the caret trackpad left and right by the same distance, and asks the application how far its cursor went each way. |
 | `../tests/verify-latch.sh` | Puts the keys away with Hide and with the tray entry while the trackpad is latched, by mouse and by finger, and asks the compositor whether they stay away. |
+| `../tests/verify-feedback.sh` | Touches the keys in a separate compositor and checks that a pressed key, a growing flick and a held key's accents each show, in the Keyboard as built. |
 | `../tests/verify-hold.sh` | Holds a physical key with the keys down and with them up, and checks that it types only itself and opens nothing. |
 | `../tests/verify-exit.sh` | Ends a compositor with the keys up, and checks that the Keyboard hands the bottom of the screen back and the compositor is gone within five seconds. |
 | `../tests/verify-orphan.sh` | Crashes a compositor with a second behind its socket, and checks that the Keyboard leaves with the first rather than reconnecting. |
@@ -31,5 +33,3 @@ against the next KWin from Arch's kde-unstable every night. A test that lacks a
 tool it needs reports a skip, not a pass. The next KWin cannot composite without
 a GPU, and hosted runners have none, so the nightly lane currently skips its
 sessions.
-
-The suite's plan is kept privately, outside this repository.

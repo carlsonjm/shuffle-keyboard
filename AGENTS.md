@@ -34,7 +34,7 @@ longer maintained and stays only as a record.
 
 ## Holds
 
-- The product owner approves product behavior and visual direction before
+- The product owner approves behavior and visual direction before
   implementation begins, sets intent, scope and sequencing, and does not review
   code.
 - One implementation owner: this workflow. Changes arrive as commits against
