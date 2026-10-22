@@ -9,7 +9,10 @@
 #include <QDBusMessage>
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>
+#include <QDBusVariant>
 #include <QObject>
+
+#include <functional>
 
 /**
  * Kadunce, the compositor effect, when it is running. An isolated test names a
@@ -47,6 +50,49 @@ inline void requestKeys(QObject *context)
             direct();
         }
         finished->deleteLater();
+    });
+}
+
+/**
+ * Shows the keys for a text field that has just taken the focus, when the
+ * compositor would have shown them itself but threw the request away.
+ *
+ * KWin 6.8.1 drops an application's request for the keys that arrives before
+ * its field counts as active, and Qt sends that request just ahead of the
+ * field's first commit, so a tapped field is left with no keys. If the
+ * compositor shows none and the last touch is one it would show them for, it
+ * is asked directly. Directly, not through Kadunce: to Kadunce this is an
+ * application focusing its own field, which it may keep the keys down for,
+ * never a request made on the person's behalf. The caller stops wanting it
+ * once the compositor has shown keys for the field, since keys it showed and
+ * that went again were put away on purpose.
+ */
+inline void showKeysForField(QObject *context, const std::function<bool()> &stillWanted)
+{
+    const auto call = [](const QString &interface, const QString &method, const QVariantList &arguments = {}) {
+        QDBusMessage message = QDBusMessage::createMethodCall(QStringLiteral("org.kde.KWin"), QStringLiteral("/VirtualKeyboard"), interface, method);
+        message.setArguments(arguments);
+        return QDBusConnection::sessionBus().asyncCall(message);
+    };
+    const QString keyboard = QStringLiteral("org.kde.kwin.VirtualKeyboard");
+    auto *willShow = new QDBusPendingCallWatcher(call(keyboard, QStringLiteral("willShowOnActive")), context);
+    QObject::connect(willShow, &QDBusPendingCallWatcher::finished, context, [=](QDBusPendingCallWatcher *finished) {
+        finished->deleteLater();
+        const QDBusPendingReply<bool> wanted = *finished;
+        if (wanted.isError() || !wanted.value() || !stillWanted()) {
+            return;
+        }
+        const QDBusPendingCall visibleCall =
+            call(QStringLiteral("org.freedesktop.DBus.Properties"), QStringLiteral("Get"), {keyboard, QStringLiteral("visible")});
+        auto *visible = new QDBusPendingCallWatcher(visibleCall, context);
+        QObject::connect(visible, &QDBusPendingCallWatcher::finished, context, [=](QDBusPendingCallWatcher *shown) {
+            shown->deleteLater();
+            const QDBusPendingReply<QDBusVariant> reply = *shown;
+            if (reply.isError() || reply.value().variant().toBool() || !stillWanted()) {
+                return;
+            }
+            call(keyboard, QStringLiteral("forceActivate"));
+        });
     });
 }
 

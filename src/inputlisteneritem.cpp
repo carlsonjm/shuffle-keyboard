@@ -7,7 +7,9 @@
 */
 
 #include "inputlisteneritem.h"
+#include "bottomsurfacecoordinator.h"
 #include "inputmethod_p.h"
+#include "keysrequest.h"
 #include "logging.h"
 #include "plasmakeyboardsettings.h"
 
@@ -20,7 +22,9 @@
 #include <QDBusObjectPath>
 #include <QDBusReply>
 #include <QLoggingCategory>
+#include <QQmlEngine>
 #include <QTextFormat>
+#include <QTimer>
 
 #include <set>
 
@@ -72,6 +76,20 @@ InputListenerItem::InputListenerItem()
         if (hasContext) {
             QGuiApplication::inputMethod()->update(Qt::ImQueryAll);
             QGuiApplication::inputMethod()->show();
+            // KWin 6.8.1 can drop the application's own request for the keys
+            // (keysrequest.h); give it the moment it takes to show them first.
+            // Keys it showed for this field and that went again were put away
+            // on purpose, by the application or by Kadunce, and stay away.
+            m_keysShownForField = false;
+            watchCompositorKeys();
+            QTimer::singleShot(150, this, [this] {
+                const auto wanted = [this] {
+                    return m_input.hasContext() && !m_keysShownForField;
+                };
+                if (wanted()) {
+                    showKeysForField(this, wanted);
+                }
+            });
         } else {
             QGuiApplication::inputMethod()->setVisible(false);
         }
@@ -227,6 +245,24 @@ bool InputListenerItem::triggerGlobalShortcut(int qtKey)
 
     QDBusInterface component(QStringLiteral("org.kde.kglobalaccel"), componentReply.value().path(), QStringLiteral("org.kde.kglobalaccel.Component"));
     return component.call(QStringLiteral("invokeShortcut"), action.at(1)).type() != QDBusMessage::ErrorMessage;
+}
+
+void InputListenerItem::watchCompositorKeys()
+{
+    if (m_compositorKeysWatched) {
+        return;
+    }
+    QQmlEngine *engine = qmlEngine(this);
+    auto *coordinator = engine ? engine->singletonInstance<BottomSurfaceCoordinator *>("org.shuffle.keyboard", "BottomSurfaceCoordinator") : nullptr;
+    if (!coordinator) {
+        return;
+    }
+    connect(coordinator, &BottomSurfaceCoordinator::compositorVisibilityChecked, this, [this](bool visible) {
+        if (visible) {
+            m_keysShownForField = true;
+        }
+    });
+    m_compositorKeysWatched = true;
 }
 
 void InputListenerItem::setEngine(QVirtualKeyboardInputEngine *engine)
