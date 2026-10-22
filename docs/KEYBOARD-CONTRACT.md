@@ -187,6 +187,14 @@ text field has been touched, the compositor's request alone shows nothing. The
 Keyboard then borrows the focus with an invisible field until the keys go, and
 the focus returns to where it was.
 
+KWin 6.8.1 throws away an application's request for the keys when it arrives a
+moment before the field counts as active, which is when Qt sends it. So 150 ms
+after a field arrives, if the compositor would show keys for the last touch but
+shows none, the Keyboard asks it directly, as an application focusing its own
+field would (`showKeysForField` in `src/keysrequest.h`). Where the compositor
+showed them for that field, nothing more happens, even if they have gone again:
+keys the application or Kadunce put away stay away.
+
 They rise from the screen's bottom edge on their own and go back into it,
 whether the Hide key, the tray entry, the end of typing or the application put
 them away. Keys going because typing ended, or because an application asked the

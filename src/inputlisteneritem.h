@@ -62,8 +62,14 @@ Q_SIGNALS:
     void contentPurposeChanged();
 
 private:
+    void watchCompositorKeys();
+
     InputPlugin m_input;
     OverlayController *m_overlayController = nullptr;
     bool m_keyboardNavigationActive = false;
     QVirtualKeyboardInputEngine *m_engine = nullptr;
+    // Whether the compositor has shown the keys since the current field
+    // arrived, as the Bottom Surface coordinator hears it.
+    bool m_keysShownForField = false;
+    bool m_compositorKeysWatched = false;
 };
