@@ -8,6 +8,8 @@ name: Arch current
 
 on:
   push:
+    # Branches only: a release tag starts nothing.
+    branches: ['**']
   pull_request:
   workflow_dispatch:
 
