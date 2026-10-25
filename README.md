@@ -1,4 +1,12 @@
-# Shuffle Keyboard
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/banner-dark.png">
+    <img src="assets/readme/banner-light.png" alt="Shuffle Keyboard: big keys for your fingers, and a trackpad for the moments that need precision" width="100%">
+  </picture>
+</p>
+
+<p align="center"><img src="assets/readme/showcase.webp" alt="The on-screen keys up under Search, in Dark" width="100%"></p>
+<p align="center"><sub>The keys rise when you tap where text goes.</sub></p>
 
 Shuffle Keyboard is a touch keyboard and precision pointer for KDE Plasma 6 on
 Wayland: four large rows centred on a card at the bottom of the screen, flick
