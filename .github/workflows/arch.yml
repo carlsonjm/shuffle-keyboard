@@ -14,12 +14,50 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Text-only changes (Markdown files and nothing else) skip the build: the
+  # check still runs and passes, so a README edit merges in about a minute.
+  # A scheduled or manual run, or any other file changed, runs everything.
+  changes:
+    name: What changed
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.files.outputs.code }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: files
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          case "$EVENT" in
+            pull_request) base="$PR_BASE" ;;
+            push) base="$PUSH_BEFORE" ;;
+            *) base="" ;;
+          esac
+          code=true
+          if [ -n "$base" ] && git cat-file -e "$base^{commit}" 2>/dev/null; then
+            files="$(git diff --name-only "$base"...HEAD)"
+            if [ -n "$files" ]; then
+              code=false
+              while IFS= read -r f; do
+                case "$f" in *.md) ;; *) code=true ;; esac
+              done <<< "$files"
+            fi
+            printf 'Changed:\n%s\n' "$files"
+          fi
+          echo "code=$code" | tee -a "$GITHUB_OUTPUT"
+
   verify:
+    needs: changes
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/archlinux/archlinux:latest
     steps:
       - name: Install build dependencies
+        if: needs.changes.outputs.code == 'true'
         run: |
           # The image lists one mirror. A dropped connection there fails the
           # whole install, so pacman gets others to fall back to.
@@ -30,7 +68,9 @@ jobs:
             kcoreaddons ki18n kcmutils kconfig kcrash libplasma layer-shell-qt \
             libxkbcommon wayland wayland-protocols plasma-wayland-protocols dbus
       - uses: actions/checkout@v5
+        if: needs.changes.outputs.code == 'true'
       - name: Run ./verify.sh
+        if: needs.changes.outputs.code == 'true'
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
@@ -41,6 +81,8 @@ jobs:
   # as its input method, touches it the way a person would, and asks the
   # compositor what happened. They build nothing of their own.
   sessions:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/archlinux/archlinux:latest
