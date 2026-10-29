@@ -58,19 +58,26 @@ Check your Plasma version. It must say 6.7 or higher:
 plasmashell --version
 ```
 
-Bring the computer up to date, then restart it, so the Keyboard is built
-against the Plasma you are running:
+Bring the computer up to date. If you just did this for another part of the
+suite, skip it:
 
 ```bash
 sudo pacman -Syu
 ```
 
-After the restart, open Konsole again and install what the build needs. Type
-your password when asked, and answer `Y`:
+Restart the computer only if that update installed a new `kwin`,
+`plasma-workspace` or kernel (`linux`, or `linux-cachyos` on CachyOS): the Keyboard is built against what is
+installed, so that has to be what is running.
+
+Then install what the build needs. Type your password when asked, and answer
+`Y`:
 
 ```bash
 sudo pacman -S --needed base-devel git cmake ninja pkgconf extra-cmake-modules qt6-base qt6-declarative qt6-virtualkeyboard qt6-wayland kcoreaddons ki18n kcmutils kconfig kcrash libplasma layer-shell-qt libxkbcommon wayland wayland-protocols plasma-wayland-protocols
 ```
+
+If pacman says a package **is up to date -- skipping**, or **there is nothing
+to do**, that is normal: it is already installed.
 
 ### 2. Download
 
