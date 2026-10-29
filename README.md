@@ -41,7 +41,106 @@ delivery, Qt Virtual Keyboard and KWin's input-method path, and adds no input
 engine of its own. It carries KDE's licence. The project's own names and marks
 are covered separately, in [`TRADEMARKS.md`](TRADEMARKS.md).
 
-## Build
+## Install
+
+These steps are for Arch Linux or CachyOS running KDE Plasma 6.7 or newer in a
+Wayland session, the default on both. The Keyboard is built on your computer
+from this page's code, so you type a few commands into **Konsole**, Plasma's
+terminal. Open it from the application launcher. It installs in your own home
+folder, needs no password, and sits beside Plasma's own keyboard without
+replacing it.
+
+### 1. What you need
+
+Check your Plasma version. It must say 6.7 or higher:
+
+```bash
+plasmashell --version
+```
+
+Bring the computer up to date, then restart it, so the Keyboard is built
+against the Plasma you are running:
+
+```bash
+sudo pacman -Syu
+```
+
+After the restart, open Konsole again and install what the build needs. Type
+your password when asked, and answer `Y`:
+
+```bash
+sudo pacman -S --needed base-devel git cmake ninja pkgconf extra-cmake-modules qt6-base qt6-declarative qt6-virtualkeyboard qt6-wayland kcoreaddons ki18n kcmutils kconfig kcrash libplasma layer-shell-qt libxkbcommon wayland wayland-protocols plasma-wayland-protocols
+```
+
+### 2. Download
+
+This puts the code in a folder called `shuffle-keyboard` in your home folder.
+Use `git` rather than GitHub's Download ZIP, so a later update is one command:
+
+```bash
+cd ~
+git clone https://github.com/carlsonjm/shuffle-keyboard.git
+cd shuffle-keyboard
+```
+
+### 3. Install
+
+```bash
+./install-keyboard.sh
+```
+
+It counts six steps, `[1/6]` to `[6/6]`. Building takes a few minutes. At step
+6 it says **no copy under /usr/local; nothing to bring level**; that step is
+for Shuffle's sign-in screen and has nothing to do on a plain Plasma desktop.
+It ends by saying the Keyboard on disk is now this build.
+
+### 4. Turn it on
+
+1. Open **System Settings → Keyboard → Virtual Keyboard**.
+2. Select **Shuffle Keyboard** and choose **Apply**.
+3. Sign out and back in, so KWin starts it.
+
+The sign-in screen keeps Plasma's own on-screen keyboard.
+
+### 5. Check it worked
+
+- On a touchscreen, tap a text field. Four rows of large keys come up at the
+  bottom of the screen. Tap **Hide**, at the bottom right, to put them away.
+- With a mouse, the **Keyboard** entry in the system tray brings the keys up.
+- Tap the trackpad mark at the space bar's right end: the keys turn into a
+  trackpad for the pointer.
+
+### 6. Update
+
+After every Plasma update, and to get a newer Keyboard:
+
+```bash
+cd ~/shuffle-keyboard
+git pull
+./install-keyboard.sh
+```
+
+Then sign out and back in. Until you do, you keep typing on the copy KWin
+started.
+
+### 7. Uninstall
+
+1. Open **System Settings → Keyboard → Virtual Keyboard**, select **None**,
+   or Plasma's own keyboard, and choose **Apply**. The uninstaller refuses
+   while the Shuffle Keyboard is still chosen, so a touch-only computer is
+   never left with no keys at the next sign-in.
+2. In Konsole:
+
+   ```bash
+   cd ~/shuffle-keyboard
+   ./uninstall-keyboard.sh
+   ```
+
+3. Sign out and back in.
+
+To delete the download too, run `rm -rf ~/shuffle-keyboard`.
+
+## For developers
 
 On an Arch-family Plasma 6 development system, with Qt 6.10, KDE Frameworks
 6.26 and Plasma 6.7 or later, Qt Virtual Keyboard, Qt Wayland and LayerShellQt
@@ -55,8 +154,6 @@ cmake --build build
 The executable is `build/bin/shuffle-keyboard`. `./verify.sh` formats, checks
 licence headers, builds and runs the tests.
 
-## Install
-
 Do not replace the active desktop keyboard while developing. Install into a
 staging prefix first:
 
@@ -64,15 +161,14 @@ staging prefix first:
 cmake --install build --prefix "$PWD/stage"
 ```
 
-On the device, `./install-keyboard.sh` builds the Keyboard and replaces the copy
-in your own prefix. Where the sign-in screen has its own copy under
-`/usr/local`, it updates that too. The new Keyboard takes over at the next
-sign-in. To enable it, follow
-[`docs/PHYSICAL_ACCEPTANCE.md`](docs/PHYSICAL_ACCEPTANCE.md) § Install and
-enable. KWin must start the binary as its virtual keyboard. Started as a normal
-application it exits, unless `SHUFFLE_PREVIEW_MODE=1` is set for an isolated
-test. `./uninstall-keyboard.sh` removes exactly what `./install-keyboard.sh`
-put in your prefix.
+`./install-keyboard.sh` builds the Keyboard and replaces the copy in your own
+prefix. Where the sign-in screen has its own copy under `/usr/local`, put
+there by the Shuffle desktop, it updates that too. KWin must start the binary
+as its virtual keyboard. Started as a normal application it exits, unless
+`SHUFFLE_PREVIEW_MODE=1` is set for an isolated test. The by-hand pass is
+[`docs/PHYSICAL_ACCEPTANCE.md`](docs/PHYSICAL_ACCEPTANCE.md).
+`./uninstall-keyboard.sh` removes exactly what `./install-keyboard.sh` put in
+your prefix.
 
 The fork installs under its own names, so it can sit beside Plasma's own
 keyboard and neither loads the other's pieces: the QML modules
