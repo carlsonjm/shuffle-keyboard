@@ -96,7 +96,7 @@ cd shuffle-keyboard
 ./install-keyboard.sh
 ```
 
-It counts six steps, `[1/6]` to `[6/6]`. Building takes a few minutes. At step
+It counts six steps, `[1/6]` to `[6/6]`. At step
 6 it says **no copy under /usr/local; nothing to bring level**; that step is
 for Shuffle's sign-in screen and has nothing to do on a plain Plasma desktop.
 It ends by saying the Keyboard on disk is now this build.
