@@ -75,3 +75,15 @@ msgstr "Expansión del texto"
 #: qml/LanguagePopup.qml:116
 msgid "Settings"
 msgstr "Preferencias"
+
+msgid "Keyboard"
+msgstr "Teclado"
+
+msgid "Shuffle Keyboard"
+msgstr "Shuffle Keyboard"
+
+msgid "Touch keyboard and precision surface for Plasma"
+msgstr "Teclado táctil y superficie de precisión para Plasma"
+
+msgid "Put the keyboard away"
+msgstr "Guardar el teclado"
