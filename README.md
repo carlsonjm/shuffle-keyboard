@@ -12,6 +12,10 @@ latch that turns the whole keyboard into a pointer trackpad. It runs on any
 Plasma 6 desktop. The Shuffle desktop bundles it and adds a dock that steps
 aside for it.
 
+<p align="center">
+<b>Shuffle Keyboard is the on-screen keyboard in <a href="https://shuffleplasma.com">Shuffle for Plasma</a></b>, a touch-first desktop for KDE Plasma that comes with every free part already set up to work together.
+</p>
+
 
 
 https://github.com/user-attachments/assets/3f88c114-e4bd-4b3a-9a83-722ffbda922b
