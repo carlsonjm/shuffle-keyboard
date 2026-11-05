@@ -200,7 +200,9 @@ whether the Hide key, the tray entry, the end of typing or the application put
 them away. Keys going because typing ended, or because an application asked the
 compositor to put them away, leave before the window goes. They wait 150 ms
 before setting off, because a field that lets go is often handing over to the
-next one, as a browser's boxes do; then nothing moves. Asked for again on the
+next one, as a browser's boxes do; then nothing moves. After a tap on the Tette Dot they wait
+up to 900 ms instead, because what it opens, usually Search, takes its field
+later than that; the keys stay up and the dock stays where it is. Asked for again on the
 way out, they come back from where they are.
 
 Where a dock holds the bottom of the screen, they rise only once it has left
