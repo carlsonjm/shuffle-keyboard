@@ -99,6 +99,11 @@ bool writePanelState(const QJsonArray &saved)
 BottomSurfaceCoordinator::BottomSurfaceCoordinator(QObject *parent)
     : QObject(parent)
 {
+    m_releaseGrace.setSingleShot(true);
+    connect(&m_releaseGrace, &QTimer::timeout, this, [this] {
+        if (!m_keyboardVisible)
+            restoreBottomPanels();
+    });
     QDBusConnection::sessionBus().connect(QStringLiteral("org.kde.KWin"),
                                           QStringLiteral("/VirtualKeyboard"),
                                           QStringLiteral("org.kde.kwin.VirtualKeyboard"),
@@ -373,10 +378,29 @@ void BottomSurfaceCoordinator::setKeyboardVisible(bool visible)
     // for the promise fell out and came back with no keys ever shown. The
     // arrival motion is what hides the moment between keys and dock.
     if (visible) {
+        m_releaseGrace.stop();
+        m_handoverHoldMs = 0;
         yieldBottomPanels();
-    } else {
-        restoreBottomPanels();
+        return;
     }
+    // Plasma's own panels have no dock to bring back, so they are put back
+    // at once, before a slow shell can still be hiding them.
+    if (!m_surfacePresent) {
+        m_handoverHoldMs = 0;
+        restoreBottomPanels();
+        return;
+    }
+    // The keys wait this long before leaving the screen (main.qml), so the
+    // region waits as long: a field handing over shows the keys again first,
+    // and the dock never comes back in between.
+    constexpr int HandoverMs = 150;
+    m_releaseGrace.start(qMax(HandoverMs, m_handoverHoldMs));
+    m_handoverHoldMs = 0;
+}
+
+void BottomSurfaceCoordinator::holdRegionThroughHandover(int ms)
+{
+    m_handoverHoldMs = ms;
 }
 
 QString BottomSurfaceCoordinator::error() const

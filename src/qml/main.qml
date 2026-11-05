@@ -189,9 +189,24 @@ InputPanelWindow {
     // between two of its boxes lets go of one and asks for the keys again a
     // few milliseconds later. The keys wait this long before they go, so a
     // handover moves nothing and tells the window above nothing.
+    // The Tette Dot opens what bare Meta opens, usually Search, whose field
+    // takes focus well after the field the keys were typing into lets go.
+    // For a moment after the dot, the keys wait long enough for that field,
+    // so they stay up and the dock stays put.
+    property bool dotHandover: false
+    Timer {
+        id: dotHandoverWindow
+        interval: 900
+        onTriggered: root.dotHandover = false
+    }
+    function expectDotHandover() {
+        root.dotHandover = true;
+        dotHandoverWindow.restart();
+        BottomSurfaceCoordinator.holdRegionThroughHandover(dotHandoverWindow.interval);
+    }
     Timer {
         id: handover
-        interval: 150
+        interval: root.dotHandover ? 900 : 150
         onTriggered: {
             root.leaving = true;
             root.closing = false;
@@ -513,7 +528,10 @@ InputPanelWindow {
                 colours: root.colours
 
                 onKeyRequested: (key, text, modifiers) => root.deliver(key, text, modifiers)
-                onMetaRequested: thing.triggerGlobalShortcut(Qt.Key_Meta)
+                onMetaRequested: {
+                    root.expectDotHandover();
+                    thing.triggerGlobalShortcut(Qt.Key_Meta);
+                }
                 onHideRequested: root.hideKeys()
             }
         }
