@@ -56,6 +56,11 @@ public:
     Q_INVOKABLE bool sendShortcut(int qtKey, int qtModifiers);
     Q_INVOKABLE bool triggerGlobalShortcut(int qtKey);
 
+    /// One line in the keys' trace, $XDG_RUNTIME_DIR/shuffle-keyboard-trace.log,
+    /// which says in order what moved, hid or showed the keys. The compositor
+    /// keeps nothing the Keyboard writes, so this is where a hand test reads it.
+    Q_INVOKABLE void trace(const QString &line) const;
+
 Q_SIGNALS:
     void keyNavigationPressed(int key);
     void keyNavigationReleased(int key);

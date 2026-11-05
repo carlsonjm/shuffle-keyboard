@@ -109,6 +109,7 @@ InputPanelWindow {
     }
 
     function beginArrival() {
+        thing.trace("arrival from below the edge");
         carryMotion.stop();
         root.carry = root.panelHeight;
         root.arriving = true;
@@ -149,6 +150,9 @@ InputPanelWindow {
     // is told where they will rest and when before they move, so it can
     // follow them without asking the window for a new size on every frame.
     function travelTo(target, duration, easing) {
+        thing.trace("travel from " + Math.round(root.carry) + " to " + Math.round(target) + " in " + duration
+                    + " ms" + (root.closing ? " (put away)" : "") + (root.leaving ? " (leaving)" : "")
+                    + (root.dotHandover && target > root.carry && !root.closing ? " held for the dot" : ""));
         // Nothing but the person's own Hide sends the keys down while the
         // Tette Dot's field is on its way; a leave asked for meanwhile waits
         // for the end of the dot's moment (dotHandoverWindow).
@@ -185,6 +189,7 @@ InputPanelWindow {
     // surface, or already down, go at once as before.
     property bool leaving: false
     function slideAway() {
+        thing.trace("slide away asked, carry " + Math.round(root.carry) + ", dot " + root.dotHandover);
         if (root.precisionActive || !root.visible || root.carry >= root.panelHeight) {
             handover.stop();
             root.finishLeaving();
@@ -207,6 +212,7 @@ InputPanelWindow {
         id: dotHandoverWindow
         interval: 1200
         onTriggered: {
+            thing.trace("dot moment over, leave wanted " + root.leaveAfterDot + ", Qt keys " + Qt.inputMethod.visible);
             root.dotHandover = false;
             const wanted = root.leaveAfterDot;
             root.leaveAfterDot = false;
@@ -217,6 +223,7 @@ InputPanelWindow {
         }
     }
     function expectDotHandover() {
+        thing.trace("Tette Dot tapped");
         root.dotHandover = true;
         root.leaveAfterDot = false;
         dotHandoverWindow.restart();
@@ -228,6 +235,7 @@ InputPanelWindow {
         id: handover
         interval: 150
         onTriggered: {
+            thing.trace("handover ran out" + (root.dotHandover ? ", held for the dot" : ""));
             if (root.dotHandover) {
                 root.leaveAfterDot = true;
                 return;
@@ -242,6 +250,7 @@ InputPanelWindow {
     // visibility, which is what brings the window back when the keys are
     // next asked for.
     function finishLeaving() {
+        thing.trace("finish leaving, carry " + Math.round(root.carry) + ", dot " + root.dotHandover);
         if (root.dotHandover && !root.closing && root.carry < root.panelHeight) {
             root.leaving = false;
             root.leaveAfterDot = true;
@@ -317,6 +326,7 @@ InputPanelWindow {
     Connections {
         target: BottomSurfaceCoordinator
         function onCompositorVisibilityChecked(visible) {
+            thing.trace("compositor shows the keys: " + visible);
             if (visible) {
                 const first = !root.compositorShown;
                 root.compositorShown = true;
@@ -381,7 +391,7 @@ InputPanelWindow {
         return since >= 0 && since < root.hiddenOnScreenFor;
     }
     function resumeInPlace() {
-        console.info("Shuffle Keyboard: shown again within the handover; the keys stay in place");
+        thing.trace("shown again within the handover; the keys stay in place");
         root.compositorShown = BottomSurfaceCoordinator.keyboardVisible;
         root.arriving = false;
         root.seatWaitOver = true;
@@ -391,25 +401,12 @@ InputPanelWindow {
             BottomSurfaceCoordinator.announceHeading(root.panelHeight, 0);
         }
         Qt.callLater(root.refreshInteractiveRegion);
-        resumeCheck.restart();
     }
-    // Shown again but not by the compositor: no field took the keys after
-    // all. They wait below the edge as a fresh arrival does, so when they are
-    // next shown they are seen rising.
-    Timer {
-        id: resumeCheck
-        interval: 450
-        onTriggered: {
-            if (root.visible && !root.compositorShown && !BottomSurfaceCoordinator.keyboardVisible) {
-                root.beginArrival();
-            }
-        }
-    }
-
     onVisibleChanged: {
+        thing.trace("keys window visible " + visible + ", carry " + Math.round(root.carry) + ", dot " + root.dotHandover
+                    + ", hidden on screen " + (root.hiddenOnScreenAt > 0 ? (Date.now() - root.hiddenOnScreenAt) + " ms ago" : "no"));
         root.compositorShown = false;
         if (visible) {
-            resumeCheck.stop();
             if (shownAgainInPlace()) {
                 resumeInPlace();
             } else {
@@ -422,12 +419,11 @@ InputPanelWindow {
                 // Says what took the window, so a hide that still shows can
                 // be traced to its source (no script frames: the compositor's
                 // side or Qt's).
-                console.info("Shuffle Keyboard: window hidden with the keys on screen, carry", Math.round(root.carry),
-                             "from", new Error().stack);
+                thing.trace("window hidden with the keys on screen, carry " + Math.round(root.carry)
+                            + ", script " + new Error().stack);
             } else {
                 root.hiddenOnScreenAt = 0;
             }
-            resumeCheck.stop();
             // The carry stays where the keys were. The panel is still mapped
             // while this runs, so returning it to zero would report the whole
             // Keyboard for a moment after the keys have gone, and the card
