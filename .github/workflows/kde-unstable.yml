@@ -81,8 +81,11 @@ jobs:
     container:
       image: ghcr.io/archlinux/archlinux:latest
       # kwin_wayland carries the capability to raise its own priority, and a
-      # container without it may not run the binary at all.
-      options: --cap-add=SYS_NICE
+      # container without it may not run the binary at all. Privileged gives
+      # KWin 6.8 a render device; without one the Keyboard comes up one pixel
+      # tall and every tap in a session misses (Kadunce's upstream watch runs
+      # these same sessions this way).
+      options: --cap-add=SYS_NICE --privileged
     timeout-minutes: 60
     steps:
       - name: Enable kde-unstable and the testing repositories it builds on
@@ -114,11 +117,12 @@ jobs:
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
           cmake --build build
 
-      # The next KWin no longer composites without a GPU render node, which
-      # a hosted runner's container does not have, and quits before a session
-      # can start ("The used windowing system requires compositing"). That is
-      # this runner, not the Keyboard: such a session is reported as skipped,
-      # in a warning and the run summary, never as passed.
+      # The next KWin no longer composites without a GPU render node. The
+      # privileged container above should give it one; should a session still
+      # find none, KWin quits before it starts ("The used windowing system
+      # requires compositing"). That is the runner, not the Keyboard: such a
+      # session is reported as skipped, in a warning and the run summary,
+      # never as passed.
       - name: Run every sealed session
         env:
           SHUFFLE_KEYBOARD_BUILD: ${{ github.workspace }}/build
