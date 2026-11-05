@@ -149,6 +149,13 @@ InputPanelWindow {
     // is told where they will rest and when before they move, so it can
     // follow them without asking the window for a new size on every frame.
     function travelTo(target, duration, easing) {
+        // Nothing but the person's own Hide sends the keys down while the
+        // Tette Dot's field is on its way; a leave asked for meanwhile waits
+        // for the end of the dot's moment (dotHandoverWindow).
+        if (root.dotHandover && target > root.carry && !root.closing) {
+            root.leaveAfterDot = true;
+            return;
+        }
         BottomSurfaceCoordinator.announceHeading(root.panelHeight - target, duration);
         root.carryTo(target, duration, easing);
     }
@@ -190,24 +197,41 @@ InputPanelWindow {
     // few milliseconds later. The keys wait this long before they go, so a
     // handover moves nothing and tells the window above nothing.
     // The Tette Dot opens what bare Meta opens, usually Search, whose field
-    // takes focus well after the field the keys were typing into lets go.
-    // For a moment after the dot, the keys wait long enough for that field,
-    // so they stay up and the dock stays put.
+    // can take focus more than a second after the field the keys were typing
+    // into lets go. For that long nothing but the Hide key moves the keys or
+    // takes their window, so they stay up and the dock stays put. A leave asked for in that moment is only noted, and goes ahead
+    // at its end if no field has taken the keys by then.
     property bool dotHandover: false
+    property bool leaveAfterDot: false
     Timer {
         id: dotHandoverWindow
-        interval: 900
-        onTriggered: root.dotHandover = false
+        interval: 1200
+        onTriggered: {
+            root.dotHandover = false;
+            const wanted = root.leaveAfterDot;
+            root.leaveAfterDot = false;
+            if (wanted && root.visible && !Qt.inputMethod.visible) {
+                root.leaving = false;
+                root.slideAway();
+            }
+        }
     }
     function expectDotHandover() {
         root.dotHandover = true;
+        root.leaveAfterDot = false;
         dotHandoverWindow.restart();
-        BottomSurfaceCoordinator.holdRegionThroughHandover(dotHandoverWindow.interval);
+        // The region outlasts the moment by the wait and the slide that may
+        // follow it, so the dock never returns under keys still leaving.
+        BottomSurfaceCoordinator.holdRegionThroughHandover(dotHandoverWindow.interval + 450);
     }
     Timer {
         id: handover
-        interval: root.dotHandover ? 900 : 150
+        interval: 150
         onTriggered: {
+            if (root.dotHandover) {
+                root.leaveAfterDot = true;
+                return;
+            }
             root.leaving = true;
             root.closing = false;
             root.arriving = false;
@@ -218,6 +242,11 @@ InputPanelWindow {
     // visibility, which is what brings the window back when the keys are
     // next asked for.
     function finishLeaving() {
+        if (root.dotHandover && !root.closing && root.carry < root.panelHeight) {
+            root.leaving = false;
+            root.leaveAfterDot = true;
+            return;
+        }
         root.leaving = false;
         if (Qt.inputMethod.visible) Qt.inputMethod.hide();
         else root.visible = false;
@@ -226,6 +255,7 @@ InputPanelWindow {
     // or, before they have set off, simply stay.
     function returnFromLeaving() {
         handover.stop();
+        root.leaveAfterDot = false;
         if (!root.leaving) return;
         root.leaving = false;
         root.travelTo(0, root.timed(240));
