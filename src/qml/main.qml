@@ -338,11 +338,66 @@ InputPanelWindow {
                                               ? PlasmaKeyboardSettings.enabledLocales : [locale];
     }
 
+    // A window that went while its keys were still on screen, rather than
+    // once they had travelled out, was taken away under them: a field handing
+    // over to the next one can hide it for a frame or two, the Tette Dot's
+    // Search most of all. Shown again within the handover's wait, the keys
+    // stay where they were instead of dropping to the edge and rising again.
+    property double hiddenOnScreenAt: 0
+    property int hiddenOnScreenFor: 0
+    function shownAgainInPlace() {
+        const since = Date.now() - root.hiddenOnScreenAt;
+        root.hiddenOnScreenAt = 0;
+        return since >= 0 && since < root.hiddenOnScreenFor;
+    }
+    function resumeInPlace() {
+        console.info("Shuffle Keyboard: shown again within the handover; the keys stay in place");
+        root.compositorShown = BottomSurfaceCoordinator.keyboardVisible;
+        root.arriving = false;
+        root.seatWaitOver = true;
+        if (root.carry > 0) {
+            root.travelTo(0, root.timed(240));
+        } else {
+            BottomSurfaceCoordinator.announceHeading(root.panelHeight, 0);
+        }
+        Qt.callLater(root.refreshInteractiveRegion);
+        resumeCheck.restart();
+    }
+    // Shown again but not by the compositor: no field took the keys after
+    // all. They wait below the edge as a fresh arrival does, so when they are
+    // next shown they are seen rising.
+    Timer {
+        id: resumeCheck
+        interval: 450
+        onTriggered: {
+            if (root.visible && !root.compositorShown && !BottomSurfaceCoordinator.keyboardVisible) {
+                root.beginArrival();
+            }
+        }
+    }
+
     onVisibleChanged: {
         root.compositorShown = false;
         if (visible) {
-            beginArrival();
+            resumeCheck.stop();
+            if (shownAgainInPlace()) {
+                resumeInPlace();
+            } else {
+                beginArrival();
+            }
         } else {
+            if (root.carry < root.panelHeight && !root.closing && !root.precisionActive) {
+                root.hiddenOnScreenAt = Date.now();
+                root.hiddenOnScreenFor = root.dotHandover ? dotHandoverWindow.interval : 150;
+                // Says what took the window, so a hide that still shows can
+                // be traced to its source (no script frames: the compositor's
+                // side or Qt's).
+                console.info("Shuffle Keyboard: window hidden with the keys on screen, carry", Math.round(root.carry),
+                             "from", new Error().stack);
+            } else {
+                root.hiddenOnScreenAt = 0;
+            }
+            resumeCheck.stop();
             // The carry stays where the keys were. The panel is still mapped
             // while this runs, so returning it to zero would report the whole
             // Keyboard for a moment after the keys have gone, and the card

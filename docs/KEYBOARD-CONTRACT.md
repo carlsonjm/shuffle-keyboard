@@ -203,7 +203,10 @@ before setting off, because a field that lets go is often handing over to the
 next one, as a browser's boxes do; then nothing moves. After a tap on the Tette Dot they wait
 up to 900 ms instead, because what it opens, usually Search, takes its field
 later than that; the keys stay up and the dock stays where it is. Asked for again on the
-way out, they come back from where they are.
+way out, they come back from where they are. A window taken away while its keys
+were still on screen, as a handover can do for a frame or two, and shown again
+within that same wait, keeps its keys where they were rather than rising from
+the edge again.
 
 Where a dock holds the bottom of the screen, they rise only once it has left
 and given up its room (§ The bottom of the screen).
