@@ -7,6 +7,7 @@
 
 #include <QJsonArray>
 #include <QObject>
+#include <QTimer>
 #include <qqmlintegration.h>
 
 class KeysTrayEntry;
@@ -69,6 +70,11 @@ public:
     /// another of this process's surfaces has held the compositor's focus.
     Q_INVOKABLE void reclaimKeyboardFocus();
 
+    /// Keep the region for up to `ms` after the compositor next hides the
+    /// keys, because the field they were for is handing over to another one
+    /// that will ask for them again.
+    Q_INVOKABLE void holdRegionThroughHandover(int ms);
+
     bool regionReserving() const;
 
     /**
@@ -129,6 +135,10 @@ private Q_SLOTS:
 private:
     KeysTrayEntry *m_trayEntry = nullptr;
     bool m_keyboardVisible = false;
+    /// The region goes back this long after the keys were hidden, unless they
+    /// come back first: a field handing over hides and shows them again.
+    QTimer m_releaseGrace;
+    int m_handoverHoldMs = 0;
     bool m_requestedVisible = false;
 
     /// True from asking the surface for the region until it is given back, so

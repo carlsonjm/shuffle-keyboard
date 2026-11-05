@@ -231,7 +231,10 @@ only one ever holds the tray entry and the bottom of the screen.
 
 The region follows keys on screen, not requests for them. While keys are shown,
 the Keyboard asks the Bottom Surface for the region, and the surface decides
-what giving it up means. The region goes back once the keys have gone. A
+what giving it up means. The region goes back once the keys have gone. When the
+compositor hides the keys, the region waits as long as the keys do before it
+goes back (150 ms, or up to 900 ms after the Tette Dot), so a field handing over
+to the next one never brings the dock back in between. A
 surface that refuses, or is slow to answer, still holds the region, and the
 Keyboard leaves every panel alone. Only where no Bottom Surface is on the bus at
 all do Plasma's bottom panels autohide while the keys are up and return to their

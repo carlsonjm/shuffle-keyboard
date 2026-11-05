@@ -202,6 +202,7 @@ InputPanelWindow {
     function expectDotHandover() {
         root.dotHandover = true;
         dotHandoverWindow.restart();
+        BottomSurfaceCoordinator.holdRegionThroughHandover(dotHandoverWindow.interval);
     }
     Timer {
         id: handover
