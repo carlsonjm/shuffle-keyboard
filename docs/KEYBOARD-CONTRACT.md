@@ -200,10 +200,15 @@ whether the Hide key, the tray entry, the end of typing or the application put
 them away. Keys going because typing ended, or because an application asked the
 compositor to put them away, leave before the window goes. They wait 150 ms
 before setting off, because a field that lets go is often handing over to the
-next one, as a browser's boxes do; then nothing moves. After a tap on the Tette Dot they wait
-up to 900 ms instead, because what it opens, usually Search, takes its field
-later than that; the keys stay up and the dock stays where it is. Asked for again on the
-way out, they come back from where they are.
+next one, as a browser's boxes do; then nothing moves. For 1.2 s after a tap on
+the Tette Dot nothing but the Hide key moves them or takes their window, because
+what it opens, usually Search, can take its field that late; the keys stay up
+and the dock stays where it is. If no field has taken them by then, they go as
+they would have. Asked for again on the
+way out, they come back from where they are. A window taken away while its keys
+were still on screen, as a handover can do for a frame or two, and shown again
+within that same wait, keeps its keys where they were rather than rising from
+the edge again.
 
 Where a dock holds the bottom of the screen, they rise only once it has left
 and given up its room (§ The bottom of the screen).
@@ -233,7 +238,7 @@ The region follows keys on screen, not requests for them. While keys are shown,
 the Keyboard asks the Bottom Surface for the region, and the surface decides
 what giving it up means. The region goes back once the keys have gone. When the
 compositor hides the keys, the region waits as long as the keys do before it
-goes back (150 ms, or up to 900 ms after the Tette Dot), so a field handing over
+goes back (150 ms, or up to 1.65 s after the Tette Dot), so a field handing over
 to the next one never brings the dock back in between. A
 surface that refuses, or is slow to answer, still holds the region, and the
 Keyboard leaves every panel alone. Only where no Bottom Surface is on the bus at

@@ -109,6 +109,7 @@ InputPanelWindow {
     }
 
     function beginArrival() {
+        thing.trace("arrival from below the edge");
         carryMotion.stop();
         root.carry = root.panelHeight;
         root.arriving = true;
@@ -149,6 +150,16 @@ InputPanelWindow {
     // is told where they will rest and when before they move, so it can
     // follow them without asking the window for a new size on every frame.
     function travelTo(target, duration, easing) {
+        thing.trace("travel from " + Math.round(root.carry) + " to " + Math.round(target) + " in " + duration
+                    + " ms" + (root.closing ? " (put away)" : "") + (root.leaving ? " (leaving)" : "")
+                    + (root.dotHandover && target > root.carry && !root.closing ? " held for the dot" : ""));
+        // Nothing but the person's own Hide sends the keys down while the
+        // Tette Dot's field is on its way; a leave asked for meanwhile waits
+        // for the end of the dot's moment (dotHandoverWindow).
+        if (root.dotHandover && target > root.carry && !root.closing) {
+            root.leaveAfterDot = true;
+            return;
+        }
         BottomSurfaceCoordinator.announceHeading(root.panelHeight - target, duration);
         root.carryTo(target, duration, easing);
     }
@@ -178,6 +189,7 @@ InputPanelWindow {
     // surface, or already down, go at once as before.
     property bool leaving: false
     function slideAway() {
+        thing.trace("slide away asked, carry " + Math.round(root.carry) + ", dot " + root.dotHandover);
         if (root.precisionActive || !root.visible || root.carry >= root.panelHeight) {
             handover.stop();
             root.finishLeaving();
@@ -190,24 +202,44 @@ InputPanelWindow {
     // few milliseconds later. The keys wait this long before they go, so a
     // handover moves nothing and tells the window above nothing.
     // The Tette Dot opens what bare Meta opens, usually Search, whose field
-    // takes focus well after the field the keys were typing into lets go.
-    // For a moment after the dot, the keys wait long enough for that field,
-    // so they stay up and the dock stays put.
+    // can take focus more than a second after the field the keys were typing
+    // into lets go. For that long nothing but the Hide key moves the keys or
+    // takes their window, so they stay up and the dock stays put. A leave asked for in that moment is only noted, and goes ahead
+    // at its end if no field has taken the keys by then.
     property bool dotHandover: false
+    property bool leaveAfterDot: false
     Timer {
         id: dotHandoverWindow
-        interval: 900
-        onTriggered: root.dotHandover = false
+        interval: 1200
+        onTriggered: {
+            thing.trace("dot moment over, leave wanted " + root.leaveAfterDot + ", Qt keys " + Qt.inputMethod.visible);
+            root.dotHandover = false;
+            const wanted = root.leaveAfterDot;
+            root.leaveAfterDot = false;
+            if (wanted && root.visible && !Qt.inputMethod.visible) {
+                root.leaving = false;
+                root.slideAway();
+            }
+        }
     }
     function expectDotHandover() {
+        thing.trace("Tette Dot tapped");
         root.dotHandover = true;
+        root.leaveAfterDot = false;
         dotHandoverWindow.restart();
-        BottomSurfaceCoordinator.holdRegionThroughHandover(dotHandoverWindow.interval);
+        // The region outlasts the moment by the wait and the slide that may
+        // follow it, so the dock never returns under keys still leaving.
+        BottomSurfaceCoordinator.holdRegionThroughHandover(dotHandoverWindow.interval + 450);
     }
     Timer {
         id: handover
-        interval: root.dotHandover ? 900 : 150
+        interval: 150
         onTriggered: {
+            thing.trace("handover ran out" + (root.dotHandover ? ", held for the dot" : ""));
+            if (root.dotHandover) {
+                root.leaveAfterDot = true;
+                return;
+            }
             root.leaving = true;
             root.closing = false;
             root.arriving = false;
@@ -218,6 +250,12 @@ InputPanelWindow {
     // visibility, which is what brings the window back when the keys are
     // next asked for.
     function finishLeaving() {
+        thing.trace("finish leaving, carry " + Math.round(root.carry) + ", dot " + root.dotHandover);
+        if (root.dotHandover && !root.closing && root.carry < root.panelHeight) {
+            root.leaving = false;
+            root.leaveAfterDot = true;
+            return;
+        }
         root.leaving = false;
         if (Qt.inputMethod.visible) Qt.inputMethod.hide();
         else root.visible = false;
@@ -226,6 +264,7 @@ InputPanelWindow {
     // or, before they have set off, simply stay.
     function returnFromLeaving() {
         handover.stop();
+        root.leaveAfterDot = false;
         if (!root.leaving) return;
         root.leaving = false;
         root.travelTo(0, root.timed(240));
@@ -287,6 +326,7 @@ InputPanelWindow {
     Connections {
         target: BottomSurfaceCoordinator
         function onCompositorVisibilityChecked(visible) {
+            thing.trace("compositor shows the keys: " + visible);
             if (visible) {
                 const first = !root.compositorShown;
                 root.compositorShown = true;
@@ -338,11 +378,52 @@ InputPanelWindow {
                                               ? PlasmaKeyboardSettings.enabledLocales : [locale];
     }
 
+    // A window that went while its keys were still on screen, rather than
+    // once they had travelled out, was taken away under them: a field handing
+    // over to the next one can hide it for a frame or two, the Tette Dot's
+    // Search most of all. Shown again within the handover's wait, the keys
+    // stay where they were instead of dropping to the edge and rising again.
+    property double hiddenOnScreenAt: 0
+    property int hiddenOnScreenFor: 0
+    function shownAgainInPlace() {
+        const since = Date.now() - root.hiddenOnScreenAt;
+        root.hiddenOnScreenAt = 0;
+        return since >= 0 && since < root.hiddenOnScreenFor;
+    }
+    function resumeInPlace() {
+        thing.trace("shown again within the handover; the keys stay in place");
+        root.compositorShown = BottomSurfaceCoordinator.keyboardVisible;
+        root.arriving = false;
+        root.seatWaitOver = true;
+        if (root.carry > 0) {
+            root.travelTo(0, root.timed(240));
+        } else {
+            BottomSurfaceCoordinator.announceHeading(root.panelHeight, 0);
+        }
+        Qt.callLater(root.refreshInteractiveRegion);
+    }
     onVisibleChanged: {
+        thing.trace("keys window visible " + visible + ", carry " + Math.round(root.carry) + ", dot " + root.dotHandover
+                    + ", hidden on screen " + (root.hiddenOnScreenAt > 0 ? (Date.now() - root.hiddenOnScreenAt) + " ms ago" : "no"));
         root.compositorShown = false;
         if (visible) {
-            beginArrival();
+            if (shownAgainInPlace()) {
+                resumeInPlace();
+            } else {
+                beginArrival();
+            }
         } else {
+            if (root.carry < root.panelHeight && !root.closing && !root.precisionActive) {
+                root.hiddenOnScreenAt = Date.now();
+                root.hiddenOnScreenFor = root.dotHandover ? dotHandoverWindow.interval : 150;
+                // Says what took the window, so a hide that still shows can
+                // be traced to its source (no script frames: the compositor's
+                // side or Qt's).
+                thing.trace("window hidden with the keys on screen, carry " + Math.round(root.carry)
+                            + ", script " + new Error().stack);
+            } else {
+                root.hiddenOnScreenAt = 0;
+            }
             // The carry stays where the keys were. The panel is still mapped
             // while this runs, so returning it to zero would report the whole
             // Keyboard for a moment after the keys have gone, and the card

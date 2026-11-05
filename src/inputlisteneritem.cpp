@@ -21,11 +21,15 @@
 #include <QDBusInterface>
 #include <QDBusObjectPath>
 #include <QDBusReply>
+#include <QDateTime>
+#include <QFile>
 #include <QLoggingCategory>
 #include <QQmlEngine>
+#include <QStandardPaths>
 #include <QTextFormat>
 #include <QTimer>
 
+#include <execinfo.h>
 #include <set>
 
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
@@ -53,6 +57,39 @@ Q_GLOBAL_STATIC_WITH_ARGS(const QList<Qt::Key>, KEYBOARD_NAVIGATION_CAPTURE_KEYS
 // Keys to capture when keyboard navigation is active
 Q_GLOBAL_STATIC_WITH_ARGS(const QList<Qt::Key>, KEYBOARD_NAVIGATION_ACTIVE_CAPTURE_KEYS, (initCapture() + QList<Qt::Key>{Qt::Key_Return}));
 
+namespace
+{
+void writeTrace(const QString &line)
+{
+    static QFile file(QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation) + QStringLiteral("/shuffle-keyboard-trace.log"));
+    if (!file.isOpen() && !file.open(QIODevice::Append | QIODevice::Text)) {
+        return;
+    }
+    file.write(QStringLiteral("%1 %2\n").arg(QDateTime::currentDateTime().toString(QStringLiteral("HH:mm:ss.zzz")), line).toUtf8());
+    file.flush();
+}
+
+// The native frames that led here, so a hide from outside the QML can be told
+// apart: Qt's own, the input method's, or ours.
+QString nativeCallers()
+{
+    void *frames[24];
+    const int count = backtrace(frames, 24);
+    char **names = backtrace_symbols(frames, count);
+    QStringList lines;
+    for (int i = 1; names && i < count; ++i) {
+        lines << QString::fromLocal8Bit(names[i]);
+    }
+    free(names);
+    return lines.join(QStringLiteral(" | "));
+}
+}
+
+void InputListenerItem::trace(const QString &line) const
+{
+    writeTrace(line);
+}
+
 InputListenerItem::InputListenerItem()
     : m_input(&(*s_im))
     , m_overlayController(new OverlayController(&m_input, this))
@@ -65,8 +102,17 @@ InputListenerItem::InputListenerItem()
     m_overlayController->registerTrigger(new PrefixQueryTrigger(m_overlayController));
     m_overlayController->registerTrigger(new TextExpansionTrigger(m_overlayController));
 
+    connect(this, &QQuickItem::windowChanged, this, [](QQuickWindow *window) {
+        if (!window) {
+            return;
+        }
+        connect(window, &QWindow::visibleChanged, window, [](bool visible) {
+            writeTrace(QStringLiteral("window visible=%1 from %2").arg(visible ? 1 : 0).arg(nativeCallers()));
+        });
+    });
     connect(&m_input, &InputPlugin::contextChanged, this, [this] {
         const bool hasContext = m_input.hasContext();
+        writeTrace(hasContext ? QStringLiteral("input context arrived") : QStringLiteral("input context gone"));
 
         // Cancel any pending overlay state when the input context changes (focus loss or target swap)
         if (m_overlayController) {
@@ -117,6 +163,7 @@ InputListenerItem::InputListenerItem()
         }
     });
     connect(&m_input, &InputPlugin::deactivate, this, [this] {
+        writeTrace(QStringLiteral("input method deactivated"));
         QGuiApplication::inputMethod()->setVisible(false);
         QGuiApplication::inputMethod()->reset();
     });
@@ -126,6 +173,7 @@ InputListenerItem::InputListenerItem()
     connect(&m_input, &InputPlugin::contentTypeChanged, this, &InputListenerItem::contentPurposeChanged);
     connect(QGuiApplication::inputMethod(), &QInputMethod::visibleChanged, this, [this] {
         const bool visible = QGuiApplication::inputMethod()->isVisible();
+        writeTrace(QStringLiteral("Qt input method visible=%1, window visible=%2").arg(visible ? 1 : 0).arg(window()->isVisible() ? 1 : 0));
         // Keys on screen slide away as Hide sends them, and the window
         // goes once they have: the window says when.
         if (!visible && window()->isVisible() && QMetaObject::invokeMethod(window(), "slideAway")) {
